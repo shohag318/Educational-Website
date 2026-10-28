@@ -1,0 +1,389 @@
+// Prisma Schema for NCTB School Management & Result Processing System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Institution {
+  id            String         @id @default(uuid())
+  code          String         @unique // EIIN
+  name          String
+  nameBn        String?
+  address       String?
+  contactEmail  String?
+  contactPhone  String?
+  adminId       String?        // Assigned login ID for the institution's admin
+  adminPassword String?        // Assigned password for the institution's admin
+  status        String         @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
+  slug          String?        // custom link slug
+  notes         String?
+  smsSenderId   String?
+  smsApiKey     String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  academicYears AcademicYear[]
+  classes       AcademicClass[]
+  students      Student[]
+  gradingSystems GradingSystem[]
+  subjects      Subject[]
+  exams         Exam[]
+  smsLogs       SmsLog[]
+  assessmentTemplates AssessmentTemplate[]
+}
+
+model AcademicYear {
+  id            String              @id @default(uuid())
+  institutionId String
+  yearName      String              // e.g. "2026"
+  isCurrent     Boolean             @default(false)
+  startDate     DateTime
+  endDate       DateTime
+  institution   Institution         @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  enrollments   StudentEnrollment[]
+  exams         Exam[]
+
+  @@unique([institutionId, yearName])
+}
+
+model AcademicClass {
+  id            String              @id @default(uuid())
+  institutionId String
+  name          String              // e.g. "Class 10", "Class 11"
+  numericValue  Int                 // 10, 11
+  shift         String              @default("DAY") // MORNING, DAY
+  institution   Institution         @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  sections      Section[]
+  enrollments   StudentEnrollment[]
+  exams         Exam[]
+  subjectMappings ClassSubjectMapping[]
+  assessmentTemplates AssessmentTemplate[]
+
+  @@unique([institutionId, name])
+}
+
+model Section {
+  id          String              @id @default(uuid())
+  classId     String
+  name        String              // "Section A", "Padma"
+  groupType   String              @default("GENERAL") // GENERAL, SCIENCE, HUMANITIES, BUSINESS_STUDIES
+  shift       String              @default("DAY") // MORNING, DAY
+  capacity    Int                 @default(60)
+  class       AcademicClass       @relation(fields: [classId], references: [id], onDelete: Cascade)
+  enrollments StudentEnrollment[]
+
+  @@unique([classId, name, groupType, shift])
+}
+
+model Student {
+  id            String              @id @default(uuid())
+  institutionId String
+  studentIdNo   String              // Unique Student Reg/ID
+  firstName     String
+  lastName      String
+  gender        String?
+  religion      String?
+  address       String?
+  guardianName  String
+  guardianPhone String              // For SMS
+  customFields  String?             // JSON string for dynamic / custom fields
+  isActive      Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  institution   Institution         @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  enrollments   StudentEnrollment[]
+
+  @@unique([institutionId, studentIdNo])
+}
+
+model StudentEnrollment {
+  id              String                     @id @default(uuid())
+  studentId       String
+  academicYearId  String
+  classId         String
+  sectionId       String
+  groupType       String                     @default("GENERAL")
+  classRoll       Int
+  student         Student                    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  academicYear    AcademicYear               @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  class           AcademicClass              @relation(fields: [classId], references: [id], onDelete: Cascade)
+  section         Section                    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  allocations     StudentSubjectAllocation[]
+  marks           StudentMark[]
+  processedResult ProcessedStudentResult?
+  smsLogs         SmsLog[]
+
+  @@unique([academicYearId, classId, sectionId, classRoll])
+}
+
+model GradingSystem {
+  id                     String      @id @default(uuid())
+  institutionId          String
+  name                   String      // e.g. "NCTB Standard Grading"
+  maxGpa                 Float       @default(5.00)
+  fourthSubjectThreshold Float       @default(2.00) // Surplus above this adds to GPA
+  passGpa                Float       @default(1.00)
+  isDefault              Boolean     @default(false)
+  institution            Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  slabs                  GradeSlab[]
+  exams                  Exam[]
+}
+
+model GradeSlab {
+  id              String        @id @default(uuid())
+  gradingSystemId String
+  letterGrade     String        // A+, A, A-, B, C, D, F
+  gradePoint      Float         // 5.0, 4.0, 3.5, 3.0, 2.0, 1.0, 0.0
+  markMin         Float         // 80.0
+  markMax         Float         // 100.0
+  isFail          Boolean       @default(false)
+  comments        String?
+  gradingSystem   GradingSystem @relation(fields: [gradingSystemId], references: [id], onDelete: Cascade)
+}
+
+model Exam {
+  id               String                   @id @default(uuid())
+  institutionId    String
+  academicYearId   String
+  classId          String
+  gradingSystemId  String
+  name             String                   // e.g. "Half-Yearly 2026"
+  termCode         String?
+  status           String                   @default("DRAFT") // DRAFT, MARK_ENTRY, CALCULATING, DRAFT_PREVIEW, PUBLISHED, ARCHIVED
+  startDate        DateTime?
+  endDate          DateTime?
+  createdAt        DateTime                 @default(now())
+  institution      Institution              @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  academicYear     AcademicYear             @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  class            AcademicClass            @relation(fields: [classId], references: [id], onDelete: Cascade)
+  gradingSystem    GradingSystem            @relation(fields: [gradingSystemId], references: [id])
+  subjectConfigs   ExamSubjectConfig[]
+  marks            StudentMark[]
+  processedResults ProcessedStudentResult[]
+  smsLogs          SmsLog[]
+  combinedRules    CombinedSubjectRule[]
+}
+
+model Subject {
+  id                     String                     @id @default(uuid())
+  institutionId          String
+  subjectCode            String?                    // 101, 107, 174 (Optional)
+  name                   String                     // Bangla 1st, Higher Math
+  institution            Institution                @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  configs                ExamSubjectConfig[]
+  allocations            StudentSubjectAllocation[]
+  marks                  StudentMark[]
+  processedMarks         ProcessedSubjectResult[]
+  classMappings          ClassSubjectMapping[]
+  primaryCombinedRules   CombinedSubjectRule[]      @relation("PrimaryCombinedSubject")
+  secondaryCombinedRules CombinedSubjectRule[]      @relation("SecondaryCombinedSubject")
+  assessmentTemplateItems AssessmentTemplateItem[]
+
+  @@unique([institutionId, subjectCode])
+}
+
+model ClassSubjectMapping {
+  id           String         @id @default(uuid())
+  classId      String
+  groupType    String         @default("ALL") // ALL, GENERAL, SCIENCE, HUMANITIES, BUSINESS_STUDIES
+  subjectId    String
+  subjectType  String         @default("MANDATORY") // MANDATORY, GROUP_ELECTIVE, OPTIONAL_4TH
+  creditWeight Float          @default(1.00)
+  class        AcademicClass  @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject      Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, groupType, subjectId])
+}
+
+model ExamSubjectConfig {
+  id                String                 @id @default(uuid())
+  examId            String
+  subjectId         String
+  groupType         String                 @default("GENERAL") // GENERAL, SCIENCE, HUMANITIES, etc.
+  totalFullMarks    Float                  @default(100.0)
+  passMode          String                 @default("COMPONENT_WISE") // COMPONENT_WISE, AGGREGATE_ONLY, BOTH
+  aggregatePassMark Float                  @default(33.0)
+  creditWeight      Float                  @default(1.00)
+  exam              Exam                   @relation(fields: [examId], references: [id], onDelete: Cascade)
+  subject           Subject                @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  components        AssessmentComponent[]
+
+  @@unique([examId, subjectId, groupType])
+}
+
+model AssessmentComponent {
+  id                  String                @id @default(uuid())
+  examSubjectConfigId String
+  componentName       String                // CQ, MCQ, PRACTICAL, CA
+  fullMarks           Float                 // e.g. 70
+  passMarks           Float                 // e.g. 23
+  isMandatoryPass     Boolean               @default(true)
+  config              ExamSubjectConfig     @relation(fields: [examSubjectConfigId], references: [id], onDelete: Cascade)
+  entries             MarkComponentEntry[]
+
+  @@unique([examSubjectConfigId, componentName])
+}
+
+model StudentSubjectAllocation {
+  id           String            @id @default(uuid())
+  enrollmentId String
+  subjectId    String
+  subjectType  String            // MANDATORY, GROUP_ELECTIVE, OPTIONAL_4TH
+  enrollment   StudentEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  subject      Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([enrollmentId, subjectId])
+}
+
+model StudentMark {
+  id           String               @id @default(uuid())
+  examId       String
+  enrollmentId String
+  subjectId    String
+  isAbsent     Boolean              @default(false)
+  isOverride   Boolean              @default(false)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  exam         Exam                 @relation(fields: [examId], references: [id], onDelete: Cascade)
+  enrollment   StudentEnrollment    @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  subject      Subject              @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  components   MarkComponentEntry[]
+  auditLogs    MarkAuditLog[]
+
+  @@unique([examId, enrollmentId, subjectId])
+}
+
+model MarkComponentEntry {
+  id            String              @id @default(uuid())
+  studentMarkId String
+  componentId   String
+  obtainedMarks Float
+  studentMark   StudentMark         @relation(fields: [studentMarkId], references: [id], onDelete: Cascade)
+  component     AssessmentComponent @relation(fields: [componentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentMarkId, componentId])
+}
+
+model MarkAuditLog {
+  id            String      @id @default(uuid())
+  studentMarkId String
+  modifiedBy    String      // User or Admin ID
+  previousValue String      // JSON string of previous component values
+  newValue      String      // JSON string of new component values
+  reason        String
+  createdAt     DateTime    @default(now())
+  studentMark   StudentMark @relation(fields: [studentMarkId], references: [id], onDelete: Cascade)
+}
+
+model ProcessedStudentResult {
+  id                       String                   @id @default(uuid())
+  examId                   String
+  enrollmentId             String                   @unique
+  totalObtainedMarks       Float                    @default(0.0)
+  gpaWithoutFourth         Float                    @default(0.0)
+  fourthSubjectBonusPoints Float                    @default(0.0)
+  finalGpa                 Float                    @default(0.0)
+  finalLetterGrade         String                   @default("F")
+  isPassed                 Boolean                  @default(false)
+  totalFailedSubjects      Int                      @default(0)
+  meritRankClass           Int?
+  meritRankSection         Int?
+  calculatedAt             DateTime                 @default(now())
+  exam                     Exam                     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  enrollment               StudentEnrollment        @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  subjectResults           ProcessedSubjectResult[]
+
+  @@unique([examId, enrollmentId])
+}
+
+model ProcessedSubjectResult {
+  id                       String                 @id @default(uuid())
+  processedStudentResultId String
+  subjectId                String
+  subjectType              String                 // MANDATORY, GROUP_ELECTIVE, OPTIONAL_4TH
+  totalObtainedMarks       Float
+  letterGrade              String
+  gradePoint               Float
+  isPassed                 Boolean
+  failureReason            String?
+  isCombined               Boolean                @default(false)
+  combinedPairSubjectId    String?
+  combinedMarks            Float?
+  processedResult          ProcessedStudentResult @relation(fields: [processedStudentResultId], references: [id], onDelete: Cascade)
+  subject                  Subject                @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+}
+
+model SmsLog {
+  id             String            @id @default(uuid())
+  institutionId  String
+  examId         String
+  enrollmentId   String
+  recipientPhone String
+  messageBody    String
+  status         String            @default("PENDING") // PENDING, SENT, FAILED
+  gatewayResponse String?
+  sentAt         DateTime?
+  institution    Institution       @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  exam           Exam              @relation(fields: [examId], references: [id], onDelete: Cascade)
+  enrollment     StudentEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+}
+
+model CombinedSubjectRule {
+  id                 String   @id @default(uuid())
+  examId             String
+  name               String?  // e.g. "Bangla 1st & 2nd Paper"
+  primarySubjectId   String   // e.g. Bangla 1st Paper
+  secondarySubjectId String   // e.g. Bangla 2nd Paper
+  combinedPassMark   Float    @default(66.0)
+  combinedFullMarks  Float    @default(200.0)
+  passMode           String   @default("AGGREGATE_ONLY") // AGGREGATE_ONLY, BOTH
+  gradeMode          String   @default("AVERAGE") // AVERAGE, INDIVIDUAL
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  exam               Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  primarySubject     Subject  @relation("PrimaryCombinedSubject", fields: [primarySubjectId], references: [id], onDelete: Cascade)
+  secondarySubject   Subject  @relation("SecondaryCombinedSubject", fields: [secondarySubjectId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, primarySubjectId])
+  @@unique([examId, secondarySubjectId])
+}
+
+model AssessmentTemplate {
+  id            String                   @id @default(uuid())
+  institutionId String
+  name          String
+  classId       String
+  description   String?
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+
+  institution   Institution              @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  class         AcademicClass            @relation(fields: [classId], references: [id], onDelete: Cascade)
+  items         AssessmentTemplateItem[]
+
+  @@index([institutionId])
+  @@index([classId])
+}
+
+model AssessmentTemplateItem {
+  id             String             @id @default(uuid())
+  templateId     String
+  subjectId      String
+  totalMarks     Float              @default(100.0)
+  passMarks      Float              @default(33.0)
+  cqMarks        Float              @default(70.0)
+  mcqMarks       Float              @default(30.0)
+  practicalMarks Float              @default(0.0)
+
+  template       AssessmentTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  subject        Subject            @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, subjectId])
+  @@index([templateId])
+  @@index([subjectId])
+}
+

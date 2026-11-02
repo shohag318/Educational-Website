@@ -5,7 +5,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { getActiveTenantCode } from "@/lib/clientTenant";
+import { getActiveTenantCode } from "@/utils/client-tenant";
 
 export function TenantInterceptor() {
   useEffect(() => {

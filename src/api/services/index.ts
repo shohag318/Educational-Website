@@ -1,0 +1,9 @@
+export { academicService } from "./academic.service";
+export { setupService } from "./setup.service";
+export { studentService } from "./student.service";
+export { examService } from "./exam.service";
+export { marksService } from "./marks.service";
+export { reportsService } from "./reports.service";
+export { smsService } from "./sms.service";
+export { authService } from "./auth.service";
+export { superAdminService } from "./super-admin.service";

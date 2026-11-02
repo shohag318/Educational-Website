@@ -1,1 +1,1 @@
-export { DownloadNavHeader } from "@/app/download/DownloadNavHeader";
+export * from "@/sections/download/component/download-nav-header";

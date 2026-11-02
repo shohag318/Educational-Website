@@ -1,1 +1,1 @@
-export { FeeNavHeader } from "@/app/fees/FeeNavHeader";
+export * from "@/sections/fees/component/fee-nav-header";

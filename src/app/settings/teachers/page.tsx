@@ -1,1 +1,1 @@
-export { default } from "../staff/page";
+export { default } from "@/sections/settings/view/staff-view";

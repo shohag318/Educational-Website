@@ -1,1 +1,1 @@
-export { SmsNavHeader } from "@/app/sms/SmsNavHeader";
+export * from "@/sections/sms/component/sms-nav-header";

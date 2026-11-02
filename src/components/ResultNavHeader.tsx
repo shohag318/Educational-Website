@@ -1,1 +1,1 @@
-export { ResultNavHeader } from "@/app/results/ResultNavHeader";
+export * from "@/sections/results/component/result-nav-header";

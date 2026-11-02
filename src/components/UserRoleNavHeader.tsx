@@ -1,1 +1,1 @@
-export { UserRoleNavHeader } from "@/app/user-role/UserRoleNavHeader";
+export * from "@/sections/user-role/component/user-role-nav-header";

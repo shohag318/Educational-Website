@@ -23,9 +23,8 @@ A complete, production-grade, highly scalable School Management and Result Proce
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: [Next.js 14 (App Router)](https://nextjs.org), TypeScript, Tailwind CSS, Lucide Icons.
-- **Backend**: Next.js Server Handlers, Node.js TypeScript computation engines.
-- **Database & ORM**: PostgreSQL / SQLite via [Prisma ORM](https://www.prisma.io/).
+- **Frontend**: [Next.js 14 (App Router)](https://nextjs.org), TypeScript, MUI, Tailwind CSS, Lucide Icons.
+- **Tooling**: Husky pre-commit hooks with lint-staged / ESLint.
 
 ---
 

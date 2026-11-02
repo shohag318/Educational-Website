@@ -28,15 +28,6 @@ lerna-debug.log*
 .env.production.local
 !.env.example
 
-# Prisma & SQLite database files
-prisma/*.db
-prisma/*.db-journal
-prisma/*.db-shm
-prisma/*.db-wal
-*.db
-*.sqlite
-*.sqlite3
-
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
@@ -48,6 +39,9 @@ coverage/
 
 # Vercel
 .vercel/
+
+# Husky
+.husky/_
 
 # Editor directories and files
 .vscode/*

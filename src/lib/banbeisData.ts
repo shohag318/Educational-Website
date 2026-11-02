@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
 import { SchoolBasicInfo, getStoredSchoolInfo } from "./settingsStore";
-import { getStoredPayroll, PayrollRecord } from "@/app/accountant/accountantStore";
+import { getStoredPayroll, PayrollRecord } from "@/sections/accountant/schema/accountant-store";
 
 export interface BanbeisClassStat {
   className: string;

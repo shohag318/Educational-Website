@@ -3,7 +3,8 @@
 import React, { useEffect, useState, useRef, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { History, X, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import { History, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { AppButton } from "@/components/button/app-button";
 
 interface RecentPageItem {
   path: string;
@@ -300,14 +301,39 @@ export function RecentlyVisitedBar() {
 
       {/* Clear All Action */}
       {recentPages.length > 0 && (
-        <button
+        <AppButton
           onClick={handleClearAll}
           title="Clear all recently visited pages"
-          className="flex items-center gap-1 px-1.5 py-1 rounded text-[11px] font-medium text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition shrink-0"
+          variant="outlined"
+          color="error"
+          size="small"
+          startIcon={<X className="w-3 h-3" />}
+          sx={{
+            minWidth: 0,
+            height: 26,
+            px: { xs: 1, lg: 1.25 },
+            py: 0,
+            borderRadius: 999,
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: "0.01em",
+            borderColor: "rgba(244, 63, 94, 0.28)",
+            color: "#e11d48",
+            bgcolor: "rgba(255, 241, 242, 0.7)",
+            boxShadow: "none",
+            "& .MuiButton-startIcon": {
+              mr: 0.5,
+              ml: 0,
+            },
+            "&:hover": {
+              bgcolor: "#fff1f2",
+              borderColor: "#fb7185",
+              boxShadow: "none",
+            },
+          }}
         >
-          <RotateCcw className="w-3 h-3" />
-          <span className="hidden lg:inline text-[10px]">Clear</span>
-        </button>
+          Clear
+        </AppButton>
       )}
     </div>
   );

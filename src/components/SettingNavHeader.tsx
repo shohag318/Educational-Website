@@ -1,1 +1,1 @@
-export { SettingNavHeader } from "@/app/settings/SettingNavHeader";
+export * from "@/sections/settings/component/setting-nav-header";

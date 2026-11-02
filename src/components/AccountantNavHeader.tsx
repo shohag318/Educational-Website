@@ -1,1 +1,1 @@
-export { AccountantNavHeader } from "@/app/accountant/AccountantNavHeader";
+export * from "@/sections/accountant/component/accountant-nav-header";

@@ -1,30 +1,54 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { Box, Drawer } from "@mui/material";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { RecentlyVisitedBar } from "@/components/RecentlyVisitedBar";
+import { PATHS } from "@/config-global";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-
-  // If viewing the dedicated login portal, render standalone full-screen view
+  const [navOpen, setNavOpen] = useState(false);
   const isAuthPage =
-    pathname?.startsWith("/portal-login") ||
-    pathname?.startsWith("/login");
+    pathname?.startsWith(PATHS.auth.portalLogin) || pathname?.startsWith(PATHS.auth.login);
+
+  useEffect(() => {
+    setNavOpen(false);
+  }, [pathname]);
 
   if (isAuthPage) {
-    return <div className="min-h-screen w-full bg-slate-900 overflow-y-auto">{children}</div>;
+    return (
+      <Box component="div" sx={{ minHeight: "100vh", width: "100%", bgcolor: "grey.900", overflowY: "auto" }}>
+        {children}
+      </Box>
+    );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900 w-full">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <Header />
+    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden", bgcolor: "background.default", width: "100%" }}>
+      <Box sx={{ display: { xs: "none", md: "block" }, flexShrink: 0 }}>
+        <Sidebar />
+      </Box>
+      <Drawer
+        open={navOpen}
+        onClose={() => setNavOpen(false)}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { md: "none" },
+          "& .MuiDrawer-paper": { width: 288, bgcolor: "transparent", border: 0 },
+        }}
+      >
+        <Sidebar />
+      </Drawer>
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, height: "100vh", overflow: "hidden" }}>
+        <Header onMenuClick={() => setNavOpen(true)} />
         <RecentlyVisitedBar />
-        <main className="flex-1 p-6 overflow-y-auto">{children}</main>
-      </div>
-    </div>
+        <Box component="main" sx={{ flex: 1, p: { xs: 1.5, sm: 2, md: 3 }, overflowY: "auto", minWidth: 0 }}>
+          {children}
+        </Box>
+      </Box>
+    </Box>
   );
 }

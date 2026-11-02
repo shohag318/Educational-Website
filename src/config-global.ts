@@ -1,0 +1,148 @@
+export const CONFIG = {
+  appName: "Smart Academy",
+  appTagline: "Bangladesh Standard",
+  appDescription:
+    "Enterprise Multi-Campus Management & Result Processing System for Bangladesh National Curriculum",
+  curriculumLabel: "NCTB Standard",
+  defaultTenantCode: "108254",
+  defaultSchoolName: "Dhaka Ideal Model High School & College",
+  tablePageSize: 15,
+  recentPagesLimit: 10,
+  storageKeys: {
+    authSession: "smart_academy_session",
+    recentlyVisited: "nctb_recently_visited_pages_v1",
+  },
+  events: {
+    authSession: "smart_academy_session_changed",
+    tenantSwitch: "smart_academy_tenant_switched",
+    settingsUpdated: "smart_academy_settings_updated",
+  },
+} as const;
+
+export const HOST_API = process.env.NEXT_PUBLIC_HOST_API || "";
+
+export const PATHS = {
+  root: "/",
+  auth: {
+    login: "/login",
+    portalLogin: "/portal-login",
+  },
+  superAdmin: "/super-admin",
+  academic: {
+    rules: "/academic/rules",
+    subjectMapping: "/academic/subject-mapping",
+  },
+  setup: {
+    classes: "/setup/classes",
+    subjectMapping: "/setup/subject-mapping",
+    exams: "/setup/exams",
+    examRoutine: "/setup/exam-routine",
+    students: "/setup/students",
+    studentInfo: "/setup/student-info",
+  },
+  student: {
+    profile: "/student/profile",
+    attendance: "/student/attendance",
+    status: "/student/status",
+    idCards: "/student/id-cards",
+    seatPlan: "/student/seat-plan",
+    transcript: "/student/transcript",
+  },
+  session: {
+    root: "/session",
+    create: "/session/create",
+  },
+  marks: {
+    entry: "/marks/entry",
+    audit: "/marks/audit",
+  },
+  results: {
+    review: "/results/review",
+    publish: "/results/publish",
+  },
+  reports: {
+    tabulation: "/reports/tabulation",
+    atAGlance: "/reports/at-a-glance",
+    marksheet: "/reports/marksheet",
+    failList: "/reports/fail-list",
+  },
+  fees: {
+    root: "/fees",
+    waiver: "/fees/waiver",
+    absentFine: "/fees/absent-fine",
+    collection: "/fees/collection",
+    collectionHistory: "/fees/collection/history",
+  },
+  accountant: {
+    root: "/accountant",
+    income: "/accountant/income",
+    expense: "/accountant/expense",
+    payroll: "/accountant/payroll",
+    audit: "/accountant/audit",
+  },
+  sms: {
+    root: "/sms",
+    result: "/sms/result",
+    custom: "/sms/custom",
+    notifications: "/notifications/sms",
+  },
+  download: {
+    root: "/download",
+    banbeis: "/download/banbeis",
+    admissionForm: "/download/admission-form",
+    academicCalendar: "/download/academic-calendar",
+  },
+  assets: {
+    root: "/assets",
+    categories: "/assets/categories",
+    maintenance: "/assets/maintenance",
+    depreciation: "/assets/depreciation",
+  },
+  settings: {
+    root: "/settings",
+    staff: "/settings/staff",
+    teachers: "/settings/teachers",
+    signatures: "/settings/signatures",
+    userRole: "/settings/user-role",
+  },
+  userRole: {
+    root: "/user-role",
+    roles: "/user-role/roles",
+    delegation: "/user-role/delegation",
+    auditLogs: "/user-role/audit-logs",
+  },
+} as const;
+
+export const API_ENDPOINTS = {
+  academicYears: "/api/academic-years",
+  classes: "/api/classes",
+  subjects: "/api/subjects",
+  students: "/api/students",
+  studentsBulk: "/api/students/bulk",
+  studentsPromote: "/api/students/promote",
+  exams: "/api/exams",
+  examSubjects: "/api/exams/subjects",
+  examRoutine: "/api/exam-routine",
+  marks: "/api/marks",
+  processResult: "/api/process-result",
+  classSubjects: "/api/setup/class-subjects",
+  seed: "/api/setup/seed",
+  seedDalta: "/api/setup/seed-dalta",
+  rulesGrading: "/api/rules/grading",
+  rulesCombined: "/api/rules/combined",
+  rulesComponents: "/api/rules/components",
+  rulesTemplates: "/api/rules/templates",
+  rulesTemplatesApply: "/api/rules/templates/apply",
+  reportsTabulation: "/api/reports/tabulation",
+  reportsAtAGlance: "/api/reports/at-a-glance",
+  reportsFailList: "/api/reports/fail-list",
+  reportsMarksheetBulk: "/api/reports/marksheet/bulk",
+  reportsMarksheet: (enrollmentId: string) => `/api/reports/marksheet/${enrollmentId}`,
+  smsDispatch: "/api/sms/dispatch",
+  smsCustom: "/api/sms/custom",
+  smsAttendance: "/api/sms/attendance",
+  authPortalInfo: "/api/auth/portal-info",
+  authPortalLogin: "/api/auth/portal-login",
+  institutions: "/api/super-admin/institutions",
+  institution: (id: string) => `/api/super-admin/institutions/${id}`,
+} as const;

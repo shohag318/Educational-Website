@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Box, Chip, Stack } from "@mui/material";
 
 export interface ModuleNavItem {
   href: string;
@@ -20,6 +21,15 @@ export interface ModuleMenuBarProps {
   activeTheme?: "emerald" | "violet" | "amber" | "cyan" | "purple" | "blue";
 }
 
+const themeColors = {
+  emerald: { main: "#059669", hover: "rgba(5, 150, 105, 0.08)" },
+  violet: { main: "#7C3AED", hover: "rgba(124, 58, 237, 0.08)" },
+  amber: { main: "#D97706", hover: "rgba(217, 119, 6, 0.08)" },
+  cyan: { main: "#0E7490", hover: "rgba(14, 116, 144, 0.08)" },
+  purple: { main: "#6D28D9", hover: "rgba(109, 40, 217, 0.08)" },
+  blue: { main: "#2563EB", hover: "rgba(37, 99, 235, 0.08)" },
+};
+
 export function ModuleMenuBar({
   moduleName,
   items,
@@ -28,15 +38,14 @@ export function ModuleMenuBar({
   const pathname = usePathname();
   const [optimisticHref, setOptimisticHref] = useState<string | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const colors = themeColors[activeTheme] || themeColors.emerald;
 
-  // Sync optimistic active state whenever route completes change
   useEffect(() => {
     setOptimisticHref(null);
   }, [pathname]);
 
   const activeHref = optimisticHref || pathname;
 
-  // Auto-scroll track smoothly if active item is partially out of view
   useEffect(() => {
     if (!trackRef.current) return;
     const activeEl = trackRef.current.querySelector('[data-active="true"]');
@@ -45,64 +54,49 @@ export function ModuleMenuBar({
     }
   }, [activeHref]);
 
-  const themeStyles = {
-    emerald: {
-      pill: "bg-emerald-600 text-white",
-      activeTab: "bg-emerald-600 text-white shadow-xs font-semibold",
-      activeBadge: "bg-emerald-700/90 text-emerald-100",
-      hover: "text-slate-600 hover:text-emerald-950 hover:bg-emerald-50/70 font-semibold",
-    },
-    violet: {
-      pill: "bg-violet-600 text-white",
-      activeTab: "bg-violet-600 text-white shadow-xs font-semibold",
-      activeBadge: "bg-violet-700/90 text-violet-100",
-      hover: "text-slate-600 hover:text-violet-950 hover:bg-violet-50/70 font-semibold",
-    },
-    amber: {
-      pill: "bg-amber-600 text-white",
-      activeTab: "bg-amber-600 text-white shadow-xs font-semibold",
-      activeBadge: "bg-amber-700/90 text-amber-100",
-      hover: "text-slate-600 hover:text-amber-950 hover:bg-amber-50/70 font-semibold",
-    },
-    cyan: {
-      pill: "bg-cyan-700 text-white",
-      activeTab: "bg-cyan-700 text-white shadow-xs font-semibold",
-      activeBadge: "bg-cyan-800/90 text-cyan-100",
-      hover: "text-slate-600 hover:text-cyan-950 hover:bg-cyan-50/70 font-semibold",
-    },
-    purple: {
-      pill: "bg-purple-700 text-white",
-      activeTab: "bg-purple-700 text-white shadow-xs font-semibold",
-      activeBadge: "bg-purple-800/90 text-purple-100",
-      hover: "text-slate-600 hover:text-purple-950 hover:bg-purple-50/70 font-semibold",
-    },
-    blue: {
-      pill: "bg-blue-600 text-white",
-      activeTab: "bg-blue-600 text-white shadow-xs font-semibold",
-      activeBadge: "bg-blue-700/90 text-blue-100",
-      hover: "text-slate-600 hover:text-blue-950 hover:bg-blue-50/70 font-semibold",
-    },
-  }[activeTheme] || {
-    pill: "bg-emerald-600 text-white",
-    activeTab: "bg-emerald-600 text-white shadow-xs font-semibold",
-    activeBadge: "bg-emerald-700/90 text-emerald-100",
-    hover: "text-slate-600 hover:text-emerald-950 hover:bg-emerald-50/70 font-semibold",
-  };
-
   return (
-    <div className="w-full mb-6 no-print">
-      <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-2 sm:p-2.5 shadow-xs transition-shadow duration-200 flex items-center justify-between gap-2.5 min-h-[58px] max-h-[58px] overflow-hidden">
-        {/* Module Label Pill (Fixed height & width, shrink-0) */}
-        <div
-          className={`inline-flex items-center px-3 py-1.5 h-9 rounded-xl ${themeStyles.pill} shadow-xs text-xs font-bold tracking-wide shrink-0 select-none`}
-        >
-          <span className="truncate">{moduleName}</span>
-        </div>
-
-        {/* Menu Items (Segmented Track) - Single row with smooth horizontal scroll, NO wrapping, STRICT fixed height! */}
-        <div
+    <Box className="no-print" sx={{ width: "100%", mb: 3 }}>
+      <Stack
+        direction="row"
+        spacing={{ xs: 0.75, sm: 1.25 }}
+        sx={{
+          alignItems: "center",
+          bgcolor: "background.paper",
+          border: 1,
+          borderColor: "divider",
+          borderRadius: 3,
+          p: { xs: 0.75, sm: 1.25 },
+          minHeight: { xs: 48, sm: 58 },
+          overflow: "hidden",
+        }}
+      >
+        <Chip
+          label={moduleName}
+          sx={{
+            bgcolor: colors.main,
+            color: "#fff",
+            fontWeight: 700,
+            borderRadius: 2,
+            height: { xs: 32, sm: 36 },
+            flexShrink: 0,
+          }}
+        />
+        <Stack
           ref={trackRef}
-          className="flex-1 flex items-center gap-1 p-1 bg-slate-50/90 rounded-xl border border-slate-200/70 overflow-x-auto no-scrollbar scroll-smooth min-w-0 h-10"
+          direction="row"
+          spacing={0.5}
+          className="no-scrollbar"
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            overflowX: "auto",
+            bgcolor: "grey.50",
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 2,
+            p: 0.5,
+            height: 40,
+          }}
         >
           {items.map((item) => {
             const isActive =
@@ -110,42 +104,57 @@ export function ModuleMenuBar({
               (item.aliases && item.aliases.some((alias) => activeHref === alias));
 
             return (
-              <Link
+              <Box
                 key={item.href}
+                component={Link}
                 href={item.href}
-                prefetch={true}
+                prefetch
                 scroll={false}
                 data-active={isActive ? "true" : "false"}
-                onClick={(e) => {
-                  if (item.onClick) {
-                    item.onClick(e);
-                  }
-                  if (!e.defaultPrevented) {
-                    setOptimisticHref(item.href);
-                  }
-                }}
                 title={item.description || item.label}
-                className={`relative flex items-center space-x-1.5 px-3 py-1.5 h-8 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors duration-150 ease-out shrink-0 cursor-pointer select-none leading-none ${
-                  isActive ? themeStyles.activeTab : themeStyles.hover
-                }`}
+                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                  if (item.onClick) item.onClick(e);
+                  if (!e.defaultPrevented) setOptimisticHref(item.href);
+                }}
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.75,
+                  px: 1.5,
+                  height: 32,
+                  borderRadius: 1.5,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  textDecoration: "none",
+                  flexShrink: 0,
+                  color: isActive ? "#fff" : "text.secondary",
+                  bgcolor: isActive ? colors.main : "transparent",
+                  "&:hover": {
+                    bgcolor: isActive ? colors.main : colors.hover,
+                    color: isActive ? "#fff" : "text.primary",
+                  },
+                }}
               >
-                <span>{item.label}</span>
+                {item.label}
                 {item.badge && (
-                  <span
-                    className={`text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded-md ${
-                      isActive
-                        ? themeStyles.activeBadge
-                        : item.badgeColor || "bg-slate-200/80 text-slate-700"
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
+                  <Chip
+                    size="small"
+                    label={item.badge}
+                    sx={{
+                      height: 18,
+                      fontSize: 9,
+                      fontWeight: 800,
+                      bgcolor: isActive ? "rgba(255,255,255,0.2)" : "grey.200",
+                      color: isActive ? "#fff" : "text.primary",
+                    }}
+                  />
                 )}
-              </Link>
+              </Box>
             );
           })}
-        </div>
-      </div>
-    </div>
+        </Stack>
+      </Stack>
+    </Box>
   );
 }

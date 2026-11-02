@@ -1,1 +1,1 @@
-export { StudentNavHeader } from "@/app/student/StudentNavHeader";
+export * from "@/sections/student/component/student-nav-header";

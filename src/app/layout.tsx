@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "@/global.css";
 import { AppShell } from "@/components/AppShell";
 import { TenantInterceptor } from "@/components/TenantInterceptor";
+import { ThemeProvider } from "@/theme/theme-provider";
+import { CONFIG } from "@/config-global";
 
 export const metadata: Metadata = {
-  title: "Smart Academy - Central School Management & Super Admin Portal",
-  description: "Enterprise Multi-Campus Management & Result Processing System for Bangladesh National Curriculum",
+  title: `${CONFIG.appName} - Central School Management & Super Admin Portal`,
+  description: CONFIG.appDescription,
 };
 
 export default function RootLayout({
@@ -15,12 +17,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className="h-screen overflow-hidden bg-slate-50 text-slate-900 antialiased"
-        suppressHydrationWarning
-      >
-        <TenantInterceptor />
-        <AppShell>{children}</AppShell>
+      <body suppressHydrationWarning>
+        <ThemeProvider>
+          <TenantInterceptor />
+          <AppShell>{children}</AppShell>
+        </ThemeProvider>
       </body>
     </html>
   );

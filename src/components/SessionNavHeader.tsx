@@ -1,1 +1,1 @@
-export { SessionNavHeader } from "@/app/session/SessionNavHeader";
+export * from "@/sections/session/component/session-nav-header";

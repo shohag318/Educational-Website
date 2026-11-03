@@ -947,19 +947,19 @@ export default function StudentStatusPage() {
           </Stack>
           <Grid container spacing={1.5}>
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
-              <SessionSelect
-                value={selectedSession}
-                onChange={(val) => setSelectedSession(val)}
+        <SessionSelect
+          value={selectedSession}
+          onChange={(val) => setSelectedSession(val)}
                 label="Session"
-                includeAll={true}
-                allLabel="All Sessions"
-                activeOnly={false}
+          includeAll={true}
+          allLabel="All Sessions"
+          activeOnly={false}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
               <AppSelect
                 label="Class"
-                value={selectedClassId}
+            value={selectedClassId}
                 onChange={handleClassChange}
                 options={[
                   { value: "ALL", label: "All Classes" },
@@ -971,7 +971,7 @@ export default function StudentStatusPage() {
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
               <AppSelect
                 label="Shift"
-                value={selectedShift}
+            value={selectedShift}
                 onChange={handleShiftChange}
                 options={[
                   { value: "", label: "All Shifts" },
@@ -987,7 +987,7 @@ export default function StudentStatusPage() {
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
               <AppSelect
                 label="Group"
-                value={selectedGroup}
+            value={selectedGroup}
                 onChange={handleGroupChange}
                 options={[
                   ...standardGroups.map((grp) => ({ value: grp.value, label: grp.label })),
@@ -998,7 +998,7 @@ export default function StudentStatusPage() {
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
               <AppSelect
                 label="Section"
-                value={selectedSectionId}
+            value={selectedSectionId}
                 onChange={setSelectedSectionId}
                 options={[
                   { value: "", label: "All Sections" },
@@ -1066,9 +1066,9 @@ export default function StudentStatusPage() {
 
           {!isMobile && batchActions}
 
-          {loading ? (
+        {loading ? (
             <LoadingScreen label="Loading student records..." />
-          ) : filteredStudents.length === 0 ? (
+        ) : filteredStudents.length === 0 ? (
             <EmptyContent
               title={hasExtraFilters ? "No matching students" : "No student records found"}
               description={
@@ -1110,35 +1110,35 @@ export default function StudentStatusPage() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {filteredStudents.map((enr) => {
-                        const isChecked = selectedIds.has(enr.studentId);
-                        const parsed = parseStudentStatus(enr.student);
-                        return (
+                {filteredStudents.map((enr) => {
+                  const isChecked = selectedIds.has(enr.studentId);
+                  const parsed = parseStudentStatus(enr.student);
+                  return (
                           <TableRow key={enr.id} hover selected={isChecked}>
                             <TableCell padding="checkbox" className="no-print">
                               <Checkbox size="small" checked={isChecked} onChange={() => toggleSelectStudent(enr.studentId)} />
                             </TableCell>
                             <TableCell align="center">
                               <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 700 }}>
-                                #{enr.classRoll}
+                        #{enr.classRoll}
                               </Typography>
                             </TableCell>
                             <TableCell>
                               <Typography variant="caption" sx={{ fontFamily: "monospace" }}>
-                                {enr.student.studentIdNo}
+                        {enr.student.studentIdNo}
                               </Typography>
                             </TableCell>
                             <TableCell>
                               <Typography variant="subtitle2">
-                                {enr.student.firstName} {enr.student.lastName || ""}
+                          {enr.student.firstName} {enr.student.lastName || ""}
                               </Typography>
                               <Typography variant="caption" color="text.secondary" sx={{ textTransform: "capitalize" }}>
-                                {enr.student.gender?.toLowerCase() || "Not specified"}
+                          {enr.student.gender?.toLowerCase() || "Not specified"}
                               </Typography>
                             </TableCell>
                             <TableCell>
                               <Typography variant="body2">
-                                {enr.class?.name || classes.find((c) => c.id === selectedClassId)?.name}
+                          {enr.class?.name || classes.find((c) => c.id === selectedClassId)?.name}
                               </Typography>
                               <Typography variant="caption" color="text.secondary">
                                 {enr.section?.name ? `Sec ${enr.section.name}` : "General"}
@@ -1153,9 +1153,9 @@ export default function StudentStatusPage() {
                             </TableCell>
                             <TableCell>{renderStatusSelect(enr)}</TableCell>
                             <TableCell>
-                              {parsed.reason ? (
+                        {parsed.reason ? (
                                 <Typography variant="body2" noWrap title={parsed.reason} sx={{ maxWidth: 180 }}>
-                                  {parsed.reason}
+                            {parsed.reason}
                                 </Typography>
                               ) : (
                                 <Typography variant="caption" color="text.secondary">
@@ -1171,15 +1171,15 @@ export default function StudentStatusPage() {
                               <AppButton
                                 size="small"
                                 variant="outlined"
-                                onClick={() => openSingleModal(enr)}
+                          onClick={() => openSingleModal(enr)}
                                 startIcon={<EditOutlinedIcon sx={{ fontSize: 16 }} />}
                               >
                                 Edit
                               </AppButton>
                             </TableCell>
                           </TableRow>
-                        );
-                      })}
+                  );
+                })}
                     </TableBody>
                   </Table>
                 </Scrollbar>
@@ -1207,16 +1207,16 @@ export default function StudentStatusPage() {
       >
         <Box component="form" onSubmit={handleModalSubmit} sx={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1 }}>
           <DialogTitle sx={{ pr: 6, position: "relative" }}>
-            {modalMode === "single"
+                    {modalMode === "single"
               ? `Update ${targetStudent?.student.firstName || "student"}`
               : `Update ${selectedIds.size} students`}
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontWeight: 400 }}>
-              {modalMode === "single"
+                    {modalMode === "single"
                 ? `Roll #${targetStudent?.classRoll} · ${targetStudent?.student.studentIdNo} · ${targetStudent?.class?.name || ""}`
                 : "The same status, reason, and date will apply to every selected student."}
             </Typography>
             <IconButton
-              onClick={() => setModalOpen(false)}
+                onClick={() => setModalOpen(false)}
               aria-label="Close"
               sx={{ position: "absolute", right: 12, top: 12 }}
             >
@@ -1233,7 +1233,7 @@ export default function StudentStatusPage() {
                   {(Object.keys(STATUS_CONFIG) as StudentStatusType[]).map((st) => {
                     const conf = STATUS_CONFIG[st];
                     const selected = newStatus === st;
-                    return (
+                      return (
                       <Grid size={{ xs: 6, sm: 4 }} key={st}>
                         <AppButton
                           type="button"
@@ -1273,10 +1273,10 @@ export default function StudentStatusPage() {
 
               <AppTextField
                 label="Reason / cause"
-                value={statusReason}
-                onChange={(e) => setStatusReason(e.target.value)}
-                placeholder="e.g. Relocated to Chittagong with parents"
-              />
+                  value={statusReason}
+                  onChange={(e) => setStatusReason(e.target.value)}
+                  placeholder="e.g. Relocated to Chittagong with parents"
+                />
 
               {newStatus === "TRANSFER" && (
                 <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: "info.lighter", border: 1, borderColor: "info.light" }}>
@@ -1286,17 +1286,17 @@ export default function StudentStatusPage() {
                   </Stack>
                   <AppTextField
                     label="TC serial number"
-                    value={tcNumber}
-                    onChange={(e) => setTcNumber(e.target.value)}
-                    placeholder="e.g. TC-2026/894"
+                      value={tcNumber}
+                      onChange={(e) => setTcNumber(e.target.value)}
+                      placeholder="e.g. TC-2026/894"
                   />
                 </Box>
               )}
 
               <AppTextField
                 label="Institutional remarks"
-                value={statusRemarks}
-                onChange={(e) => setStatusRemarks(e.target.value)}
+                  value={statusRemarks}
+                  onChange={(e) => setStatusRemarks(e.target.value)}
                 placeholder="Optional note for census and result records"
                 multiline
                 minRows={2}
@@ -1305,7 +1305,7 @@ export default function StudentStatusPage() {
           </DialogContent>
           <DialogActions sx={{ px: 3, py: 2, gap: 1, flexWrap: "wrap" }}>
             <AppButton type="button" variant="outlined" color="error" onClick={() => setModalOpen(false)} sx={{ ml: { xs: 0, sm: "auto" } }}>
-              Cancel
+                  Cancel
             </AppButton>
             <AppButton type="submit" variant="contained" color="success" loading={isSubmitting}>
               {modalMode === "single" ? `Save ${STATUS_CONFIG[newStatus].label}` : `Apply to ${selectedIds.size} students`}

@@ -160,7 +160,7 @@ export default function ClassSubjectMappingPage() {
 
   const postAction = async (payload: unknown, successMessage?: string) => {
     const json = await setupService.saveClassSubjects(payload);
-    if (json.success) {
+      if (json.success) {
       showNotify("success", successMessage || (json as any).message || "Updated");
       await fetchMappings(true);
       return true;
@@ -187,7 +187,7 @@ export default function ClassSubjectMappingPage() {
           const isJunior =
             targetClass && (targetClass.numericValue ? targetClass.numericValue < 9 : !/9|10|11|12|ssc|hsc/i.test(targetClass.name));
           setSelectedGroup(isJunior ? "GENERAL" : "SCIENCE");
-        } else {
+      } else {
           setLoading(false);
         }
       })
@@ -195,7 +195,7 @@ export default function ClassSubjectMappingPage() {
   }, []);
 
   useEffect(() => {
-    fetchMappings();
+        fetchMappings();
   }, [selectedClassId, selectedGroup]);
 
   useEffect(() => {
@@ -349,12 +349,12 @@ export default function ClassSubjectMappingPage() {
       confirmLabel: "Sync now",
       danger: false,
       run: async () => {
-        setActionLoading(true);
-        try {
+    setActionLoading(true);
+    try {
           await postAction({ action: "sync_to_students", classId: selectedClassId, groupType: selectedGroup }, "Synced to students");
-        } finally {
-          setActionLoading(false);
-        }
+    } finally {
+      setActionLoading(false);
+    }
       },
     });
   };
@@ -421,11 +421,11 @@ export default function ClassSubjectMappingPage() {
 
   const mappedCards = (
     <Stack spacing={1.25}>
-      {filteredMappings.map((item) => {
+                  {filteredMappings.map((item) => {
         const selected = selectedMappingIds.includes(item.subjectId);
-        return (
+                    return (
           <Box
-            key={item.id}
+                        key={item.id}
             sx={{
               p: 1.5,
               border: 1,
@@ -438,7 +438,7 @@ export default function ClassSubjectMappingPage() {
               <Checkbox
                 checked={selected}
                 onChange={(e) =>
-                  setSelectedMappingIds(
+                                setSelectedMappingIds(
                     e.target.checked ? [...selectedMappingIds, item.subjectId] : selectedMappingIds.filter((id) => id !== item.subjectId)
                   )
                 }
@@ -470,8 +470,8 @@ export default function ClassSubjectMappingPage() {
               </Box>
             </Stack>
           </Box>
-        );
-      })}
+                    );
+                  })}
     </Stack>
   );
 
@@ -546,11 +546,11 @@ export default function ClassSubjectMappingPage() {
 
   const catalogCards = (
     <Stack spacing={1.25}>
-      {filteredUnmapped.map((sub) => {
+                  {filteredUnmapped.map((sub) => {
         const selected = selectedCatalogSubjectIds.includes(sub.id);
-        return (
+                    return (
           <Box
-            key={sub.id}
+                        key={sub.id}
             sx={{
               p: 1.5,
               border: 1,
@@ -563,7 +563,7 @@ export default function ClassSubjectMappingPage() {
               <Checkbox
                 checked={selected}
                 onChange={(e) =>
-                  setSelectedCatalogSubjectIds(
+                                setSelectedCatalogSubjectIds(
                     e.target.checked ? [...selectedCatalogSubjectIds, sub.id] : selectedCatalogSubjectIds.filter((id) => id !== sub.id)
                   )
                 }
@@ -597,8 +597,8 @@ export default function ClassSubjectMappingPage() {
               </Box>
             </Stack>
           </Box>
-        );
-      })}
+                    );
+                  })}
     </Stack>
   );
 
@@ -678,10 +678,10 @@ export default function ClassSubjectMappingPage() {
               variant="outlined"
               size="small"
               startIcon={<ContentCopyIcon />}
-              onClick={() => {
+                                onClick={() => {
                 setCopySourceClassId(classes[0]?.id || "");
-                setShowCopyModal(true);
-              }}
+                                  setShowCopyModal(true);
+                                }}
             >
               Copy from
             </AppButton>
@@ -918,7 +918,7 @@ export default function ClassSubjectMappingPage() {
               <Box
                 key={preset.key}
                 component="button"
-                type="button"
+                  type="button"
                 onClick={() => !actionLoading && handleApplyPreset(preset.key)}
                 sx={{
                   p: 2,
@@ -1006,7 +1006,7 @@ export default function ClassSubjectMappingPage() {
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2 }}>
             <AppButton color="inherit" onClick={() => setShowAddSubjectModal(false)}>
-              Cancel
+                  Cancel
             </AppButton>
             <AppButton type="submit" variant="contained" loading={actionLoading}>
               Create and map

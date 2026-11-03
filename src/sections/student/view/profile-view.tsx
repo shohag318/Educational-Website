@@ -46,13 +46,37 @@ import {
 } from "lucide-react";
 import { getStoredWaivers, calculateStudentWaiver } from "@/sections/fees/schema/waiver-store";
 import { StudentAdminPageShell } from "@/sections/student/component/admin-page-shell";
+import { StudentPageHeader } from "@/sections/student/component/student-page-header";
 import { DatePicker } from "@/components/date-picker/date-picker";
 import { AppButton } from "@/components/button/app-button";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppCard } from "@/components/card/app-card";
 import { AppSelect } from "@/components/select/app-select";
-import { StudentPageHeader } from "@/sections/student/component/student-page-header";
-import { Box, Grid, Stack } from "@mui/material";
+import { AppTextField } from "@/components/text-field/app-text-field";
+import { EmptyContent } from "@/components/empty-content/empty-content";
+import { Label } from "@/components/label/label";
+import { CustomTabs } from "@/components/custom-tabs/custom-tabs";
+import {
+  Avatar,
+  Box,
+  Divider,
+  Grid,
+  IconButton,
+  Stack,
+  Tab,
+  Typography,
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import PrintOutlinedIcon from "@mui/icons-material/PrintOutlined";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import PhotoCameraOutlinedIcon from "@mui/icons-material/PhotoCameraOutlined";
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 const formatGroupName = (g?: string) => {
   if (!g) return "General";
@@ -964,741 +988,721 @@ export default function StudentProfilePage() {
     return notices.filter((n) => n.category === noticeCategory);
   }, [notices, noticeCategory]);
 
+  const studentInitials = `${activeStudent?.student?.firstName?.[0] || "S"}${activeStudent?.student?.lastName?.[0] || ""}`;
+  const studentFullName = `${activeStudent?.student?.firstName || ""} ${activeStudent?.student?.lastName || ""}`.trim();
+  const studentGroupLabel = activeStudent?.groupType
+    ? formatGroupName(activeStudent.groupType)
+    : activeStudent?.section?.groupType
+      ? formatGroupName(activeStudent.section.groupType)
+      : "General";
+
+  const profileStatTiles = activeStudent
+    ? [
+        {
+          label: "Exam GPA",
+          value: `${studentResultInfo?.gpa.toFixed(2) ?? "—"} (${studentResultInfo?.letterGrade ?? "—"})`,
+          color: "success.main",
+          bg: "success.lighter",
+        },
+        {
+          label: "Class Rank",
+          value: `#${activeStudent.classRoll}`,
+          color: "info.main",
+          bg: "info.lighter",
+        },
+        {
+          label: "Fee Status",
+          value: studentFeeInfo?.status || "—",
+          color: studentFeeInfo?.status === "PAID" ? "success.main" : "warning.main",
+          bg: studentFeeInfo?.status === "PAID" ? "success.lighter" : "warning.lighter",
+        },
+        {
+          label: "Admit Card",
+          value: studentFeeInfo?.isExamCleared ? "CLEARED" : "HOLD",
+          color: studentFeeInfo?.isExamCleared ? "success.main" : "warning.main",
+          bg: studentFeeInfo?.isExamCleared ? "success.lighter" : "warning.lighter",
+        },
+      ]
+    : [];
+
   return (
     <StudentAdminPageShell>
       <StudentPageHeader
         heading="Student Profile"
         current="Profiles"
         action={
-          <AppButton variant="outlined" onClick={() => window.print()} startIcon={<Printer className="w-3.5 h-3.5" />} className="no-print">
-            Print Student Dossier
+          <AppButton
+            variant="outlined"
+            color="inherit"
+            onClick={() => window.print()}
+            startIcon={<PrintOutlinedIcon fontSize="small" />}
+            className="no-print"
+          >
+            Print Dossier
           </AppButton>
         }
       />
 
-      <AppCard sx={{ mb: 3 }} className="no-print">
-        <Grid container spacing={1.5} sx={{ mb: students.length > 0 ? 2 : 0 }}>
-          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
-            <SessionSelect value={selectedSession} onChange={(val) => setSelectedSession(val)} label="Session" />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
-            <AppSelect
-              label="Class"
-              value={selectedClassId}
-              onChange={(val) => {
-                setSelectedClassId(val);
-                setSelectedSectionId("");
-              }}
-              options={classes.map((cls) => ({ value: cls.id, label: cls.name }))}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
-            <AppSelect
-              label="Shift"
-              value={selectedShift}
-              onChange={(val) => {
-                setSelectedShift(val);
-                setSelectedSectionId("");
-              }}
-              options={[
-                { value: "ALL", label: "All Shifts" },
-                { value: "MORNING", label: "Morning" },
-                { value: "DAY", label: "Day" },
-              ]}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
-            <AppSelect
-              label="Group"
-              value={selectedGroup}
-              onChange={(val) => {
-                setSelectedGroup(val);
-                setSelectedSectionId("");
-              }}
-              options={[
-                { value: "ALL", label: "All Groups" },
-                { value: "SCIENCE", label: "Science" },
-                { value: "HUMANITIES", label: "Humanities" },
-                { value: "BUSINESS_STUDIES", label: "Business Studies" },
-                { value: "GENERAL", label: "General" },
-              ]}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
-            <AppSelect
-              label="Section"
-              value={selectedSectionId}
-              onChange={setSelectedSectionId}
-              options={[
-                { value: "", label: "All Sections" },
-                ...availableSections.map((sec: any) => {
-                  const namePrefix = sec.name?.toLowerCase().startsWith("section") ? sec.name : `Section ${sec.name}`;
-                  const groupPart = sec.groupType && sec.groupType !== "GENERAL" ? ` (${sec.groupType})` : "";
-                  const shiftPart = sec.shift ? ` • ${sec.shift}` : " • Day";
-                  return { value: sec.id, label: `${namePrefix}${groupPart}${shiftPart}` };
-                }),
-              ]}
-            />
-          </Grid>
-        </Grid>
+      <AppCard sx={{ mb: 2.5 }} className="no-print">
+        <Stack spacing={2}>
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
+              Find student
+            </Typography>
+            <Grid container spacing={1.5}>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
+                <SessionSelect value={selectedSession} onChange={(val) => setSelectedSession(val)} label="Session" />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
+                <AppSelect
+                  label="Class"
+                  value={selectedClassId}
+                  onChange={(val) => {
+                    setSelectedClassId(val);
+                    setSelectedSectionId("");
+                  }}
+                  options={classes.map((cls) => ({ value: cls.id, label: cls.name }))}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
+                <AppSelect
+                  label="Shift"
+                  value={selectedShift}
+                  onChange={(val) => {
+                    setSelectedShift(val);
+                    setSelectedSectionId("");
+                  }}
+                  options={[
+                    { value: "ALL", label: "All Shifts" },
+                    { value: "MORNING", label: "Morning" },
+                    { value: "DAY", label: "Day" },
+                  ]}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
+                <AppSelect
+                  label="Group"
+                  value={selectedGroup}
+                  onChange={(val) => {
+                    setSelectedGroup(val);
+                    setSelectedSectionId("");
+                  }}
+                  options={[
+                    { value: "ALL", label: "All Groups" },
+                    { value: "SCIENCE", label: "Science" },
+                    { value: "HUMANITIES", label: "Humanities" },
+                    { value: "BUSINESS_STUDIES", label: "Business Studies" },
+                    { value: "GENERAL", label: "General" },
+                  ]}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
+                <AppSelect
+                  label="Section"
+                  value={selectedSectionId}
+                  onChange={setSelectedSectionId}
+                  options={[
+                    { value: "", label: "All Sections" },
+                    ...availableSections.map((sec: any) => {
+                      const namePrefix = sec.name?.toLowerCase().startsWith("section") ? sec.name : `Section ${sec.name}`;
+                      const groupPart = sec.groupType && sec.groupType !== "GENERAL" ? ` (${sec.groupType})` : "";
+                      const shiftPart = sec.shift ? ` • ${sec.shift}` : " • Day";
+                      return { value: sec.id, label: `${namePrefix}${groupPart}${shiftPart}` };
+                    }),
+                  ]}
+                />
+              </Grid>
+            </Grid>
+          </Box>
 
-        {/* Sequential Student Navigator (Previous / Next) */}
-        {students.length > 0 && (
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2">
-              <AppButton
-                type="button"
-                variant="outlined"
-                onClick={handlePreviousStudent}
-                disabled={!hasPrevious}
-                title={hasPrevious ? `Go to previous student (Roll #${students[currentStudentIndex - 1]?.classRoll})` : "No previous student"}
-                startIcon={<ChevronLeft className="w-4 h-4" />}
+          {students.length > 0 && (
+            <>
+              <Divider />
+              <Stack
+                direction={{ xs: "column", md: "row" }}
+                spacing={1.5}
+                sx={{ alignItems: { xs: "stretch", md: "center" }, justifyContent: "space-between" }}
               >
-                Previous
-              </AppButton>
-
-              <div className="px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-700 flex items-center gap-2">
-                <span className="text-emerald-700">Roll: #{activeStudent?.classRoll}</span>
-                <span className="text-slate-300">•</span>
-                <span className="text-slate-600 font-sans font-medium">
-                  {currentStudentIndex >= 0 ? currentStudentIndex + 1 : 1} of {students.length} Students
-                </span>
-              </div>
-
-              <AppButton
-                type="button"
-                variant="contained"
-                color="success"
-                onClick={handleNextStudent}
-                disabled={!hasNext}
-                title={hasNext ? `Go to next student (Roll #${students[currentStudentIndex + 1]?.classRoll})` : "No next student"}
-                endIcon={<ChevronRight className="w-4 h-4" />}
-              >
-                Next
-              </AppButton>
-            </div>
-
-            {/* Jump to Student by Roll / Name */}
-            <div className="relative shrink-0">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Jump to roll or name..."
-                className="pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-medium text-slate-800 w-52 shadow-2xs"
-              />
-            </div>
-          </div>
-        )}
-      </AppCard>
-
-      {/* If No Student Found */}
-      {!activeStudent ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400">
-          <GraduationCap className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <p className="font-bold text-slate-700 text-sm">No Student Records Selected</p>
-          <p className="text-xs text-slate-500 mt-1">
-            Please adjust class or section filters to view the student profile.
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* ========================================================
-              STUDENT HERO CARD
-             ======================================================== */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 overflow-hidden">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-              <div className="flex items-start sm:items-center space-x-4">
-                {/* Avatar with Photo or Initials + Camera Overlay */}
-                <div className="relative group shrink-0">
-                  {currentPhoto ? (
-                    <img
-                      src={currentPhoto}
-                      alt={`${activeStudent.student?.firstName || "Student"} Photo`}
-                      className="w-16 h-16 rounded-2xl object-cover shadow-md border-2 border-emerald-500 ring-2 ring-emerald-100"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center font-black text-2xl shadow-md">
-                      {activeStudent.student?.firstName ? activeStudent.student.firstName[0] : "S"}
-                      {activeStudent.student?.lastName ? activeStudent.student.lastName[0] : ""}
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTempPhotoUrl(currentPhoto || "");
-                      setIsPhotoModalOpen(true);
-                    }}
-                    className="absolute -bottom-1 -right-1 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 p-1.5 rounded-full shadow-md border border-slate-200 transition cursor-pointer"
-                    title="Change Student Profile Picture"
-                  >
-                    <Camera className="w-3.5 h-3.5 text-emerald-600" />
-                  </button>
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-xl font-extrabold text-slate-900">
-                      {activeStudent.student?.firstName} {activeStudent.student.lastName}
-                    </h2>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                      Active Student
-                    </span>
-                    {studentFeeInfo?.isSpecialScholarship && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1">
-                        <Sparkles className="w-3 h-3 text-amber-600" />
-                        {studentFeeInfo.waiverTitle}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-3 text-xs text-slate-500 mt-1 flex-wrap">
-                    <span className="font-mono font-semibold text-slate-800">
-                      ID: {activeStudent.student?.studentIdNo || "N/A"}
-                    </span>
-                    <span>•</span>
-                    <span className="font-semibold text-slate-800">
-                      Roll: <strong className="font-mono">{activeStudent.classRoll}</strong>
-                    </span>
-                    <span>•</span>
-                    <span>{activeStudent.class?.name || "—"}{activeStudent.section?.name ? ` • Section ${activeStudent.section.name}` : ""}</span>
-                    <span>•</span>
-                    <span className="text-slate-600 font-medium">
-                      Group: {activeStudent.groupType ? formatGroupName(activeStudent.groupType) : activeStudent.section?.groupType ? formatGroupName(activeStudent.section.groupType) : "General"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-end gap-2.5">
-                {/* Sequential Student Navigation Buttons */}
-                <div className="flex items-center gap-1.5 self-end no-print">
+                <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: "center", flexWrap: "wrap" }}>
                   <AppButton
                     type="button"
+                    variant="outlined"
+                    color="inherit"
                     size="small"
-                    variant="outline"
                     onClick={handlePreviousStudent}
                     disabled={!hasPrevious}
-                    title={hasPrevious ? `Previous Student (Roll #${students[currentStudentIndex - 1]?.classRoll})` : "No previous student"}
-                    startIcon={<ChevronLeft className="w-3.5 h-3.5" />}
+                    startIcon={<ChevronLeftIcon fontSize="small" />}
                   >
                     Previous
                   </AppButton>
-                  <span className="text-[11px] font-mono font-bold text-slate-500 px-2 py-0.5 bg-slate-50 rounded-md border border-slate-200">
-                    {currentStudentIndex >= 0 ? currentStudentIndex + 1 : 1} / {students.length}
-                  </span>
+
+                  <Box
+                    sx={{
+                      px: 1.5,
+                      py: 0.75,
+                      borderRadius: 1.5,
+                      bgcolor: "grey.50",
+                      border: "1px solid",
+                      borderColor: "divider",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <Typography variant="caption" sx={{ color: "success.main", fontWeight: 700, fontFamily: "monospace" }}>
+                      Roll #{activeStudent?.classRoll ?? "—"}
+                    </Typography>
+                    <Typography variant="caption" color="text.disabled">
+                      •
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                      {currentStudentIndex >= 0 ? currentStudentIndex + 1 : 1} of {students.length}
+                    </Typography>
+                  </Box>
+
                   <AppButton
                     type="button"
-                    size="small"
                     variant="contained"
                     color="success"
+                    size="small"
                     onClick={handleNextStudent}
                     disabled={!hasNext}
-                    title={hasNext ? `Next Student (Roll #${students[currentStudentIndex + 1]?.classRoll})` : "No next student"}
-                    endIcon={<ChevronRight className="w-3.5 h-3.5" />}
+                    endIcon={<ChevronRightIcon fontSize="small" />}
                   >
                     Next
                   </AppButton>
-                </div>
+                </Stack>
 
-                {/* Quick Stat Pill Highlights */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs w-full sm:w-auto">
-                <div className="p-2.5 rounded-lg bg-emerald-50/70 border border-emerald-200">
-                  <span className="text-[10px] text-emerald-700 font-bold block uppercase">Exam GPA</span>
-                  <span className="text-base font-extrabold font-mono text-emerald-800">
-                    {studentResultInfo?.gpa.toFixed(2)} ({studentResultInfo?.letterGrade})
-                  </span>
-                </div>
+                <AppTextField
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Jump to roll or name…"
+                  startIcon={<SearchIcon sx={{ fontSize: 18, color: "text.disabled" }} />}
+                  sx={{ maxWidth: { xs: "100%", md: 260 } }}
+                />
+              </Stack>
+            </>
+          )}
+        </Stack>
+      </AppCard>
 
-                <div className="p-2.5 rounded-lg bg-indigo-50/70 border border-indigo-200">
-                  <span className="text-[10px] text-indigo-700 font-bold block uppercase">Class Rank</span>
-                  <span className="text-base font-extrabold font-mono text-indigo-800">
-                    #{activeStudent.classRoll}
-                  </span>
-                </div>
-
-                <div className="p-2.5 rounded-lg bg-amber-50/70 border border-amber-200">
-                  <span className="text-[10px] text-amber-700 font-bold block uppercase">Fee Status</span>
-                  <span className={`text-base font-extrabold font-mono ${studentFeeInfo?.status === "PAID" ? "text-emerald-700" : "text-amber-700"}`}>
-                    {studentFeeInfo?.status}
-                  </span>
-                </div>
-
-                <div className="p-2.5 rounded-lg bg-teal-50/70 border border-teal-200">
-                  <span className="text-[10px] text-teal-700 font-bold block uppercase">Admit Card</span>
-                  <span className="text-xs font-bold font-mono text-teal-800 flex items-center justify-center gap-1 mt-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
-                    {studentFeeInfo?.isExamCleared ? "CLEARED" : "HOLD"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-            {/* ========================================================
-                4 CORE SUB-SECTION TABS (PROFILE, RESULT, FEE, NOTICE)
-               ======================================================== */}
-            <div className="pt-4 flex items-center space-x-2 border-b border-slate-200 no-print overflow-x-auto">
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={activeTab === "PROFILE" ? "primary" : "inherit"}
-                onClick={() => setActiveTab("PROFILE")}
-                startIcon={<UserCheck className="w-4 h-4" />}
+      {!activeStudent ? (
+        <AppCard>
+          <EmptyContent
+            title="No student selected"
+            description="Choose a session, class, and section above to open a student profile."
+          />
+        </AppCard>
+      ) : (
+        <>
+          <AppCard sx={{ mb: 2.5, overflow: "hidden" }}>
+            <Stack spacing={2.5}>
+              <Stack
+                direction={{ xs: "column", md: "row" }}
+                spacing={2.5}
+                sx={{ alignItems: { xs: "flex-start", md: "center" }, justifyContent: "space-between" }}
               >
-                1. Personal Profile
-              </AppButton>
-
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={activeTab === "RESULT" ? "primary" : "inherit"}
-                onClick={() => setActiveTab("RESULT")}
-                startIcon={<Award className="w-4 h-4" />}
-              >
-                2. Academic Results
-              </AppButton>
-
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={activeTab === "FEE_STATUS" ? "primary" : "inherit"}
-                onClick={() => setActiveTab("FEE_STATUS")}
-                startIcon={<Receipt className="w-4 h-4" />}
-              >
-                3. Fee Status & Ledger
-              </AppButton>
-
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={activeTab === "NOTICE" ? "primary" : "inherit"}
-                onClick={() => setActiveTab("NOTICE")}
-                startIcon={<Bell className="w-4 h-4" />}
-              >
-                4. Institutional Notices ({notices.length})
-              </AppButton>
-
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={activeTab === "SUBJECT_LIST" ? "primary" : "inherit"}
-                onClick={() => setActiveTab("SUBJECT_LIST")}
-                startIcon={<BookOpen className="w-4 h-4" />}
-              >
-                5. Subject List ({studentSubjectList.length})
-              </AppButton>
-            </div>
-          </div>
-
-          {/* ========================================================
-              TAB CONTENT 1: PROFILE
-             ======================================================== */}
-          {activeTab === "PROFILE" && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* 1. Academic Registration & Class Details */}
-                <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-2xs space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                    <div className="flex items-center space-x-2 font-bold text-slate-800 text-xs">
-                      <GraduationCap className="w-4 h-4 text-emerald-600" />
-                      <span>Academic Registration & Class Details</span>
-                    </div>
-                    <AppButton
-                      type="button"
-                      size="small"
-                      variant="soft"
-                      color="success"
-                      onClick={() => handleOpenSectionEdit("academic")}
-                      title="Edit Academic Details"
-                      startIcon={<Edit2 className="w-3 h-3" />}
+                <Stack direction="row" spacing={2} sx={{ minWidth: 0, alignItems: "center" }}>
+                  <Box sx={{ position: "relative", flexShrink: 0 }}>
+                    <Avatar
+                      src={currentPhoto || undefined}
+                      alt={studentFullName || "Student"}
+                      variant="rounded"
+                      sx={{
+                        width: 72,
+                        height: 72,
+                        fontSize: 22,
+                        fontWeight: 800,
+                        bgcolor: "success.main",
+                        border: "2px solid",
+                        borderColor: "success.light",
+                      }}
                     >
+                      {studentInitials}
+                    </Avatar>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setTempPhotoUrl(currentPhoto || "");
+                        setIsPhotoModalOpen(true);
+                      }}
+                      aria-label="Change profile photo"
+                      sx={{
+                        position: "absolute",
+                        right: -6,
+                        bottom: -6,
+                        bgcolor: "background.paper",
+                        border: "1px solid",
+                        borderColor: "divider",
+                        boxShadow: 1,
+                        "&:hover": { bgcolor: "success.lighter" },
+                      }}
+                    >
+                      <PhotoCameraOutlinedIcon sx={{ fontSize: 16, color: "success.main" }} />
+                    </IconButton>
+                  </Box>
+
+                  <Box sx={{ minWidth: 0 }}>
+                    <Stack direction="row" spacing={1} useFlexGap sx={{ mb: 0.75, alignItems: "center", flexWrap: "wrap" }}>
+                      <Typography variant="h5" noWrap sx={{ fontWeight: 800 }}>
+                        {studentFullName || "Student"}
+                      </Typography>
+                      <Label color="success" variant="soft">
+                        Active
+                      </Label>
+                      {studentFeeInfo?.isSpecialScholarship && (
+                        <Label color="warning" variant="soft" startIcon={<Sparkles className="w-3 h-3" />}>
+                          {studentFeeInfo.waiverTitle}
+                        </Label>
+                      )}
+                    </Stack>
+
+                    <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: "center", flexWrap: "wrap" }}>
+                      <Typography variant="caption" color="text.primary" sx={{ fontWeight: 700, fontFamily: "monospace" }}>
+                        ID {activeStudent.student?.studentIdNo || "N/A"}
+                      </Typography>
+                      <Typography variant="caption" color="text.disabled">
+                        •
+                      </Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                        Roll <Box component="span" sx={{ fontFamily: "monospace" }}>{activeStudent.classRoll}</Box>
+                      </Typography>
+                      <Typography variant="caption" color="text.disabled">
+                        •
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {activeStudent.class?.name || "—"}
+                        {activeStudent.section?.name ? ` · Sec ${activeStudent.section.name}` : ""}
+                      </Typography>
+                      <Typography variant="caption" color="text.disabled">
+                        •
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {studentGroupLabel}
+                      </Typography>
+                    </Stack>
+                  </Box>
+                </Stack>
+
+                <Stack direction="row" spacing={0.75} className="no-print" sx={{ alignSelf: { xs: "stretch", md: "flex-start" }, alignItems: "center" }}>
+                  <IconButton
+                    size="small"
+                    onClick={handlePreviousStudent}
+                    disabled={!hasPrevious}
+                    aria-label="Previous student"
+                    sx={{ border: "1px solid", borderColor: "divider" }}
+                  >
+                    <ChevronLeftIcon fontSize="small" />
+                  </IconButton>
+                  <Typography variant="caption" color="text.secondary" sx={{ minWidth: 48, textAlign: "center", fontWeight: 700, fontFamily: "monospace" }}>
+                    {currentStudentIndex >= 0 ? currentStudentIndex + 1 : 1}/{students.length}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={handleNextStudent}
+                    disabled={!hasNext}
+                    aria-label="Next student"
+                    sx={{ border: "1px solid", borderColor: "divider", bgcolor: "success.main", color: "common.white", "&:hover": { bgcolor: "success.dark" }, "&.Mui-disabled": { bgcolor: "action.disabledBackground" } }}
+                  >
+                    <ChevronRightIcon fontSize="small" />
+                  </IconButton>
+                </Stack>
+              </Stack>
+
+              <Grid container spacing={1.5}>
+                {profileStatTiles.map((tile) => (
+                  <Grid key={tile.label} size={{ xs: 6, sm: 3 }}>
+                    <Box
+                      sx={{
+                        p: 1.5,
+                        borderRadius: 2,
+                        bgcolor: tile.bg,
+                        textAlign: "center",
+                        height: 1,
+                      }}
+                    >
+                      <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: 0.4, display: "block", mb: 0.5, color: tile.color, fontWeight: 700 }}>
+                        {tile.label}
+                      </Typography>
+                      <Typography variant="subtitle1" sx={{ lineHeight: 1.2, color: tile.color, fontWeight: 800, fontFamily: "monospace" }}>
+                        {tile.value}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+
+              <CustomTabs
+                value={activeTab}
+                onChange={(_e, value) => setActiveTab(value)}
+                className="no-print"
+                sx={{
+                  borderBottom: 1,
+                  borderColor: "divider",
+                  mx: { xs: -1, sm: 0 },
+                }}
+              >
+                <Tab
+                  value="PROFILE"
+                  icon={<PersonOutlinedIcon sx={{ fontSize: 18 }} />}
+                  iconPosition="start"
+                  label="Profile"
+                  sx={{ minHeight: 44, textTransform: "none", fontWeight: 600 }}
+                />
+                <Tab
+                  value="RESULT"
+                  icon={<EmojiEventsOutlinedIcon sx={{ fontSize: 18 }} />}
+                  iconPosition="start"
+                  label="Results"
+                  sx={{ minHeight: 44, textTransform: "none", fontWeight: 600 }}
+                />
+                <Tab
+                  value="FEE_STATUS"
+                  icon={<ReceiptLongOutlinedIcon sx={{ fontSize: 18 }} />}
+                  iconPosition="start"
+                  label="Fees"
+                  sx={{ minHeight: 44, textTransform: "none", fontWeight: 600 }}
+                />
+                <Tab
+                  value="NOTICE"
+                  icon={<NotificationsNoneOutlinedIcon sx={{ fontSize: 18 }} />}
+                  iconPosition="start"
+                  label={`Notices (${notices.length})`}
+                  sx={{ minHeight: 44, textTransform: "none", fontWeight: 600 }}
+                />
+                <Tab
+                  value="SUBJECT_LIST"
+                  icon={<MenuBookOutlinedIcon sx={{ fontSize: 18 }} />}
+                  iconPosition="start"
+                  label={`Subjects (${studentSubjectList.length})`}
+                  sx={{ minHeight: 44, textTransform: "none", fontWeight: 600 }}
+                />
+              </CustomTabs>
+            </Stack>
+          </AppCard>
+
+          {activeTab === "PROFILE" && (
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <AppCard
+                  title="Academic registration"
+                  action={
+                    <AppButton type="button" size="small" variant="soft" color="success" onClick={() => handleOpenSectionEdit("academic")} startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}>
                       Edit
                     </AppButton>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Academic Class</span>
-                      <strong className="text-slate-800">{activeStudent.class?.name || "—"}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Section & Shift</span>
-                      <strong className="text-slate-800">
-                        {activeStudent.section ? (
-                          <>
-                            {activeStudent.section.name}
-                            {activeStudent.section.shift ? (
-                              <> • {activeStudent.section.shift === "MORNING" ? "Morning" : "Day"}</>
-                            ) : null}
-                          </>
-                        ) : (
-                          "—"
-                        )}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Class Roll</span>
-                      <strong className="font-mono text-emerald-700 text-sm">
-                        {activeStudent.classRoll !== undefined && activeStudent.classRoll !== null ? `#${activeStudent.classRoll}` : "—"}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Student Reg ID</span>
-                      <strong className="font-mono text-slate-800">{activeStudent.student?.studentIdNo || "—"}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Curriculum Group</span>
-                      <strong className="text-slate-800">
-                        {activeStudent.groupType
-                          ? formatGroupName(activeStudent.groupType)
-                          : activeStudent.section?.groupType
-                          ? formatGroupName(activeStudent.section.groupType)
+                  }
+                  sx={{ height: 1 }}
+                >
+                  <Grid container spacing={2}>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Academic class</Typography>
+                      <Typography variant="subtitle2">{activeStudent.class?.name || "—"}</Typography>
+                    </Grid>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Section & shift</Typography>
+                      <Typography variant="subtitle2">
+                        {activeStudent.section
+                          ? `${activeStudent.section.name}${activeStudent.section.shift ? ` · ${activeStudent.section.shift === "MORNING" ? "Morning" : "Day"}` : ""}`
                           : "—"}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Academic Session</span>
-                      <strong className="text-slate-800">{activeStudent.academicYear?.yearName || "—"}</strong>
-                    </div>
-                    {/* Allocated 4th Subject */}
+                      </Typography>
+                    </Grid>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Class roll</Typography>
+                      <Typography variant="subtitle2" sx={{ color: "success.main", fontFamily: "monospace" }}>
+                        {activeStudent.classRoll != null ? `#${activeStudent.classRoll}` : "—"}
+                      </Typography>
+                    </Grid>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Student reg ID</Typography>
+                      <Typography variant="subtitle2" sx={{ fontFamily: "monospace" }}>{activeStudent.student?.studentIdNo || "—"}</Typography>
+                    </Grid>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Curriculum group</Typography>
+                      <Typography variant="subtitle2">{studentGroupLabel === "General" && !activeStudent.groupType && !activeStudent.section?.groupType ? "—" : studentGroupLabel}</Typography>
+                    </Grid>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Academic session</Typography>
+                      <Typography variant="subtitle2">{activeStudent.academicYear?.yearName || "—"}</Typography>
+                    </Grid>
                     {activeStudent.allocations?.some((a: any) => a.subjectType === "OPTIONAL_4TH") && (
-                      <div className="col-span-2 pt-1 border-t border-slate-50">
-                        <span className="text-slate-400 block text-[11px]">Allocated 4th Subject</span>
-                        <strong className="text-emerald-700 font-semibold">
+                      <Grid size={12}>
+                        <Divider sx={{ mb: 1.5 }} />
+                        <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Allocated 4th subject</Typography>
+                        <Typography variant="subtitle2" sx={{ color: "success.dark", fontWeight: 700 }}>
                           {activeStudent.allocations.find((a: any) => a.subjectType === "OPTIONAL_4TH")?.subject?.name || "—"}
                           {activeStudent.allocations.find((a: any) => a.subjectType === "OPTIONAL_4TH")?.subject?.subjectCode
                             ? ` (${activeStudent.allocations.find((a: any) => a.subjectType === "OPTIONAL_4TH")?.subject?.subjectCode})`
                             : ""}
-                        </strong>
-                      </div>
+                        </Typography>
+                      </Grid>
                     )}
-                  </div>
-                </div>
+                  </Grid>
+                </AppCard>
+              </Grid>
 
-                {/* 2. Personal & Health Details */}
-                <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-2xs space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                    <div className="flex items-center space-x-2 font-bold text-slate-800 text-xs">
-                      <Heart className="w-4 h-4 text-rose-500" />
-                      <span>Personal & Bio Profile</span>
-                    </div>
-                    <AppButton
-                      type="button"
-                      size="small"
-                      variant="soft"
-                      color="success"
-                      onClick={() => handleOpenSectionEdit("personal")}
-                      title="Edit Personal Details"
-                      startIcon={<Edit2 className="w-3 h-3" />}
-                    >
+              <Grid size={{ xs: 12, md: 6 }}>
+                <AppCard
+                  title="Personal & bio"
+                  action={
+                    <AppButton type="button" size="small" variant="soft" color="success" onClick={() => handleOpenSectionEdit("personal")} startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}>
                       Edit
                     </AppButton>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Full Name</span>
-                      <strong className="text-slate-800">
-                        {`${activeStudent.student?.firstName || ""} ${activeStudent.student?.lastName || ""}`.trim() || "—"}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Gender</span>
-                      <strong className="text-slate-800">{activeStudent.student?.gender || "—"}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Religion</span>
-                      <strong className="text-slate-800">{activeStudent.student?.religion || "—"}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Blood Group</span>
-                      <strong className="font-bold text-rose-600">
+                  }
+                  sx={{ height: 1 }}
+                >
+                  <Grid container spacing={2}>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Full name</Typography>
+                      <Typography variant="subtitle2">{studentFullName || "—"}</Typography>
+                    </Grid>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Gender</Typography>
+                      <Typography variant="subtitle2">{activeStudent.student?.gender || "—"}</Typography>
+                    </Grid>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Religion</Typography>
+                      <Typography variant="subtitle2">{activeStudent.student?.religion || "—"}</Typography>
+                    </Grid>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Blood group</Typography>
+                      <Typography variant="subtitle2" sx={{ color: "error.main", fontWeight: 700 }}>
                         {customData.bloodGroup || customData.blood_group || customData["Blood Group"] || "—"}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Date of Birth</span>
-                      <strong className="font-mono text-slate-800">
+                      </Typography>
+                    </Grid>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Date of birth</Typography>
+                      <Typography variant="subtitle2" sx={{ fontFamily: "monospace" }}>
                         {customData.dob || customData.dateOfBirth || customData["Date of Birth"] || "—"}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Nationality</span>
-                      <strong className="text-slate-800">
-                        {customData.nationality || customData["Nationality"] || "—"}
-                      </strong>
-                    </div>
+                      </Typography>
+                    </Grid>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Nationality</Typography>
+                      <Typography variant="subtitle2">{customData.nationality || customData["Nationality"] || "—"}</Typography>
+                    </Grid>
+                    <Grid size={12}>
+                      <Divider sx={{ mb: 1.5 }} />
+                      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", justifyContent: "space-between" }}>
+                        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                          <Avatar
+                            src={currentPhoto || undefined}
+                            variant="rounded"
+                            sx={{ width: 40, height: 40, bgcolor: "grey.100", color: "text.disabled" }}
+                          >
+                            <ImageIcon className="w-4 h-4" />
+                          </Avatar>
+                          <Box>
+                            <Typography variant="subtitle2">Profile picture</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {currentPhoto ? "Custom photo active" : "Default initials avatar"}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                        <AppButton
+                          type="button"
+                          size="small"
+                          variant="soft"
+                          color="success"
+                          onClick={() => {
+                            setTempPhotoUrl(currentPhoto || "");
+                            setIsPhotoModalOpen(true);
+                          }}
+                          startIcon={<PhotoCameraOutlinedIcon sx={{ fontSize: 16 }} />}
+                        >
+                          {currentPhoto ? "Change" : "Add photo"}
+                        </AppButton>
+                      </Stack>
+                    </Grid>
+                  </Grid>
+                </AppCard>
+              </Grid>
 
-                    <div className="col-span-2 pt-2.5 mt-1 border-t border-slate-100 flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        {currentPhoto ? (
-                          <img
-                            src={currentPhoto}
-                            alt="Profile"
-                            className="w-10 h-10 rounded-xl object-cover border border-emerald-500 shadow-2xs"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs border border-slate-200">
-                            <ImageIcon className="w-4 h-4 text-slate-400" />
-                          </div>
-                        )}
-                        <div>
-                          <div className="font-bold text-xs text-slate-800">Profile Picture</div>
-                          <div className="text-[10px] text-slate-500">
-                            {currentPhoto ? "Custom photo active" : "Default initials avatar"}
-                          </div>
-                        </div>
-                      </div>
-                      <AppButton
-                        type="button"
-                        size="small"
-                        variant="soft"
-                        color="success"
-                        onClick={() => {
-                          setTempPhotoUrl(currentPhoto || "");
-                          setIsPhotoModalOpen(true);
-                        }}
-                        startIcon={<Camera className="w-3.5 h-3.5" />}
-                      >
-                        {currentPhoto ? "Change Photo" : "Add Photo"}
-                      </AppButton>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3. Guardian & Emergency Contact */}
-                <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-2xs space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                    <div className="flex items-center space-x-2 font-bold text-slate-800 text-xs">
-                      <Phone className="w-4 h-4 text-indigo-600" />
-                      <span>Guardian & Family Information</span>
-                    </div>
-                    <AppButton
-                      type="button"
-                      size="small"
-                      variant="soft"
-                      color="success"
-                      onClick={() => handleOpenSectionEdit("guardian")}
-                      title="Edit Guardian Details"
-                      startIcon={<Edit2 className="w-3 h-3" />}
-                    >
+              <Grid size={{ xs: 12, md: 6 }}>
+                <AppCard
+                  title="Guardian & family"
+                  action={
+                    <AppButton type="button" size="small" variant="soft" color="success" onClick={() => handleOpenSectionEdit("guardian")} startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}>
                       Edit
                     </AppButton>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Primary Guardian</span>
-                      <strong className="text-slate-800">{activeStudent.student?.guardianName || "—"}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Guardian Phone (SMS)</span>
-                      <strong className="font-mono text-indigo-700">{activeStudent.student?.guardianPhone || "—"}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Father's Name</span>
-                      <strong className="text-slate-800">
+                  }
+                  sx={{ height: 1 }}
+                >
+                  <Grid container spacing={2}>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Primary guardian</Typography>
+                      <Typography variant="subtitle2">{activeStudent.student?.guardianName || "—"}</Typography>
+                    </Grid>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Guardian phone</Typography>
+                      <Typography variant="subtitle2" sx={{ color: "info.main", fontFamily: "monospace" }}>
+                        {activeStudent.student?.guardianPhone || "—"}
+                      </Typography>
+                    </Grid>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Father&apos;s name</Typography>
+                      <Typography variant="subtitle2">
                         {customData.fatherName || customData.father_name || customData["Father's Name"] || "—"}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Mother's Name</span>
-                      <strong className="text-slate-800">
+                      </Typography>
+                    </Grid>
+                    <Grid size={6}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Mother&apos;s name</Typography>
+                      <Typography variant="subtitle2">
                         {customData.motherName || customData.mother_name || customData["Mother's Name"] || "—"}
-                      </strong>
-                    </div>
-                  </div>
-                </div>
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </AppCard>
+              </Grid>
 
-                {/* 4. Address & Residence */}
-                <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-2xs space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                    <div className="flex items-center space-x-2 font-bold text-slate-800 text-xs">
-                      <MapPin className="w-4 h-4 text-emerald-600" />
-                      <span>Residential Address & Location</span>
-                    </div>
-                    <AppButton
-                      type="button"
-                      size="small"
-                      variant="soft"
-                      color="success"
-                      onClick={() => handleOpenSectionEdit("address")}
-                      title="Edit Residential Address"
-                      startIcon={<Edit2 className="w-3 h-3" />}
-                    >
+              <Grid size={{ xs: 12, md: 6 }}>
+                <AppCard
+                  title="Residential address"
+                  action={
+                    <AppButton type="button" size="small" variant="soft" color="success" onClick={() => handleOpenSectionEdit("address")} startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}>
                       Edit
                     </AppButton>
-                  </div>
-
-                  <div className="space-y-2 text-xs">
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Present Residential Address</span>
-                      <p className="text-slate-800 font-medium">{activeStudent.student?.address || "—"}</p>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Permanent Address</span>
-                      <p className="text-slate-800 font-medium">
+                  }
+                  sx={{ height: 1 }}
+                >
+                  <Stack spacing={2}>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Present address</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{activeStudent.student?.address || "—"}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Permanent address</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
                         {customData.permanentAddress || customData.permanent_address || customData["Permanent Address"] || "—"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </AppCard>
+              </Grid>
 
-                {/* 5. Additional Enrolled Information (Category, Service, Status) */}
-                <div className="col-span-1 md:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-2xs space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                    <div className="flex items-center space-x-2 font-bold text-slate-800 text-xs">
-                      <FileText className="w-4 h-4 text-purple-600" />
-                      <span>Additional Enrolled Information</span>
-                    </div>
-                    <AppButton
-                      type="button"
-                      size="small"
-                      variant="soft"
-                      onClick={() => handleOpenSectionEdit("additional")}
-                      title="Edit Additional Enrolled Information"
-                      startIcon={<Edit2 className="w-3 h-3" />}
-                    >
+              <Grid size={12}>
+                <AppCard
+                  title="Additional enrolled information"
+                  action={
+                    <AppButton type="button" size="small" variant="soft" color="inherit" onClick={() => handleOpenSectionEdit("additional")} startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}>
                       Edit
                     </AppButton>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Student Status</span>
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          activeStudent.student?.isActive !== false
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : "bg-rose-50 text-rose-700 border border-rose-200"
-                        }`}
-                      >
+                  }
+                >
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 6, sm: 3 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block",  mb: 0.5 }}>Student status</Typography>
+                      <Label color={activeStudent.student?.isActive !== false ? "success" : "error"} variant="soft">
                         {customData.studentStatus || (activeStudent.student?.isActive !== false ? "ACTIVE" : "INACTIVE")}
-                      </span>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Status Date</span>
-                      <strong className="text-slate-800 font-mono">
+                      </Label>
+                    </Grid>
+                    <Grid size={{ xs: 6, sm: 3 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Status date</Typography>
+                      <Typography variant="subtitle2" sx={{ fontFamily: "monospace" }}>
                         {customData.statusDate || customData.status_date || "2026-10-20"}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Student Category</span>
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                          String(customData.studentCategory || customData.studentCatagory || customData.category || "General").toLowerCase() === "military"
-                            ? "bg-amber-50 text-amber-800 border border-amber-300"
-                            : "bg-sky-50 text-sky-800 border border-sky-200"
-                        }`}
+                      </Typography>
+                    </Grid>
+                    <Grid size={{ xs: 6, sm: 3 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block",  mb: 0.5 }}>Category</Typography>
+                      <Label
+                        color={String(customData.studentCategory || customData.studentCatagory || customData.category || "General").toLowerCase() === "military" ? "warning" : "info"}
+                        variant="soft"
                       >
                         {customData.studentCategory || customData.studentCatagory || customData.category || "General"}
-                      </span>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Service</span>
+                      </Label>
+                    </Grid>
+                    <Grid size={{ xs: 6, sm: 3 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block",  mb: 0.5 }}>Services</Typography>
                       {(() => {
                         const raw = customData.service || customData.services || "None";
                         const list = String(raw).split(",").map((s) => s.trim()).filter(Boolean);
                         if (list.length === 0 || raw === "None" || raw === "-") {
-                          return <span className="text-slate-500 font-medium text-[11px]">None</span>;
+                          return <Typography variant="body2" color="text.secondary">None</Typography>;
                         }
                         return (
-                          <div className="flex flex-wrap gap-1 mt-0.5">
-                            {list.map((srv, idx) => (
-                              <span
-                                key={idx}
-                                className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                  srv === "Bus"
-                                    ? "bg-blue-50 text-blue-700 border border-blue-200"
-                                    : srv === "Hostel"
-                                    ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
-                                    : srv === "Extra Coaching"
-                                    ? "bg-purple-50 text-purple-700 border border-purple-200"
-                                    : "bg-slate-100 text-slate-700 border border-slate-200"
-                                }`}
-                              >
+                          <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
+                            {list.map((srv) => (
+                              <Label key={srv} color={srv === "Bus" ? "info" : srv === "Hostel" ? "secondary" : "default"} variant="soft">
                                 {srv}
-                              </span>
+                              </Label>
                             ))}
-                          </div>
+                          </Stack>
                         );
                       })()}
-                    </div>
-
-                    {/* Any extra dynamic custom fields */}
+                    </Grid>
                     {Object.entries(customData)
                       .filter(([k]) => !isStandardOrInternalKey(k))
                       .map(([k, val]) => (
-                        <div key={k}>
-                          <span className="text-slate-400 block text-[11px]">
-                            {formatCustomFieldLabel(k)}
-                          </span>
-                          <strong className="text-slate-800">{String(val) || "—"}</strong>
-                        </div>
+                        <Grid key={k} size={{ xs: 6, sm: 3 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>{formatCustomFieldLabel(k)}</Typography>
+                          <Typography variant="subtitle2">{String(val) || "—"}</Typography>
+                        </Grid>
                       ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+                  </Grid>
+                </AppCard>
+              </Grid>
+            </Grid>
           )}
 
           {/* ========================================================
               TAB CONTENT 2: RESULT
              ======================================================== */}
           {activeTab === "RESULT" && studentResultInfo && (
-            <div className="space-y-4">
-              {/* Term Assessment Summary Banner */}
-              <div className="bg-gradient-to-r from-emerald-600 via-teal-700 to-slate-900 text-white rounded-xl p-5 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-200 block mb-0.5">
-                    Official Summative Evaluation
-                  </span>
-                  <h3 className="text-lg font-black">{studentResultInfo.termName}</h3>
-                  <p className="text-xs text-emerald-100 mt-1">
-                    All subjects evaluated under National Curriculum & Textbook Board (NCTB) grading regulations.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-4 bg-white/10 p-3 rounded-lg backdrop-blur-xs shrink-0">
-                  <div className="text-center pr-3 border-r border-white/20">
-                    <span className="text-[10px] text-emerald-200 block uppercase">GPA Score</span>
-                    <span className="text-2xl font-black font-mono">{studentResultInfo.gpa.toFixed(2)}</span>
-                  </div>
-                  <div className="text-center pr-3 border-r border-white/20">
-                    <span className="text-[10px] text-emerald-200 block uppercase">Grade</span>
-                    <span className="text-2xl font-black">{studentResultInfo.letterGrade}</span>
-                  </div>
-                  <div className="text-center">
-                    <span className="text-[10px] text-emerald-200 block uppercase">Total Marks</span>
-                    <span className="text-lg font-bold font-mono">{studentResultInfo.totalMarks} / {studentResultInfo.maxMarks}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Subject Marks Table */}
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="p-4 bg-slate-50/70 border-b border-slate-200 flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-                    Subject-Wise Marks & Grade Points
-                  </h4>
-                  <Link
-                    href={`/reports/marksheet`}
-                    className="text-xs text-emerald-700 hover:text-emerald-800 font-semibold underline flex items-center gap-1"
+            <Stack spacing={2}>
+              <AppCard
+                sx={{
+                  bgcolor: "success.darker",
+                  color: "common.white",
+                  backgroundImage: "linear-gradient(135deg, #059669 0%, #0f766e 55%, #0f172a 100%)",
+                }}
+              >
+                <Stack
+                  direction={{ xs: "column", md: "row" }}
+                  spacing={2}
+                  sx={{ alignItems: { xs: "flex-start", md: "center" }, justifyContent: "space-between" }}
+                >
+                  <Box>
+                    <Typography variant="caption" sx={{ opacity: 0.8, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase" }}>
+                      Official summative evaluation
+                    </Typography>
+                    <Typography variant="h6" sx={{ mt: 0.5, fontWeight: 800 }}>
+                      {studentResultInfo.termName}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 0.5, opacity: 0.85 }}>
+                      Subjects graded under NCTB regulations.
+                    </Typography>
+                  </Box>
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    divider={<Divider orientation="vertical" flexItem sx={{ borderColor: "rgba(255,255,255,0.2)" }} />}
+                    sx={{ px: 2, py: 1.5, borderRadius: 2, bgcolor: "rgba(255,255,255,0.1)" }}
                   >
-                    <span>View Full Single Marksheet</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
+                    <Box sx={{ textAlign: "center" }}>
+                      <Typography variant="caption" sx={{ opacity: 0.75, display: "block" }}>GPA</Typography>
+                      <Typography variant="h5" sx={{ fontWeight: 800, fontFamily: "monospace" }}>{studentResultInfo.gpa.toFixed(2)}</Typography>
+                    </Box>
+                    <Box sx={{ textAlign: "center" }}>
+                      <Typography variant="caption" sx={{ opacity: 0.75, display: "block" }}>Grade</Typography>
+                      <Typography variant="h5" sx={{ fontWeight: 800 }}>{studentResultInfo.letterGrade}</Typography>
+                    </Box>
+                    <Box sx={{ textAlign: "center" }}>
+                      <Typography variant="caption" sx={{ opacity: 0.75, display: "block" }}>Marks</Typography>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: "monospace" }}>
+                        {studentResultInfo.totalMarks}/{studentResultInfo.maxMarks}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Stack>
+              </AppCard>
+
+              <AppCard
+                title="Subject-wise marks"
+                action={
+                  <AppButton component={Link} href="/reports/marksheet" size="small" variant="text" color="success" endIcon={<ArrowRight className="w-3.5 h-3.5" />}>
+                    Full marksheet
+                  </AppButton>
+                }
+                sx={{ "& .MuiCardContent-root": { pt: 0, px: 0, pb: "0 !important" } }}
+              >
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
@@ -1752,76 +1756,67 @@ export default function StudentProfilePage() {
                     </tfoot>
                   </table>
                 </div>
-              </div>
-            </div>
+              </AppCard>
+            </Stack>
           )}
 
-          {/* ========================================================
-              TAB CONTENT 3: FEE STATUS
-             ======================================================== */}
           {activeTab === "FEE_STATUS" && studentFeeInfo && (
-            <div className="space-y-4">
-              {/* Fee Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-                  <span className="text-xs font-semibold text-slate-500 block">Standard Tuition Fee</span>
-                  <div className="text-2xl font-bold text-slate-900 mt-1 font-mono">
-                    ৳ {studentFeeInfo.tuitionFee.toLocaleString()}
-                  </div>
-                  <span className="text-[11px] text-slate-400 mt-0.5 block">Academic Monthly Rate</span>
-                </div>
+            <Stack spacing={2}>
+              <Grid container spacing={2}>
+                {[
+                  {
+                    label: "Tuition fee",
+                    value: `৳ ${studentFeeInfo.tuitionFee.toLocaleString()}`,
+                    hint: "Monthly rate",
+                    color: "text.primary",
+                    bg: "background.paper",
+                  },
+                  {
+                    label: "Scholarship / waiver",
+                    value: studentFeeInfo.waiverAmount > 0 ? `-৳ ${studentFeeInfo.waiverAmount.toLocaleString()}` : "৳ 0",
+                    hint: studentFeeInfo.waiverTitle || "No special waiver",
+                    color: "error.main",
+                    bg: "warning.lighter",
+                  },
+                  {
+                    label: "Amount paid",
+                    value: `৳ ${studentFeeInfo.paidAmount.toLocaleString()}`,
+                    hint: `Via ${studentFeeInfo.lastPaymentMethod}`,
+                    color: "success.main",
+                    bg: "success.lighter",
+                  },
+                  {
+                    label: "Outstanding due",
+                    value: `৳ ${studentFeeInfo.dueAmount.toLocaleString()}`,
+                    hint: studentFeeInfo.dueAmount === 0 ? "All cleared" : "Pending clearance",
+                    color: "error.main",
+                    bg: "error.lighter",
+                  },
+                ].map((tile) => (
+                  <Grid key={tile.label} size={{ xs: 12, sm: 6, lg: 3 }}>
+                    <AppCard sx={{ bgcolor: tile.bg, height: 1 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                        {tile.label}
+                      </Typography>
+                      <Typography variant="h5" sx={{ mt: 0.5, color: tile.color, fontWeight: 800, fontFamily: "monospace" }}>
+                        {tile.value}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }} noWrap>
+                        {tile.hint}
+                      </Typography>
+                    </AppCard>
+                  </Grid>
+                ))}
+              </Grid>
 
-                <div className="bg-white p-4 rounded-xl border border-amber-200 bg-amber-50/20 shadow-2xs">
-                  <span className="text-xs font-semibold text-amber-800 block">Scholarship / Waiver</span>
-                  <div className="text-2xl font-bold text-rose-600 mt-1 font-mono">
-                    {studentFeeInfo.waiverAmount > 0 ? `-৳ ${studentFeeInfo.waiverAmount.toLocaleString()}` : "৳ 0"}
-                  </div>
-                  <span className="text-[11px] text-amber-700 font-medium mt-0.5 block truncate">
-                    {studentFeeInfo.waiverTitle || "No Special Waiver"}
-                  </span>
-                </div>
-
-                <div className="bg-white p-4 rounded-xl border border-emerald-200 bg-emerald-50/20 shadow-2xs">
-                  <span className="text-xs font-semibold text-emerald-800 block">Total Amount Paid</span>
-                  <div className="text-2xl font-bold text-emerald-600 mt-1 font-mono">
-                    ৳ {studentFeeInfo.paidAmount.toLocaleString()}
-                  </div>
-                  <span className="text-[11px] text-emerald-700 font-medium mt-0.5 block">
-                    Via {studentFeeInfo.lastPaymentMethod}
-                  </span>
-                </div>
-
-                <div className="bg-white p-4 rounded-xl border border-rose-200 bg-rose-50/20 shadow-2xs">
-                  <span className="text-xs font-semibold text-rose-800 block">Outstanding Due Balance</span>
-                  <div className="text-2xl font-bold text-rose-600 mt-1 font-mono">
-                    ৳ {studentFeeInfo.dueAmount.toLocaleString()}
-                  </div>
-                  <span className="text-[11px] font-semibold mt-0.5 block text-rose-700">
-                    {studentFeeInfo.dueAmount === 0 ? "Zero Dues (All Cleared)" : "Pending Clearance"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Monthly Ledger Details & Clearance */}
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center space-x-2">
-                    <Receipt className="w-5 h-5 text-emerald-600" />
-                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-                      Student Billing Particulars & Clearance Status
-                    </h4>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href="/fees"
-                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-2xs flex items-center gap-1.5 transition cursor-pointer"
-                    >
-                      <CreditCard className="w-3.5 h-3.5" />
-                      <span>Open in Fee Management</span>
-                    </Link>
-                  </div>
-                </div>
+              <AppCard
+                title="Billing particulars & clearance"
+                action={
+                  <AppButton component={Link} href="/fees" size="small" variant="contained" color="success" startIcon={<CreditCard className="w-3.5 h-3.5" />}>
+                    Fee management
+                  </AppButton>
+                }
+              >
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Particulars Breakdown */}
@@ -1888,113 +1883,106 @@ export default function StudentProfilePage() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </AppCard>
+            </Stack>
           )}
 
-          {/* ========================================================
-              TAB CONTENT 4: NOTICE
-             ======================================================== */}
           {activeTab === "NOTICE" && (
-            <div className="space-y-4">
-              {/* Notice Filters */}
-              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between flex-wrap gap-2 text-xs">
-                <div className="flex items-center space-x-2">
-                  <Bell className="w-4 h-4 text-amber-500" />
-                  <span className="font-bold text-slate-800">Notice Circulars for {activeStudent.class?.name || "Class 10"}:</span>
-                </div>
+            <Stack spacing={2}>
+              <AppCard>
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={1.5}
+                  sx={{ alignItems: { xs: "flex-start", sm: "center" }, justifyContent: "space-between" }}
+                >
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                    <NotificationsNoneOutlinedIcon sx={{ fontSize: 18, color: "warning.main" }} />
+                    <Typography variant="subtitle2">
+                      Notices for {activeStudent.class?.name || "selected class"}
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap" }}>
+                    {["ALL", "EXAM", "ACCOUNTS", "SCHOLARSHIP", "HOLIDAY"].map((cat) => (
+                      <AppButton
+                        key={cat}
+                        size="small"
+                        variant="soft"
+                        color={noticeCategory === cat ? "primary" : "inherit"}
+                        onClick={() => setNoticeCategory(cat)}
+                      >
+                        {cat}
+                      </AppButton>
+                    ))}
+                  </Stack>
+                </Stack>
+              </AppCard>
 
-                <div className="flex items-center gap-1.5">
-                  {["ALL", "EXAM", "ACCOUNTS", "SCHOLARSHIP", "HOLIDAY"].map((cat) => (
-                    <AppButton
-                      key={cat}
-                      size="small"
-                      variant="soft"
-                      color={noticeCategory === cat ? "primary" : "inherit"}
-                      onClick={() => setNoticeCategory(cat)}
-                    >
-                      {cat}
-                    </AppButton>
-                  ))}
-                </div>
-              </div>
-
-              {/* Notice List */}
-              <div className="space-y-3">
-                {filteredNotices.map((notice) => (
-                  <div
-                    key={notice.id}
-                    className="p-4 rounded-xl border border-slate-200 bg-white hover:border-emerald-300 shadow-2xs transition space-y-2"
-                  >
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          notice.category === "EXAM"
-                            ? "bg-indigo-100 text-indigo-800"
-                            : notice.category === "ACCOUNTS"
-                            ? "bg-amber-100 text-amber-800"
-                            : notice.category === "SCHOLARSHIP"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : "bg-slate-100 text-slate-700"
-                        }`}>
-                          {notice.category}
-                        </span>
-                        {notice.important && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
-                            Urgent Notice
-                          </span>
-                        )}
-                        <h4 className="text-xs font-bold text-slate-900">{notice.title}</h4>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{notice.date}</span>
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      {notice.summary}
-                    </p>
-
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                      <span>Issued by: <strong className="text-slate-600">{notice.publisher}</strong></span>
-                      <span className="text-emerald-700 font-semibold cursor-pointer hover:underline">
-                        Download Notice PDF
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+              {filteredNotices.map((notice) => {
+                const categoryColor =
+                  notice.category === "EXAM"
+                    ? "info"
+                    : notice.category === "ACCOUNTS"
+                      ? "warning"
+                      : notice.category === "SCHOLARSHIP"
+                        ? "success"
+                        : "default";
+                return (
+                  <AppCard key={notice.id}>
+                    <Stack spacing={1.25}>
+                      <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap" }}>
+                        <Stack direction="row" spacing={1} useFlexGap sx={{ minWidth: 0, alignItems: "center", flexWrap: "wrap" }}>
+                          <Label color={categoryColor as any} variant="soft">{notice.category}</Label>
+                          {notice.important && <Label color="error" variant="soft">Urgent</Label>}
+                          <Typography variant="subtitle2">{notice.title}</Typography>
+                        </Stack>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+                          {notice.date}
+                        </Typography>
+                      </Stack>
+                      <Typography variant="body2" color="text.secondary">{notice.summary}</Typography>
+                      <Divider />
+                      <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Issued by <Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>{notice.publisher}</Box>
+                        </Typography>
+                        <Typography variant="caption" sx={{ cursor: "pointer", color: "success.main", fontWeight: 700 }}>
+                          Download PDF
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                  </AppCard>
+                );
+              })}
+            </Stack>
           )}
 
           {/* ========================================================
               TAB CONTENT 5: SUBJECT LIST
              ======================================================== */}
           {activeTab === "SUBJECT_LIST" && (
-            <div className="space-y-4">
-              {/* Header and Print Control */}
-              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs uppercase tracking-widest font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5" />
-                      NCTB Registered Curriculum Catalog
-                    </span>
-                    <span className="text-xs bg-slate-100 text-slate-700 font-mono px-2 py-0.5 rounded font-bold">
-                      {activeStudent.groupType} Group
-                    </span>
-                  </div>
-                  <h3 className="text-base font-bold text-slate-900 mt-1.5">
-                    Official Registered Subject Roster & Marks Distribution
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    All assigned compulsory, group elective, and 4th optional subjects registered with the Education Board for {activeStudent.student?.firstName} {activeStudent.student?.lastName}.
-                  </p>
-                </div>
+            <Stack spacing={2}>
+              <AppCard>
+                <Stack
+                  direction={{ xs: "column", md: "row" }}
+                  spacing={2}
+                  sx={{ alignItems: { xs: "flex-start", md: "center" }, justifyContent: "space-between" }}
+                >
+                  <Box>
+                    <Stack direction="row" spacing={1} useFlexGap sx={{ mb: 1, alignItems: "center", flexWrap: "wrap" }}>
+                      <Label color="success" variant="soft" startIcon={<MenuBookOutlinedIcon sx={{ fontSize: 14 }} />}>
+                        NCTB curriculum
+                      </Label>
+                      <Label color="default" variant="soft">{`${activeStudent.groupType || "General"} group`}</Label>
+                    </Stack>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                      Registered subject roster
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                      Compulsory, group elective, and 4th optional subjects for {studentFullName || "this student"}.
+                    </Typography>
+                  </Box>
 
-                <div className="flex items-center gap-2 self-start md:self-auto shrink-0 no-print">
+                <Stack direction="row" spacing={1} className="no-print" useFlexGap sx={{ flexWrap: "wrap" }}>
                   <AppButton
                     type="button"
                     variant="contained"
@@ -2003,59 +1991,46 @@ export default function StudentProfilePage() {
                       const subjectToEdit = studentSubjectList.find((s) => s.type === "OPTIONAL_4TH") || studentSubjectList[0];
                       if (subjectToEdit) openEditSubjectModal(subjectToEdit);
                     }}
-                    startIcon={<Edit2 className="w-3.5 h-3.5" />}
+                    startIcon={<EditOutlinedIcon sx={{ fontSize: 16 }} />}
                   >
-                    Change Subject
+                    Change subject
                   </AppButton>
                   <AppButton
                     type="button"
-                    variant="contained"
-                    color="secondary"
+                    variant="outlined"
+                    color="inherit"
                     onClick={() => window.print()}
                     startIcon={<Printer className="w-3.5 h-3.5" />}
                   >
-                    Print Subject Slip
+                    Print slip
                   </AppButton>
-                </div>
-              </div>
+                </Stack>
+                </Stack>
+              </AppCard>
 
-              {/* Subject KPI Metric Strip */}
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                <div className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Subjects</span>
-                  <span className="text-lg font-extrabold font-mono text-slate-900 mt-0.5 block">
-                    {subjectStats.total} <span className="text-xs font-normal text-slate-500">Registered</span>
-                  </span>
-                </div>
-
-                <div className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block">Compulsory</span>
-                  <span className="text-lg font-extrabold font-mono text-emerald-800 mt-0.5 block">
-                    {subjectStats.compulsory} <span className="text-xs font-normal text-emerald-600">Subjects</span>
-                  </span>
-                </div>
-
-                <div className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 block">Group Electives</span>
-                  <span className="text-lg font-extrabold font-mono text-indigo-800 mt-0.5 block">
-                    {subjectStats.electives} <span className="text-xs font-normal text-indigo-600">Subjects</span>
-                  </span>
-                </div>
-
-                <div className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 block">4th / Optional</span>
-                  <span className="text-lg font-extrabold font-mono text-amber-800 mt-0.5 block">
-                    {subjectStats.optional} <span className="text-xs font-normal text-amber-600">Subject</span>
-                  </span>
-                </div>
-
-                <div className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs col-span-2 sm:col-span-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Total Full Marks</span>
-                  <span className="text-lg font-extrabold font-mono text-slate-900 mt-0.5 block">
-                    {subjectStats.totalFullMarks} <span className="text-xs font-normal text-slate-500">Marks</span>
-                  </span>
-                </div>
-              </div>
+              <Grid container spacing={1.5}>
+                {[
+                  { label: "Total", value: subjectStats.total, hint: "Registered", color: "text.primary" },
+                  { label: "Compulsory", value: subjectStats.compulsory, hint: "Subjects", color: "success.main" },
+                  { label: "Electives", value: subjectStats.electives, hint: "Subjects", color: "info.main" },
+                  { label: "4th / optional", value: subjectStats.optional, hint: "Subject", color: "warning.main" },
+                  { label: "Full marks", value: subjectStats.totalFullMarks, hint: "Marks", color: "text.primary" },
+                ].map((stat) => (
+                  <Grid key={stat.label} size={{ xs: 6, sm: 4, md: 2.4 }}>
+                    <AppCard sx={{ height: 1 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: 0.4, fontWeight: 700 }}>
+                        {stat.label}
+                      </Typography>
+                      <Typography variant="h6" sx={{ mt: 0.5, color: stat.color, fontWeight: 800, fontFamily: "monospace" }}>
+                        {stat.value}{" "}
+                        <Typography component="span" variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                          {stat.hint}
+                        </Typography>
+                      </Typography>
+                    </AppCard>
+                  </Grid>
+                ))}
+              </Grid>
 
               {/* Filter Tabs */}
               <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between flex-wrap gap-2 text-xs no-print">
@@ -2161,21 +2136,20 @@ export default function StudentProfilePage() {
                   </table>
                 </div>
 
-                {/* Printable Institutional Signature Block */}
-                <div className="hidden print:grid grid-cols-2 gap-8 p-8 mt-12 pt-12 border-t border-slate-300 text-center text-xs">
-                  <div>
-                    <div className="border-b border-slate-400 w-44 mx-auto mb-1"></div>
-                    <p className="font-bold">Academic In-Charge / Course Advisor</p>
-                    <p className="text-[10px] text-slate-500">Course & Curriculum Registration</p>
-                  </div>
-                  <div>
-                    <div className="border-b border-slate-400 w-44 mx-auto mb-1"></div>
-                    <p className="font-bold">Principal / Headmaster</p>
-                    <p className="text-[10px] text-slate-500">Dhaka Ideal Model High School & College</p>
-                  </div>
-                </div>
+                <Box className="hidden print:grid" sx={{ gridTemplateColumns: "1fr 1fr", gap: 4, p: 4, mt: 6, pt: 6, borderTop: 1, borderColor: "divider", textAlign: "center" }}>
+                  <Box>
+                    <Box sx={{ borderBottom: 1, borderColor: "text.disabled", width: 176, mx: "auto", mb: 0.5 }} />
+                    <Typography variant="caption" sx={{ display: "block",  fontWeight: 700 }}>Academic In-Charge / Course Advisor</Typography>
+                    <Typography variant="caption" color="text.secondary">Course & Curriculum Registration</Typography>
+                  </Box>
+                  <Box>
+                    <Box sx={{ borderBottom: 1, borderColor: "text.disabled", width: 176, mx: "auto", mb: 0.5 }} />
+                    <Typography variant="caption" sx={{ display: "block",  fontWeight: 700 }}>Principal / Headmaster</Typography>
+                    <Typography variant="caption" color="text.secondary">Dhaka Ideal Model High School & College</Typography>
+                  </Box>
+                </Box>
               </div>
-            </div>
+            </Stack>
           )}
 
           {/* ========================================================

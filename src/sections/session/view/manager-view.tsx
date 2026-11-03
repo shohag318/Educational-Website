@@ -114,10 +114,10 @@ function SessionControlContent() {
   useEffect(() => {
     fetchSessions();
     if (initialAction === "create") setShowCreateModal(true);
-    try {
-      const storedPolicy = localStorage.getItem("nctb_multi_active_sessions_policy_v1");
-      if (storedPolicy) {
-        const parsed = JSON.parse(storedPolicy);
+      try {
+        const storedPolicy = localStorage.getItem("nctb_multi_active_sessions_policy_v1");
+        if (storedPolicy) {
+          const parsed = JSON.parse(storedPolicy);
         if (typeof parsed.allowMultiple === "boolean") setAllowMultipleActive(parsed.allowMultiple);
         if (typeof parsed.limit === "number") setActiveLimit(parsed.limit);
       }
@@ -130,7 +130,7 @@ function SessionControlContent() {
     setAllowMultipleActive(allowMultiple);
     setActiveLimit(limit);
     localStorage.setItem("nctb_multi_active_sessions_policy_v1", JSON.stringify({ allowMultiple, limit }));
-    setSuccessMessage(
+      setSuccessMessage(
       allowMultiple
         ? limit === 0
           ? "Multiple active sessions enabled (unlimited)."
@@ -179,11 +179,11 @@ function SessionControlContent() {
     try {
       setSubmitting(true);
       const json = await academicService.createYear({
-        yearName: yearName.trim(),
-        startDate: startDate ? new Date(startDate).toISOString() : undefined,
-        endDate: endDate ? new Date(endDate).toISOString() : undefined,
-        isCurrent,
-        allowMultiple: allowMultipleActive,
+          yearName: yearName.trim(),
+          startDate: startDate ? new Date(startDate).toISOString() : undefined,
+          endDate: endDate ? new Date(endDate).toISOString() : undefined,
+          isCurrent,
+          allowMultiple: allowMultipleActive,
         termStructure,
         notes,
       });
@@ -213,9 +213,9 @@ function SessionControlContent() {
     try {
       setLoading(true);
       const json = await academicService.updateYear({
-        id: session.id,
-        isCurrent: true,
-        allowMultiple: allowMultipleActive,
+          id: session.id,
+          isCurrent: true,
+          allowMultiple: allowMultipleActive,
       });
       if (json.success) {
         setSuccessMessage(`Session "${session.yearName}" is now active.`);
@@ -247,12 +247,12 @@ function SessionControlContent() {
     try {
       setSubmitting(true);
       const json = await academicService.updateYear({
-        id: editingSession.id,
-        yearName: editYearName.trim(),
-        startDate: editStartDate ? new Date(editStartDate).toISOString() : undefined,
-        endDate: editEndDate ? new Date(editEndDate).toISOString() : undefined,
-        isCurrent: editIsCurrent,
-        allowMultiple: allowMultipleActive,
+          id: editingSession.id,
+          yearName: editYearName.trim(),
+          startDate: editStartDate ? new Date(editStartDate).toISOString() : undefined,
+          endDate: editEndDate ? new Date(editEndDate).toISOString() : undefined,
+          isCurrent: editIsCurrent,
+          allowMultiple: allowMultipleActive,
       });
       if (json.success) {
         setSuccessMessage(`Session "${editYearName.trim()}" updated.`);
@@ -317,13 +317,13 @@ function SessionControlContent() {
   const filteredSessions = useMemo(
     () =>
       sessions.filter((s) => {
-        const matchSearch =
-          s.yearName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (s.institution?.name || "").toLowerCase().includes(searchTerm.toLowerCase());
-        if (!matchSearch) return false;
-        if (statusFilter === "ACTIVE") return s.isCurrent;
-        if (statusFilter === "ARCHIVED") return !s.isCurrent;
-        return true;
+      const matchSearch =
+        s.yearName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (s.institution?.name || "").toLowerCase().includes(searchTerm.toLowerCase());
+      if (!matchSearch) return false;
+      if (statusFilter === "ACTIVE") return s.isCurrent;
+      if (statusFilter === "ARCHIVED") return !s.isCurrent;
+      return true;
       }),
     [sessions, searchTerm, statusFilter]
   );
@@ -543,9 +543,9 @@ function SessionControlContent() {
           )}
         </Stack>
 
-        {loading ? (
+              {loading ? (
           <LoadingScreen label="Loading sessions..." />
-        ) : filteredSessions.length === 0 ? (
+              ) : filteredSessions.length === 0 ? (
           <EmptyContent
             title={searchTerm ? "No matching sessions" : statusFilter === "ARCHIVED" ? "No archived sessions" : "No sessions found"}
             description={
@@ -570,7 +570,7 @@ function SessionControlContent() {
             <Stack spacing={1.25} sx={{ display: { xs: "flex", md: "none" } }}>
               {filteredSessions.map((session) => (
                 <Box
-                  key={session.id}
+                      key={session.id}
                   sx={{
                     p: 1.5,
                     border: 1,
@@ -589,8 +589,8 @@ function SessionControlContent() {
                         fontSize: 13,
                         flexShrink: 0,
                       }}
-                    >
-                      {session.yearName.slice(-2)}
+                          >
+                            {session.yearName.slice(-2)}
                     </Avatar>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between" }}>
@@ -689,8 +689,8 @@ function SessionControlContent() {
                 </Table>
               </Scrollbar>
             </Box>
-          </>
-        )}
+                            </>
+                          )}
       </AppCard>
 
       <Dialog
@@ -706,7 +706,7 @@ function SessionControlContent() {
             <Stack spacing={2} sx={{ mt: 1 }}>
               <AppTextField label="Session name / year" value={yearName} onChange={(e) => setYearName(e.target.value)} required autoFocus />
               <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
-                {yearSuggestions.map((sug) => (
+                  {yearSuggestions.map((sug) => (
                   <Chip key={sug} size="small" label={sug} clickable onClick={() => handleSelectSuggestion(sug)} />
                 ))}
               </Stack>
@@ -716,7 +716,7 @@ function SessionControlContent() {
               </Stack>
               <AppSelect
                 label="Term structure"
-                value={termStructure}
+                  value={termStructure}
                 onChange={setTermStructure}
                 options={[
                   { value: "NCTB_3_TERMS", label: "NCTB 3 terms" },
@@ -734,7 +734,7 @@ function SessionControlContent() {
           </DialogContent>
           <DialogActions sx={dialogActionSx}>
             <AppButton variant="outlined" color="error" onClick={() => setShowCreateModal(false)}>
-              Cancel
+                  Cancel
             </AppButton>
             <AppButton type="submit" variant="contained" color="primary" loading={submitting}>
               Create session
@@ -761,7 +761,7 @@ function SessionControlContent() {
           </DialogContent>
           <DialogActions sx={dialogActionSx}>
             <AppButton variant="outlined" color="error" onClick={() => setEditingSession(null)}>
-              Cancel
+                  Cancel
             </AppButton>
             <AppButton type="submit" variant="contained" color="primary" loading={submitting}>
               Save changes
@@ -793,21 +793,21 @@ function SessionControlContent() {
           {needsDeleteConfirm && (
             <AppTextField
               label={`Type ${permanentDeleteSession?.yearName} to confirm`}
-              value={deleteConfirmInput}
-              onChange={(e) => setDeleteConfirmInput(e.target.value)}
+                  value={deleteConfirmInput}
+                  onChange={(e) => setDeleteConfirmInput(e.target.value)}
             />
           )}
         </DialogContent>
         <DialogActions sx={dialogActionSx}>
           <AppButton variant="outlined" color="error" onClick={() => setPermanentDeleteSession(null)}>
-            Cancel
+                Cancel
           </AppButton>
           <AppButton
             color="error"
             variant="contained"
             loading={deleteLoading}
             disabled={needsDeleteConfirm && deleteConfirmInput.trim() !== permanentDeleteSession?.yearName}
-            onClick={handleConfirmPermanentDelete}
+                onClick={handleConfirmPermanentDelete}
           >
             Delete permanently
           </AppButton>

@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -746,21 +747,7 @@ export default function SuperAdminDashboardPage() {
             <p className="text-xs">Loading institutions directory...</p>
           </div>
         ) : filteredInstitutions.length === 0 ? (
-          <div className="p-12 text-center text-slate-500 space-y-3">
-            <Building2 className="w-10 h-10 text-slate-300 mx-auto" />
-            <p className="text-sm font-medium text-slate-700">No institutions found</p>
-            <p className="text-xs text-slate-400">
-              {searchQuery ? "Try refining your search filter" : "Get started by creating your first institution."}
-            </p>
-            <AppButton
-              onClick={handleOpenCreateModal}
-              variant="contained"
-              size="small"
-              startIcon={<PlusCircle className="w-3.5 h-3.5" />}
-            >
-              Create Institution
-            </AppButton>
-          </div>
+          <NoDataFound />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">

@@ -27,6 +27,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Tooltip,
@@ -389,35 +390,9 @@ export default function ClassSubjectMappingPage() {
     }
   };
 
-  const mappedEmpty = (
-    <EmptyContent
-      title="No subjects mapped"
-      description={`${selectedClass?.name || "This class"} (${GROUP_LABELS[selectedGroup] || selectedGroup}) has no subjects yet.`}
-      action={
-        <Stack direction="row" spacing={1} useFlexGap sx={{ justifyContent: "center", flexWrap: "wrap" }}>
-          <AppButton variant="contained" onClick={() => setShowPresetModal(true)}>
-            Apply NCTB preset
-          </AppButton>
-          <AppButton onClick={() => setActiveTab("catalog")}>Browse catalog</AppButton>
-        </Stack>
-      }
-    />
-  );
+  const mappedEmpty = <EmptyContent />;
 
-  const catalogEmpty = (
-    <EmptyContent
-      title="Catalog is empty for this class"
-      description="Add a subject, copy from another class, or apply an NCTB preset."
-      action={
-        <Stack direction="row" spacing={1} useFlexGap sx={{ justifyContent: "center", flexWrap: "wrap" }}>
-          <AppButton variant="contained" onClick={() => setShowAddSubjectModal(true)}>
-            New subject
-          </AppButton>
-          <AppButton onClick={() => setShowCopyModal(true)}>Copy from</AppButton>
-        </Stack>
-      }
-    />
-  );
+  const catalogEmpty = <EmptyContent />;
 
   const mappedCards = (
     <Stack spacing={1.25}>
@@ -476,8 +451,9 @@ export default function ClassSubjectMappingPage() {
   );
 
   const mappedTable = (
-    <Scrollbar sx={{ overflowX: "auto" }}>
-      <Table size="small" sx={{ minWidth: 720 }}>
+    <TableContainer>
+      <Scrollbar sx={{ overflowX: "auto" }}>
+      <Table sx={{ minWidth: 720 }}>
         <TableHead>
           <TableRow>
             <TableCell padding="checkbox">
@@ -541,7 +517,8 @@ export default function ClassSubjectMappingPage() {
           ))}
         </TableBody>
       </Table>
-    </Scrollbar>
+      </Scrollbar>
+    </TableContainer>
   );
 
   const catalogCards = (
@@ -603,8 +580,9 @@ export default function ClassSubjectMappingPage() {
   );
 
   const catalogTable = (
-    <Scrollbar sx={{ overflowX: "auto" }}>
-      <Table size="small" sx={{ minWidth: 640 }}>
+    <TableContainer>
+      <Scrollbar sx={{ overflowX: "auto" }}>
+      <Table sx={{ minWidth: 640 }}>
         <TableHead>
           <TableRow>
             <TableCell padding="checkbox">
@@ -661,7 +639,8 @@ export default function ClassSubjectMappingPage() {
           ))}
         </TableBody>
       </Table>
-    </Scrollbar>
+      </Scrollbar>
+    </TableContainer>
   );
 
   return (

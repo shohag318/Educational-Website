@@ -1,17 +1,15 @@
 "use client";
 
 import {
-  Box,
-  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
 } from "@mui/material";
 import type { ReactNode } from "react";
+import { TableNoData } from "@/components/table/table-no-data";
 
 export interface AppTableColumn<T> {
   id: string;
@@ -25,7 +23,7 @@ interface AppTableProps<T> {
   columns: AppTableColumn<T>[];
   rows: T[];
   rowKey: (row: T, index: number) => string;
-  emptyText?: string;
+  emptyIcon?: string;
   maxHeight?: number | string;
 }
 
@@ -33,12 +31,12 @@ export function AppTable<T>({
   columns,
   rows,
   rowKey,
-  emptyText = "No records found",
+  emptyIcon,
   maxHeight = 640,
 }: AppTableProps<T>) {
   return (
-    <TableContainer component={Paper} sx={{ maxHeight, borderRadius: 2 }}>
-      <Table stickyHeader size="small">
+    <TableContainer sx={{ maxHeight }}>
+      <Table stickyHeader>
         <TableHead>
           <TableRow>
             {columns.map((col) => (
@@ -50,21 +48,15 @@ export function AppTable<T>({
         </TableHead>
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length}>
-                <Box sx={{ py: 4, textAlign: "center" }}>
-                  <Typography variant="body2" color="text.secondary">
-                    {emptyText}
-                  </Typography>
-                </Box>
-              </TableCell>
-            </TableRow>
+            <TableNoData colSpan={columns.length} icon={emptyIcon} />
           ) : (
             rows.map((row, index) => (
               <TableRow key={rowKey(row, index)} hover>
                 {columns.map((col) => (
                   <TableCell key={col.id} align={col.align}>
-                    {col.render ? col.render(row, index) : String((row as Record<string, unknown>)[col.id] ?? "")}
+                    {col.render
+                      ? col.render(row, index)
+                      : String((row as Record<string, unknown>)[col.id] ?? "")}
                   </TableCell>
                 ))}
               </TableRow>

@@ -216,22 +216,105 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     MuiSwitch: {
       defaultProps: { size: "small" },
     },
+    MuiTableContainer: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          border: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.paper,
+          boxShadow: "none",
+        },
+      },
+    },
+    MuiTable: {
+      defaultProps: {
+        size: "medium",
+      },
+      styleOverrides: {
+        root: {
+          borderCollapse: "separate",
+          borderSpacing: 0,
+        },
+      },
+    },
     MuiTableHead: {
       styleOverrides: {
         root: {
-          backgroundColor: theme.palette.grey[50],
+          backgroundColor: theme.palette.common.white,
           "& .MuiTableCell-head": {
-            fontWeight: 700,
-            fontSize: 12,
+            fontWeight: 500,
+            fontSize: 13,
+            lineHeight: 1.4,
             color: theme.palette.text.secondary,
+            backgroundColor: theme.palette.common.white,
             whiteSpace: "nowrap",
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            paddingTop: 14,
+            paddingBottom: 14,
+            paddingLeft: 16,
+            paddingRight: 16,
+          },
+        },
+      },
+    },
+    MuiTableBody: {
+      styleOverrides: {
+        root: {
+          "& .MuiTableRow-root:last-of-type .MuiTableCell-root": {
+            borderBottom: 0,
+          },
+        },
+      },
+    },
+    MuiTableRow: {
+      styleOverrides: {
+        root: {
+          "&:hover": {
+            backgroundColor: alpha(theme.palette.grey[500], 0.04),
+          },
+          "&.Mui-selected": {
+            backgroundColor: alpha(theme.palette.primary.main, 0.06),
+            "&:hover": {
+              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+            },
           },
         },
       },
     },
     MuiTableCell: {
       styleOverrides: {
-        root: { borderColor: theme.palette.divider, fontSize: 13 },
+        root: {
+          borderColor: theme.palette.divider,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          fontSize: 13.5,
+          color: theme.palette.text.primary,
+          paddingTop: 14,
+          paddingBottom: 14,
+          paddingLeft: 16,
+          paddingRight: 16,
+          verticalAlign: "middle",
+        },
+        head: {
+          fontWeight: 500,
+          color: theme.palette.text.secondary,
+        },
+        sizeSmall: {
+          paddingTop: 10,
+          paddingBottom: 10,
+          paddingLeft: 12,
+          paddingRight: 12,
+          fontSize: 13,
+        },
+      },
+    },
+    MuiTablePagination: {
+      styleOverrides: {
+        root: {
+          borderTop: `1px solid ${theme.palette.divider}`,
+        },
+        toolbar: {
+          minHeight: 52,
+        },
       },
     },
     MuiDialog: {

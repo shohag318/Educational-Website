@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
@@ -1402,8 +1403,8 @@ export default function BanbeisDownloadPage() {
                 <tbody className="divide-y divide-slate-100">
                   {filteredStudents.length === 0 ? (
                     <tr>
-                      <td colSpan={10} className="py-8 text-center text-slate-400">
-                        No students found matching current search/filter.
+                      <td colSpan={10} className="p-0">
+                        <NoDataFound />
                       </td>
                     </tr>
                   ) : (
@@ -1687,8 +1688,8 @@ export default function BanbeisDownloadPage() {
                 <tbody className="divide-y divide-slate-100">
                   {filteredSubjectWise.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-slate-400">
-                        No subject records found matching the selected filter.
+                      <td colSpan={7} className="p-0">
+                        <NoDataFound />
                       </td>
                     </tr>
                   ) : (

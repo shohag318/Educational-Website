@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Boxes,
@@ -552,8 +553,8 @@ export default function InstitutionAssetsPage() {
             <tbody className="divide-y divide-slate-100">
               {filteredAssets.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="py-12 text-center text-xs text-slate-400 italic">
-                    No institutional assets found matching current criteria.
+                  <td colSpan={11} className="p-0">
+                    <NoDataFound />
                   </td>
                 </tr>
               ) : (

@@ -1,8 +1,11 @@
 import type { ThemeOptions } from "@mui/material/styles";
 
+/** Matches `next/font` CSS variable from `src/app/layout.tsx`. */
+export const FONT_PRIMARY = 'var(--font-roboto), "Roboto", "Helvetica", "Arial", sans-serif';
+
 export const typography: NonNullable<ThemeOptions["typography"]> = {
-  fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  fontFamily: FONT_PRIMARY,
+  fontWeightLight: 300,
   fontWeightRegular: 400,
   fontWeightMedium: 500,
   fontWeightBold: 700,

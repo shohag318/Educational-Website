@@ -1,24 +1,19 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
-import type { ReactNode } from "react";
+import { NoDataFound } from "@/components/table/no-data-found";
 
 interface EmptyContentProps {
+  /** @deprecated Always shows "No Data Found" */
   title?: string;
+  /** @deprecated Descriptions are not shown */
   description?: string;
-  action?: ReactNode;
+  /** @deprecated Actions are not shown on empty states */
+  action?: React.ReactNode;
+  icon?: string;
+  hideIcon?: boolean;
 }
 
-export function EmptyContent({ title = "Nothing here", description, action }: EmptyContentProps) {
-  return (
-    <Box sx={{ textAlign: "center", py: 6, px: 2 }}>
-      <Typography variant="subtitle1">{title}</Typography>
-      {description && (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          {description}
-        </Typography>
-      )}
-      {action && <Box sx={{ mt: 2 }}>{action}</Box>}
-    </Box>
-  );
+/** Table/list empty state — icon + "No Data Found" only. */
+export function EmptyContent(_props: EmptyContentProps) {
+  return <NoDataFound icon={_props.icon} />;
 }

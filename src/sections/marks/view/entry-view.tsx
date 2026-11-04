@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
@@ -1964,7 +1965,11 @@ export default function MarkEntryPage() {
                     <tr>
                       <td
                         colSpan={isClassTest ? 5 : (7 + (hasPractical ? 1 : 0) + (isCtActive ? 1 : 0) + otherDefs.length)}
-                        className="p-8 text-center text-slate-500 font-sans"
+                        className={
+                          loading || !selectedSubjectId
+                            ? "p-8 text-center text-slate-500 font-sans"
+                            : "p-0"
+                        }
                       >
                         {loading ? (
                           <div className="flex items-center justify-center space-x-2 text-slate-400 italic">
@@ -1973,41 +1978,7 @@ export default function MarkEntryPage() {
                         ) : !selectedSubjectId ? (
                           <span className="italic text-slate-400">Please select a valid subject to load spreadsheet roster.</span>
                         ) : (
-                          <div className="max-w-md mx-auto space-y-3">
-                            <div className="w-10 h-10 mx-auto bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
-                              <AlertCircle className="w-5 h-5" />
-                            </div>
-                            <div>
-                              <p className="font-semibold text-slate-800 text-xs">
-                                No students found who have taken this subject in the selected criteria.
-                              </p>
-                              <p className="text-[11px] text-slate-500 mt-1">
-                                {selectedSectionId
-                                  ? "The selected section may belong to a different group (e.g. viewing a Science subject while a Business Studies section is selected), or students in this section have not yet been allocated this subject."
-                                  : "No students in this class have been allocated this subject in their curriculum yet."}
-                              </p>
-                            </div>
-                            <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-xs">
-                              {selectedSectionId && (
-                                <AppButton
-                                  type="button"
-                                  variant="soft"
-                                  color="success"
-                                  size="small"
-                                  onClick={() => setSelectedSectionId("")}
-                                >
-                                  Clear Section Filter (View All Sections)
-                                </AppButton>
-                              )}
-                              <Link
-                                href="/academic/subject-mapping"
-                                className="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium transition-colors inline-flex items-center space-x-1"
-                              >
-                                <span>Allocate Subjects in Matrix</span>
-                                <ArrowRight className="w-3.5 h-3.5" />
-                              </Link>
-                            </div>
-                          </div>
+                          <NoDataFound />
                         )}
                       </td>
                     </tr>
@@ -2608,8 +2579,8 @@ export default function MarkEntryPage() {
                               })}
                               {rows.length === 0 && (
                                 <tr>
-                                  <td colSpan={isClassTest ? 5 : 10} className="p-8 text-center text-slate-500 font-sans">
-                                    No students found allocated to this subject in the selected class/section.
+                                  <td colSpan={isClassTest ? 5 : 10} className="p-0">
+                                    <NoDataFound />
                                   </td>
                                 </tr>
                               )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState } from "react";
 import { AlertTriangle, Filter, Phone, Printer, RotateCcw } from "lucide-react";
 import { AppButton } from "@/components/button/app-button";
@@ -477,12 +478,11 @@ export default function FailListPage() {
               ))}
               {filteredList.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-slate-400 italic">
-                    {loading
-                      ? "Loading..."
-                      : failedList.length > 0
-                      ? "No records match the selected filter criteria."
-                      : "No failing records found! Either all students passed or results need processing."}
+                  <td
+                    colSpan={8}
+                    className={loading ? "p-8 text-center text-slate-400 italic" : "p-0"}
+                  >
+                    {loading ? "Loading..." : <NoDataFound />}
                   </td>
                 </tr>
               )}

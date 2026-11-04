@@ -17,7 +17,7 @@ export function SessionPageHeader({ heading, current, action }: SessionPageHeade
       heading={heading}
       links={[
         { name: "Overview", href: PATHS.root, icon: <AddCircleOutlineIcon sx={{ fontSize: 16 }} /> },
-        { name: "Sessions", href: PATHS.session.root },
+        { name: "Sessions", href: PATHS.session.manager },
         { name: current },
       ]}
       action={action}

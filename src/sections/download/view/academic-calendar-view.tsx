@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -715,8 +716,8 @@ export default function AcademicCalendarPage() {
 
                 {filteredActivities.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-400 italic">
-                      No academic activities found for the selected filter criteria.
+                    <td colSpan={7} className="p-0">
+                      <NoDataFound />
                     </td>
                   </tr>
                 )}

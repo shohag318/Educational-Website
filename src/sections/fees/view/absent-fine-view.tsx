@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -946,8 +947,8 @@ export default function AbsentFineCalculationPage() {
                 </tr>
               ) : filteredList.length === 0 ? (
                 <tr>
-                  <td colSpan={13} className="py-12 text-center text-xs text-slate-400 italic">
-                    No student records matching current filters.
+                  <td colSpan={13} className="p-0">
+                    <NoDataFound />
                   </td>
                 </tr>
               ) : (

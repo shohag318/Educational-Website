@@ -1,6 +1,7 @@
 // src/app/user-role/audit-logs/page.tsx
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -268,8 +269,8 @@ export default function SecurityAuditLogsPage() {
             <tbody className="divide-y divide-slate-100">
               {filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
-                    No audit records matching criteria.
+                  <td colSpan={7} className="p-0">
+                    <NoDataFound />
                   </td>
                 </tr>
               ) : (

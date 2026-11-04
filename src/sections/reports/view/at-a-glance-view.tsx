@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState } from "react";
 import {
   FileBarChart,
@@ -853,8 +854,8 @@ export default function AtAGlancePage() {
                     ))}
                     {reportData.failedStatisticsByCourse.length === 0 && (
                       <tr>
-                        <td colSpan={5} className="p-6 text-center italic text-slate-500">
-                          Outstanding! No students failed in this examination session.
+                        <td colSpan={5} className="p-0">
+                          <NoDataFound />
                         </td>
                       </tr>
                     )}
@@ -904,8 +905,8 @@ export default function AtAGlancePage() {
                     ))}
                     {(!reportData.failedStatisticsByCourseWithoutFourth || reportData.failedStatisticsByCourseWithoutFourth.length === 0) && (
                       <tr>
-                        <td colSpan={5} className="p-6 text-center italic text-slate-500">
-                          Outstanding! No students failed in any mandatory or elective course (excluding 4th subject).
+                        <td colSpan={5} className="p-0">
+                          <NoDataFound />
                         </td>
                       </tr>
                     )}

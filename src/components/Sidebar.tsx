@@ -233,9 +233,9 @@ export function Sidebar() {
                     </Link>
 
                     <Link
-                      href="/session"
+                      href="/session/manager"
                       className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
-                        isLinkActive("/session")
+                        isLinkActive("/session/manager") || isLinkActive("/session")
                           ? "bg-emerald-600 text-white font-medium"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}

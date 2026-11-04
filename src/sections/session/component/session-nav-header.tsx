@@ -17,8 +17,9 @@ export function SessionNavHeader() {
       label: "Create Session",
     },
     {
-      href: "/session",
+      href: "/session/manager",
       label: "Session Manager",
+      aliases: ["/session"],
     },
   ];
 

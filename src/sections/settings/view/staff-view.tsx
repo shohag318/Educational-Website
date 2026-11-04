@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -934,8 +935,8 @@ export default function TeacherStaffInfoPage() {
               <tbody className="divide-y divide-slate-100">
                 {filteredStaff.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="p-8 text-center text-slate-500">
-                      No personnel records match your filter criteria.
+                    <td colSpan={9} className="p-0">
+                      <NoDataFound />
                     </td>
                   </tr>
                 ) : (

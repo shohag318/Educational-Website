@@ -50,6 +50,7 @@ export const PATHS = {
   },
   session: {
     root: "/session",
+    manager: "/session/manager",
     create: "/session/create",
   },
   marks: {

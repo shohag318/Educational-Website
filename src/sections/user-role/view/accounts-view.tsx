@@ -1,6 +1,7 @@
 // src/app/user-role/page.tsx
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -711,8 +712,8 @@ export default function UserRolePage() {
             <tbody className="divide-y divide-slate-100">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-slate-400">
-                    No users matching the search criteria.
+                  <td colSpan={8} className="p-0">
+                    <NoDataFound />
                   </td>
                 </tr>
               ) : (

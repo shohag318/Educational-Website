@@ -49,6 +49,7 @@ const ROUTE_DIRECTORY: Record<
   "/results/publish": { title: "Publish Results", module: "Results", color: "indigo" },
   "/results/review": { title: "Process & Review", module: "Results", color: "indigo" },
   "/session": { title: "Session Manager", module: "Sessions", color: "emerald" },
+  "/session/manager": { title: "Session Manager", module: "Sessions", color: "emerald" },
   "/session/create": { title: "Create Session", module: "Sessions", color: "emerald" },
   "/settings": { title: "Institution Profile", module: "Settings", color: "cyan" },
   "/settings/staff": { title: "Teachers & Staff", module: "Settings", color: "cyan" },

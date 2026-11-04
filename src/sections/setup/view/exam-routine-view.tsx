@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -1557,8 +1558,8 @@ export default function ExamRoutinePage() {
                 <tbody className="divide-y divide-slate-800 text-slate-900">
                   {filteredRoutineItems.length === 0 ? (
                     <tr>
-                      <td colSpan={showRoomInPrint ? 7 : 6} className="text-center py-8 text-slate-500">
-                        No examination slots have been scheduled for this filter selection.
+                      <td colSpan={showRoomInPrint ? 7 : 6} className="p-0">
+                        <NoDataFound />
                       </td>
                     </tr>
                   ) : (

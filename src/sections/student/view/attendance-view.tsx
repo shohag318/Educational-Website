@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import {
@@ -1551,10 +1552,7 @@ export default function StudentAttendancePage() {
                   Loading student roster...
                 </div>
               ) : students.length === 0 ? (
-                <div className="py-16 text-center text-slate-500 text-xs">
-                  <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                  No enrolled students found matching the selected filters.
-                </div>
+                <NoDataFound />
               ) : (
                 <table className="w-full text-left border-collapse">
                   <thead>
@@ -1958,10 +1956,7 @@ export default function StudentAttendancePage() {
                   Loading monthly registers...
                 </div>
               ) : students.length === 0 ? (
-                <div className="py-20 text-center text-slate-500 text-xs">
-                  <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                  No enrolled students found.
-                </div>
+                <NoDataFound />
               ) : (
                 <table className="w-full text-left border-collapse text-xs">
                   <thead className="sticky top-0 z-20 bg-slate-100 shadow-2xs">
@@ -2428,10 +2423,7 @@ export default function StudentAttendancePage() {
                   Compiling range attendance statistics...
                 </div>
               ) : students.length === 0 ? (
-                <div className="py-16 text-center text-slate-500 text-xs">
-                  <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                  No enrolled students found.
-                </div>
+                <NoDataFound />
               ) : (
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>

@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState, useMemo } from "react";
 import {
   Contact,
@@ -1359,8 +1360,11 @@ export default function StudentInfoPage() {
 
                 {students.length === 0 && (
                   <tr>
-                    <td colSpan={activeColumns.length + 3} className="p-12 text-center text-slate-400 italic text-xs">
-                      {loading ? "Loading student records..." : "No student records match the active filter."}
+                    <td
+                      colSpan={activeColumns.length + 3}
+                      className={loading ? "p-12 text-center text-slate-400 italic text-xs" : "p-0"}
+                    >
+                      {loading ? "Loading student records..." : <NoDataFound />}
                     </td>
                   </tr>
                 )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -1037,11 +1038,7 @@ export default function StudentFeeModulePage() {
             <p>Loading student fee records...</p>
           </div>
         ) : displayedStudents.length === 0 ? (
-          <div className="p-12 text-center text-slate-500 text-xs">
-            <Receipt className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-            <p className="font-semibold text-slate-700 text-sm">No student records found</p>
-            <p className="text-slate-400 mt-1">Try resetting the filter criteria or searching with a different term.</p>
-          </div>
+          <NoDataFound />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600 border-collapse">

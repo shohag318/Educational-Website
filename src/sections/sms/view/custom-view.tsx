@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -1120,8 +1121,8 @@ export default function CustomSMSPage() {
                     </tr>
                   ) : filteredStudents.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="p-8 text-center text-slate-400 italic">
-                        No students found matching current filters.
+                      <td colSpan={6} className="p-0">
+                        <NoDataFound />
                       </td>
                     </tr>
                   ) : (

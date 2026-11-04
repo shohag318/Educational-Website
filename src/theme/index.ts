@@ -59,4 +59,4 @@ export const theme = createTheme(baseTheme, {
 });
 
 export { palette } from "./palette";
-export { typography } from "./typography";
+export { typography, FONT_PRIMARY } from "./typography";

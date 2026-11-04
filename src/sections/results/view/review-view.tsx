@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState } from "react";
 import {
   CheckCircle,
@@ -917,12 +918,11 @@ export default function ResultReviewPage() {
               ))}
               {filteredTabulation.length === 0 && (
                 <tr>
-                  <td colSpan={isCtActive ? 12 : 10} className="p-8 text-center text-slate-400 italic font-sans">
-                    {loading
-                      ? "Loading results..."
-                      : tabulation.length > 0
-                      ? "No students match the selected filter criteria."
-                      : "No results computed yet. Click 'Run Result Engine' above to process."}
+                  <td
+                    colSpan={isCtActive ? 12 : 10}
+                    className={loading ? "p-8 text-center text-slate-400 italic font-sans" : "p-0"}
+                  >
+                    {loading ? "Loading results..." : <NoDataFound />}
                   </td>
                 </tr>
               )}

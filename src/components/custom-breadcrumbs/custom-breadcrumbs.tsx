@@ -32,14 +32,14 @@ export function CustomBreadcrumbs({ heading, links, action, moreLink }: CustomBr
             {links.map((link, index) => {
               const last = index === links.length - 1;
               const content = (
-                <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                <Stack component="span" direction="row" spacing={0.5} sx={{ alignItems: "center", display: "inline-flex" }}>
                   {link.icon}
-                  <span>{link.name}</span>
+                  <Box component="span">{link.name}</Box>
                 </Stack>
               );
               if (last || !link.href) {
                 return (
-                  <Typography key={link.name} color="text.primary" variant="body2">
+                  <Typography key={link.name} component="span" color="text.primary" variant="body2">
                     {content}
                   </Typography>
                 );

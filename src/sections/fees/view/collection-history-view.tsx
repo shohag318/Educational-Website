@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Search,
@@ -370,8 +371,8 @@ export default function DailyCollectionHistoryPage() {
             <tbody className="divide-y divide-slate-100 font-medium">
               {filteredVouchers.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="py-12 text-center text-xs text-slate-400 italic">
-                    No collection vouchers match the selected criteria.
+                  <td colSpan={12} className="p-0">
+                    <NoDataFound />
                   </td>
                 </tr>
               ) : (

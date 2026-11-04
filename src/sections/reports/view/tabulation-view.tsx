@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState } from "react";
 import { FileSpreadsheet, Printer, Filter, RotateCcw } from "lucide-react";
 import { AppButton } from "@/components/button/app-button";
@@ -549,9 +550,9 @@ export default function TabulationPage() {
                 <tr>
                   <td
                     colSpan={subjects.length * 3 + 10}
-                    className="p-8 text-center text-slate-400 italic font-sans"
+                    className={loading ? "p-8 text-center text-slate-400 italic font-sans" : "p-0"}
                   >
-                    {loading ? "Loading master tabulation sheet..." : "No results available."}
+                    {loading ? "Loading master tabulation sheet..." : <NoDataFound />}
                   </td>
                 </tr>
               )}

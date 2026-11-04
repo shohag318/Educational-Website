@@ -20,6 +20,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   ToggleButton,
@@ -46,7 +47,8 @@ import { AppTextField } from "@/components/text-field/app-text-field";
 import { DatePicker } from "@/components/date-picker/date-picker";
 import { AppSelect } from "@/components/select/app-select";
 import { LoadingScreen } from "@/components/loading-screen/loading-screen";
-import { EmptyContent } from "@/components/empty-content/empty-content";
+import { NoDataFound } from "@/components/table/no-data-found";
+import { TableNoData } from "@/components/table/table-no-data";
 import { Label } from "@/components/label/label";
 import { Scrollbar } from "@/components/scrollbar/scrollbar";
 import { academicService } from "@/api/services";
@@ -545,30 +547,13 @@ function SessionControlContent() {
 
               {loading ? (
           <LoadingScreen label="Loading sessions..." />
-              ) : filteredSessions.length === 0 ? (
-          <EmptyContent
-            title={searchTerm ? "No matching sessions" : statusFilter === "ARCHIVED" ? "No archived sessions" : "No sessions found"}
-            description={
-              searchTerm
-                ? "Try another year name, or clear the search to see every session."
-                : "Create an academic year to start enrollment, exams, and results."
-            }
-            action={
-              searchTerm ? (
-                <AppButton variant="outline" onClick={() => setSearchTerm("")}>
-                  Clear search
-                </AppButton>
               ) : (
-                <AppButton variant="contained" onClick={handleOpenCreateModal}>
-                  Create session
-                </AppButton>
-              )
-            }
-          />
-        ) : (
           <>
             <Stack spacing={1.25} sx={{ display: { xs: "flex", md: "none" } }}>
-              {filteredSessions.map((session) => (
+              {filteredSessions.length === 0 ? (
+                <NoDataFound />
+              ) : (
+              filteredSessions.map((session) => (
                 <Box
                       key={session.id}
                   sx={{
@@ -616,12 +601,14 @@ function SessionControlContent() {
                     </Box>
                   </Stack>
                 </Box>
-              ))}
+              ))
+              )}
             </Stack>
 
             <Box sx={{ display: { xs: "none", md: "block" }, minWidth: 0 }}>
-              <Scrollbar sx={{ width: 1, overflowX: "auto" }}>
-                <Table size="small" sx={{ minWidth: 760 }}>
+              <TableContainer>
+                <Scrollbar sx={{ width: 1, overflowX: "auto" }}>
+                <Table sx={{ minWidth: 760 }}>
                   <TableHead>
                     <TableRow>
                       <TableCell>Session</TableCell>
@@ -638,7 +625,10 @@ function SessionControlContent() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {filteredSessions.map((session) => (
+                    {filteredSessions.length === 0 ? (
+                      <TableNoData colSpan={7} />
+                    ) : (
+                    filteredSessions.map((session) => (
                       <TableRow key={session.id} hover selected={session.isCurrent}>
                         <TableCell>
                           <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
@@ -684,10 +674,12 @@ function SessionControlContent() {
                           {renderSessionActions(session, true)}
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ))
+                    )}
                   </TableBody>
                 </Table>
-              </Scrollbar>
+                </Scrollbar>
+              </TableContainer>
             </Box>
                             </>
                           )}

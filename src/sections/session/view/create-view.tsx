@@ -201,7 +201,7 @@ export default function CreateSessionPage() {
 
       if (json.success) {
         enqueueSnackbar(`Academic session "${yearName}" created`, { variant: "success" });
-        setTimeout(() => router.push(PATHS.session.root), 900);
+        setTimeout(() => router.push(PATHS.session.manager), 900);
       } else {
         enqueueSnackbar((json as any).error || "Failed to create academic session.", { variant: "error" });
       }
@@ -220,7 +220,7 @@ export default function CreateSessionPage() {
         action={
           <AppButton
             component={Link}
-            href={PATHS.session.root}
+            href={PATHS.session.manager}
             variant="outlined"
             sx={{ width: { xs: 1, sm: "auto" } }}
           >
@@ -531,7 +531,7 @@ export default function CreateSessionPage() {
               "& > :not(style)": { width: { xs: 1, sm: "auto" }, minWidth: { sm: 120 }, px: 2.5, borderRadius: "12px" },
             }}
           >
-            <AppButton component={Link} href={PATHS.session.root} variant="outlined" color="error">
+            <AppButton component={Link} href={PATHS.session.manager} variant="outlined" color="error">
               Cancel
             </AppButton>
             {isLastStep ? (

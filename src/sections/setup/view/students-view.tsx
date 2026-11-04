@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import {
@@ -2152,8 +2153,11 @@ export default function StudentsPage() {
               })}
               {students.length === 0 && (
                 <tr>
-                  <td colSpan={Math.max(1, activeFields.length + 2)} className="p-8 text-center text-slate-400 italic">
-                    {loading ? "Loading students..." : "No students enrolled in this class/section yet."}
+                  <td
+                    colSpan={Math.max(1, activeFields.length + 2)}
+                    className={loading ? "p-8 text-center text-slate-400 italic" : "p-0"}
+                  >
+                    {loading ? "Loading students..." : <NoDataFound />}
                   </td>
                 </tr>
               )}

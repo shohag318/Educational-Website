@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -1044,10 +1045,7 @@ export default function ScholarshipWaiverPage() {
             Loading enrolled cohort and calculating scholarship ledger...
           </div>
         ) : filteredStudents.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 text-xs">
-            <AlertCircle className="w-8 h-8 mx-auto text-slate-300 mb-2" />
-            No student records match the active criteria. Try broadening your filter or resetting.
-          </div>
+          <NoDataFound />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">

@@ -10,7 +10,8 @@ import { AppCard } from "@/components/card/app-card";
 import { AppSelect } from "@/components/select/app-select";
 import { AppTextField } from "@/components/text-field/app-text-field";
 import { StudentPageHeader } from "@/sections/student/component/student-page-header";
-import { EmptyContent } from "@/components/empty-content/empty-content";
+import { NoDataFound } from "@/components/table/no-data-found";
+import { TableNoData } from "@/components/table/table-no-data";
 import { LoadingScreen } from "@/components/loading-screen/loading-screen";
 import { Label } from "@/components/label/label";
 import { Scrollbar } from "@/components/scrollbar/scrollbar";
@@ -30,6 +31,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Typography,
@@ -1068,30 +1070,19 @@ export default function StudentStatusPage() {
 
         {loading ? (
             <LoadingScreen label="Loading student records..." />
-        ) : filteredStudents.length === 0 ? (
-            <EmptyContent
-              title={hasExtraFilters ? "No matching students" : "No student records found"}
-              description={
-                hasExtraFilters
-                  ? "Try another name, or reset filters to see the full class list."
-                  : "Choose a class or session to load enrollment records."
-              }
-              action={
-                hasExtraFilters ? (
-                  <AppButton variant="outlined" onClick={resetListFilters}>
-                    Reset filters
-                  </AppButton>
-                ) : undefined
-              }
-            />
-          ) : isMobile ? (
-            <Stack spacing={1.25} className="no-print">
-              {filteredStudents.map(renderStudentCard)}
-            </Stack>
+        ) : isMobile ? (
+            filteredStudents.length === 0 ? (
+              <NoDataFound />
+            ) : (
+              <Stack spacing={1.25} className="no-print">
+                {filteredStudents.map(renderStudentCard)}
+              </Stack>
+            )
           ) : (
             <Box sx={{ minWidth: 0, "@media print": { display: "block" } }}>
+              <TableContainer>
                 <Scrollbar sx={{ width: 1, overflowX: "auto" }}>
-                  <Table size="small" sx={{ minWidth: 920 }}>
+                  <Table sx={{ minWidth: 920 }}>
                     <TableHead>
                       <TableRow>
                         <TableCell padding="checkbox" className="no-print">
@@ -1110,6 +1101,7 @@ export default function StudentStatusPage() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
+                {filteredStudents.length === 0 && <TableNoData colSpan={9} />}
                 {filteredStudents.map((enr) => {
                   const isChecked = selectedIds.has(enr.studentId);
                   const parsed = parseStudentStatus(enr.student);
@@ -1183,6 +1175,7 @@ export default function StudentStatusPage() {
                     </TableBody>
                   </Table>
                 </Scrollbar>
+              </TableContainer>
               </Box>
           )}
         </Stack>

@@ -36,7 +36,7 @@ const sessionControlItems = [
   { name: "Classes & Sections", href: PATHS.setup.classes, icon: SchoolIcon, color: "success" as const },
   { name: "Subject Mapping", href: PATHS.setup.subjectMapping, icon: MenuBookIcon, color: "secondary" as const },
   { name: "Create Session", href: PATHS.session.create, icon: AddCircleOutlineIcon, color: "success" as const, badge: "New" },
-  { name: "Session Manager", href: PATHS.session.root, icon: DateRangeIcon, color: "success" as const },
+  { name: "Session Manager", href: PATHS.session.manager, icon: DateRangeIcon, color: "success" as const },
 ];
 
 const studentInfoItems = [
@@ -143,7 +143,7 @@ export default function DashboardOverviewPage() {
       <Card sx={{ p: 2.5, mb: 3 }}>
         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="overline">Academic Sessions</Typography>
-          <AppButton component={Link} href={PATHS.session.root} size="small" endIcon={<ArrowForwardIcon />}>
+          <AppButton component={Link} href={PATHS.session.manager} size="small" endIcon={<ArrowForwardIcon />}>
             Session Manager
           </AppButton>
         </Stack>

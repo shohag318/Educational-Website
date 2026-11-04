@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Wrench,
@@ -323,8 +324,8 @@ export default function AssetMaintenancePage() {
             <tbody className="divide-y divide-slate-100">
               {filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-xs text-slate-400 italic">
-                    No maintenance logs matching current search filters.
+                  <td colSpan={8} className="p-0">
+                    <NoDataFound />
                   </td>
                 </tr>
               ) : (

@@ -1,5 +1,6 @@
 "use client";
 
+import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -1528,8 +1529,8 @@ export default function ExamsPage() {
                             })}
                             {filteredConfigs.length === 0 && (
                               <tr>
-                                <td colSpan={8} className="py-6 text-center text-slate-400 italic">
-                                  No subjects match your filter criteria.
+                                <td colSpan={8} className="p-0">
+                                  <NoDataFound />
                                 </td>
                               </tr>
                             )}

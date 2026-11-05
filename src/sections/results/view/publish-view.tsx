@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ShieldCheck, Lock, Unlock, CheckCircle2, AlertCircle } from "lucide-react";
+import { ShieldCheck, Lock, Unlock, CheckCircle2, AlertCircle } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
 

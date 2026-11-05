@@ -22,7 +22,7 @@ import {
   Image as ImageIcon,
   Lock,
   Unlock,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { StudentAdminPageShell } from "@/sections/student/component/admin-page-shell";
 import { StudentPageHeader } from "@/sections/student/component/student-page-header";
 import { SessionSelect } from "@/components/SessionSelect";

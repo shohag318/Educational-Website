@@ -14,7 +14,7 @@ import {
   DollarSign,
   Banknote,
   RotateCcw,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import * as XLSX from "xlsx";
 import { AppButton } from "@/components/button/app-button";
 import { ManualFeeNavHeader } from "@/sections/fees/component/manual-fee-nav-header";

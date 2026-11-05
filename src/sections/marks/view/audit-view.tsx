@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AppButton } from "@/components/button/app-button";
 import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
-import { FileEdit, History, Save, Check, RefreshCw } from "lucide-react";
+import { FileEdit, History, Save, Check, RefreshCw } from "@/components/iconify/lucide";
 
 export default function MarkAuditPage() {
   const [exams, setExams] = useState<any[]>([]);

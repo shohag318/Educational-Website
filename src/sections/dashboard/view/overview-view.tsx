@@ -2,33 +2,7 @@
 
 import Link from "next/link";
 import { Box, Card, CardActionArea, Chip, Grid, Stack, Typography } from "@mui/material";
-import SchoolIcon from "@mui/icons-material/School";
-import PeopleIcon from "@mui/icons-material/People";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import TuneIcon from "@mui/icons-material/Tune";
-import TableChartIcon from "@mui/icons-material/TableChart";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import SendIcon from "@mui/icons-material/Send";
-import AssessmentIcon from "@mui/icons-material/Assessment";
-import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
-import BadgeIcon from "@mui/icons-material/Badge";
-import CreditCardIcon from "@mui/icons-material/CreditCard";
-import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import DescriptionIcon from "@mui/icons-material/Description";
-import GridViewIcon from "@mui/icons-material/GridView";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import ReceiptIcon from "@mui/icons-material/Receipt";
-import PaymentsIcon from "@mui/icons-material/Payments";
-import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import SettingsIcon from "@mui/icons-material/Settings";
-import HowToRegIcon from "@mui/icons-material/HowToReg";
-import DateRangeIcon from "@mui/icons-material/DateRange";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import Inventory2Icon from "@mui/icons-material/Inventory2";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { SchoolIcon, PeopleIcon, CalendarMonthIcon, MenuBookIcon, TuneIcon, TableChartIcon, CheckCircleIcon, VerifiedUserIcon, SendIcon, AssessmentIcon, WorkspacePremiumIcon, BadgeIcon, CreditCardIcon, EventAvailableIcon, DescriptionIcon, GridViewIcon, BarChartIcon, WarningAmberIcon, ReceiptIcon, PaymentsIcon, AccountBalanceIcon, SettingsIcon, HowToRegIcon, DateRangeIcon, AddCircleOutlineIcon, Inventory2Icon, ArrowForwardIcon } from "@/components/iconify/mui-icons";
 import { AppButton } from "@/components/button/app-button";
 import { CONFIG, PATHS } from "@/config-global";
 

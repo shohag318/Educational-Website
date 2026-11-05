@@ -20,7 +20,7 @@ import {
   Check,
   Download,
   AlertCircle,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { AccountantNavHeader } from "@/sections/accountant/component/accountant-nav-header";
 import {
   PayrollRecord,

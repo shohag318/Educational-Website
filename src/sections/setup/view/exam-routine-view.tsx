@@ -30,7 +30,7 @@ import {
   Timer,
   BookmarkPlus,
   EyeOff,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
 import { SessionSelect } from "@/components/SessionSelect";
 import { DatePicker, TimePicker } from "@/components/date-picker/date-picker";

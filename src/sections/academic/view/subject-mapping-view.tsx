@@ -14,7 +14,7 @@ import {
   Plus,
   RefreshCw,
   Printer,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import { SessionSelect } from "@/components/SessionSelect";
 import { StudentAdminPageShell } from "@/sections/student/component/admin-page-shell";
@@ -23,9 +23,7 @@ import { AppCard } from "@/components/card/app-card";
 import { AppSelect } from "@/components/select/app-select";
 import { AppTextField } from "@/components/text-field/app-text-field";
 import { Box, Grid, IconButton, InputAdornment } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import CloseIcon from "@mui/icons-material/Close";
-
+import { SearchIcon, CloseIcon } from "@/components/iconify/mui-icons";
 export default function SubjectMappingPage() {
   const [selectedSession, setSelectedSession] = useState("ALL");
   const [classes, setClasses] = useState<any[]>([]);

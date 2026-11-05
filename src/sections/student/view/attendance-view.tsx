@@ -43,7 +43,7 @@ import {
   FileText,
   Trash2,
   Phone,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import * as XLSX from "xlsx";
 import { StudentAdminPageShell } from "@/sections/student/component/admin-page-shell";
 import { SessionSelect } from "@/components/SessionSelect";
@@ -54,7 +54,7 @@ import { AppSelect } from "@/components/select/app-select";
 import { AppTextField } from "@/components/text-field/app-text-field";
 import { StudentPageHeader } from "@/sections/student/component/student-page-header";
 import { Box, Grid, Stack, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import { SearchIcon } from "@/components/iconify/mui-icons";
 import { getScopedStorageKey, getActiveTenantCode, TENANT_SWITCH_EVENT } from "@/lib/clientTenant";
 
 type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";

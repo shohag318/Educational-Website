@@ -38,19 +38,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import PeopleIcon from "@mui/icons-material/People";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ScheduleIcon from "@mui/icons-material/Schedule";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import SearchIcon from "@mui/icons-material/Search";
-import CloseIcon from "@mui/icons-material/Close";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import PrintOutlinedIcon from "@mui/icons-material/PrintOutlined";
+import { PeopleIcon, CheckCircleIcon, ScheduleIcon, WarningAmberIcon, SwapHorizIcon, FavoriteBorderIcon, SearchIcon, CloseIcon, EditOutlinedIcon, DescriptionOutlinedIcon, RestartAltIcon, FileDownloadOutlinedIcon, PrintOutlinedIcon } from "@/components/iconify/mui-icons";
 import { getStoredSchoolInfo } from "@/lib/settingsStore";
 
 export type StudentStatusType = "ACTIVE" | "INACTIVE" | "DROPOUT" | "TRANSFER" | "DEATH";

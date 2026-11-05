@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { History, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { History, X, ChevronLeft, ChevronRight } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 
 interface RecentPageItem {

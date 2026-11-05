@@ -1,8 +1,7 @@
 "use client";
 
 import { Checkbox, Grid, List, ListItemButton, ListItemIcon, ListItemText, Paper, Stack } from "@mui/material";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import { ChevronRightIcon, ChevronLeftIcon } from "@/components/iconify/mui-icons";
 import { useState } from "react";
 import { AppButton } from "@/components/button/app-button";
 

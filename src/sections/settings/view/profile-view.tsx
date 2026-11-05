@@ -24,7 +24,7 @@ import {
   Layers,
   ArrowRight,
   FileSignature,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import {
   SchoolBasicInfo,
   DEFAULT_SCHOOL_INFO,

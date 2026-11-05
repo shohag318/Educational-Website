@@ -39,7 +39,7 @@ import {
   Zap,
   SlidersHorizontal,
   FileText,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { FeeNavHeader } from "@/sections/fees/component/fee-nav-header";
 import {
   StudentWaiver,

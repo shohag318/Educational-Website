@@ -16,7 +16,7 @@ import {
   Maximize2,
   Minimize2,
   ExternalLink,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import {
   FeeCollectionVoucher,
   getStoredCollectionVouchers,

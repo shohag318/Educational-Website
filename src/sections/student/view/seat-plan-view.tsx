@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutGrid, Printer, ArrowLeft, Calendar, School, Users } from "lucide-react";
+import { LayoutGrid, Printer, ArrowLeft, Calendar, School, Users } from "@/components/iconify/lucide";
 import { DownloadNavHeader } from "@/sections/download/component/download-nav-header";
 import { AppButton } from "@/components/button/app-button";
 

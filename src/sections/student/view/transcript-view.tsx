@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GraduationCap, Award, Printer, ArrowLeft, Sparkles, FileText } from "lucide-react";
+import { GraduationCap, Award, Printer, ArrowLeft, Sparkles, FileText } from "@/components/iconify/lucide";
 import { DownloadNavHeader } from "@/sections/download/component/download-nav-header";
 
 export default function StudentTranscriptPage() {

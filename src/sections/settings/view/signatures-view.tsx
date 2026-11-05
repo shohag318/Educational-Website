@@ -28,7 +28,7 @@ import {
   Building2,
   Calendar,
   AlertCircle,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { SettingNavHeader } from "@/sections/settings/component/setting-nav-header";
 import { AppButton } from "@/components/button/app-button";
 import {

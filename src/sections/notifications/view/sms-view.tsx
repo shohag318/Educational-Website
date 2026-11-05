@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Send, MessageSquare, Check, PhoneCall, History, Filter, RotateCcw } from "lucide-react";
+import { Send, MessageSquare, Check, PhoneCall, History, Filter, RotateCcw } from "@/components/iconify/lucide";
 import { DEFAULT_SMS_TEMPLATE } from "@/lib/sms/sms-service";
 import { SmsNavHeader } from "@/sections/sms/component/sms-nav-header";
 import { SessionSelect } from "@/components/SessionSelect";

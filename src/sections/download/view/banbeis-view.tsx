@@ -27,7 +27,7 @@ import {
   Database,
   ArrowDownToLine,
   Filter,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import {
   BanbeisMasterCensus,
   getBanbeisMasterCensus,

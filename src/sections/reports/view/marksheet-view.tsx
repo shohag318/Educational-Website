@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Award, Printer, ChevronLeft, ChevronRight, User, Filter, RotateCcw, Layers } from "lucide-react";
+import { Award, Printer, ChevronLeft, ChevronRight, User, Filter, RotateCcw, Layers } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import { SessionSelect } from "@/components/SessionSelect";
 import { ResultNavHeader } from "@/sections/results/component/result-nav-header";

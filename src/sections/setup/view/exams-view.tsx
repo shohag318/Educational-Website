@@ -24,7 +24,7 @@ import {
   Search,
   ArrowRight,
   ShieldAlert,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
 import { ResultNavHeader } from "@/sections/results/component/result-nav-header";

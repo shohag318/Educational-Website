@@ -22,7 +22,7 @@ import {
   Plus,
   ArrowRight,
   TrendingUp,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import { ManualFeeNavHeader } from "@/sections/fees/component/manual-fee-nav-header";
 import {

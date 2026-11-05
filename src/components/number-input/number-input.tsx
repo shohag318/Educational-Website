@@ -1,8 +1,7 @@
 "use client";
 
 import { IconButton, Stack } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
+import { AddIcon, RemoveIcon } from "@/components/iconify/mui-icons";
 import { AppTextField } from "@/components/text-field/app-text-field";
 
 interface NumberInputProps {

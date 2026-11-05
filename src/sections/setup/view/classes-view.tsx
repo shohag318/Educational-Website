@@ -13,19 +13,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import LayersIcon from "@mui/icons-material/Layers";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
-import WbSunnyIcon from "@mui/icons-material/WbSunny";
-import WbTwilightIcon from "@mui/icons-material/WbTwilight";
-import PeopleOutlineIcon from "@mui/icons-material/PeopleOutlined";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
-import SearchIcon from "@mui/icons-material/Search";
-import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
-import ClassOutlinedIcon from "@mui/icons-material/ClassOutlined";
+import { AddIcon, LayersIcon, MenuBookIcon, EditIcon, DeleteOutlineIcon, WbSunnyIcon, WbTwilightIcon, PeopleOutlineIcon, CheckIcon, CloseIcon, SearchIcon, SchoolOutlinedIcon, ClassOutlinedIcon } from "@/components/iconify/mui-icons";
 import { AdminPageShell } from "@/sections/session/component/admin-page-shell";
 import { SessionPageHeader } from "@/sections/session/component/session-page-header";
 import { AppCard } from "@/components/card/app-card";

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Printer, X, CheckCircle2, Building2, ShieldCheck, Download } from "lucide-react";
+import { Printer, X, CheckCircle2, Building2, ShieldCheck, Download } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import { FeeCollectionVoucher, amountToWordsBD } from "@/sections/fees/schema/collection-store";
 import { MONTHS } from "@/sections/fees/component/monthly-fee-template";

@@ -6,6 +6,8 @@ export { TableNoData } from "./table/table-no-data";
 export { NoDataFound } from "./table/no-data-found";
 export { Iconify } from "./iconify/iconify";
 export type { IconifyProps } from "./iconify/iconify";
+export type { SvgIconComponent, MuiIconifyProps } from "./iconify/mui-icons";
+export type { IconifyLucideProps } from "./iconify/lucide";
 export { AppCard } from "./card/app-card";
 export { ConfirmDialog } from "./dialog/confirm-dialog";
 export { AppTextField } from "./text-field/app-text-field";

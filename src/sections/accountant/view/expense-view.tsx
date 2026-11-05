@@ -17,7 +17,7 @@ import {
   DollarSign,
   Printer,
   ShieldCheck,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { AccountantNavHeader } from "@/sections/accountant/component/accountant-nav-header";
 import { DatePicker } from "@/components/date-picker/date-picker";
 import {

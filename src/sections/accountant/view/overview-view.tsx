@@ -19,7 +19,7 @@ import {
   FileSpreadsheet,
   Receipt,
   Scale,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { AccountantNavHeader } from "@/sections/accountant/component/accountant-nav-header";
 import {
   getStoredIncomes,

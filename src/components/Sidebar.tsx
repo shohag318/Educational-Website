@@ -9,54 +9,78 @@ import {
   getAuthSession,
   AuthSession,
 } from "@/lib/authSession";
-import {
-  School,
-  Users,
-  Calendar,
-  BookOpen,
-  Sliders,
-  TableProperties,
-  CheckCircle,
-  FileEdit,
-  Send,
-  FileSpreadsheet,
-  Award,
-  AlertTriangle,
-  LayoutDashboard,
-  ShieldCheck,
-  FileBarChart,
-  Contact,
-  CreditCard,
-  CalendarCheck,
-  FileText,
-  LayoutGrid,
-  Receipt,
-  HandCoins,
-  Banknote,
-  Landmark,
-  ChevronDown,
-  ChevronRight,
-  GraduationCap,
-  Layers,
-  Sparkles,
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  UserCheck,
-  UserX,
-  ShieldAlert,
-  Settings,
-  Building2,
-  CalendarX2,
-  Download,
-  Boxes,
-  Barcode,
-  Wrench,
-  MessageSquare,
-  CalendarRange,
-  PlusCircle,
-  FileSignature,
-} from "lucide-react";
+import { Iconify } from "@/components/iconify/iconify";
+
+/** Fluent Color — https://icon-sets.iconify.design/fluent-color/ */
+const FI = {
+  superAdmin: "fluent-color:lock-shield-24",
+  overview: "fluent-color:board-24",
+  sessions: "fluent-color:calendar-24",
+  classes: "fluent-color:building-24",
+  subjects: "fluent-color:book-open-24",
+  createSession: "fluent-color:add-circle-24",
+  sessionManager: "fluent-color:calendar-checkmark-24",
+  students: "fluent-color:people-community-24",
+  enrollment: "fluent-color:people-24",
+  subjectAlloc: "fluent-color:library-24",
+  profiles: "fluent-color:contact-card-24",
+  attendance: "fluent-color:calendar-clock-24",
+  studentStatus: "fluent-color:person-warning-24",
+  results: "fluent-color:trophy-24",
+  grading: "fluent-color:options-24",
+  examConfig: "fluent-color:calendar-edit-24",
+  examRoutine: "fluent-color:calendar-data-bar-24",
+  markEntry: "fluent-color:table-24",
+  processReview: "fluent-color:checkmark-circle-24",
+  publish: "fluent-color:shield-checkmark-24",
+  tabulation: "fluent-color:document-text-24",
+  glance: "fluent-color:chart-multiple-24",
+  reportCards: "fluent-color:ribbon-star-24",
+  failList: "fluent-color:warning-24",
+  sms: "fluent-color:send-24",
+  chat: "fluent-color:chat-24",
+  fees: "fluent-color:receipt-24",
+  feeSetup: "fluent-color:coin-multiple-24",
+  waiver: "fluent-color:star-24",
+  collection: "fluent-color:savings-24",
+  cash: "fluent-color:coin-multiple-24",
+  ledger: "fluent-color:document-folder-24",
+  absentFine: "fluent-color:calendar-cancel-24",
+  accounts: "fluent-color:building-government-24",
+  accountsOverview: "fluent-color:data-bar-vertical-ascending-24",
+  income: "fluent-color:data-trending-24",
+  expense: "fluent-color:data-area-24",
+  payroll: "fluent-color:people-team-24",
+  trial: "fluent-color:clipboard-task-24",
+  downloads: "fluent-color:arrow-square-down-24",
+  banbeis: "fluent-color:table-24",
+  admission: "fluent-color:form-24",
+  academicCal: "fluent-color:calendar-24",
+  register: "fluent-color:book-contacts-24",
+  idCards: "fluent-color:scan-person-24",
+  transcripts: "fluent-color:certificate-24",
+  seatPlan: "fluent-color:apps-24",
+  settings: "fluent-color:settings-24",
+  institution: "fluent-color:building-home-24",
+  staff: "fluent-color:person-available-24",
+  signatures: "fluent-color:clipboard-text-edit-24",
+  rolesGroup: "fluent-color:shield-checkmark-24",
+  roles: "fluent-color:shield-24",
+  userAccounts: "fluent-color:people-list-24",
+  teacherAccess: "fluent-color:person-key-24",
+  audit: "fluent-color:history-24",
+  assets: "fluent-color:toolbox-24",
+  assetRegister: "fluent-color:building-store-24",
+  rooms: "fluent-color:building-multiple-24",
+  maintenance: "fluent-color:wrench-24",
+  depreciation: "fluent-color:data-pie-24",
+  chevronRight: "lucide:chevron-right",
+  chevronDown: "lucide:chevron-down",
+} as const;
+
+function NavIcon({ icon, size = 18 }: { icon: string; size?: number }) {
+  return <Iconify icon={icon} width={size} sx={{ flexShrink: 0, display: "block" }} />;
+}
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -129,14 +153,14 @@ export function Sidebar() {
             href="/super-admin"
             className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all ${
               pathname?.startsWith("/super-admin")
-                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-indigo-400 shadow-md shadow-indigo-900/50"
+                ? "bg-gradient-to-r from-indigo-400/30 via-purple-400/10 to-transparent text-white border-indigo-300/40 shadow-[inset_3px_0_0_0_#a5b4fc]"
                 : "bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700/80 hover:border-indigo-500/50"
             }`}
             title="Super Admin Dashboard: Manage institutions, assign credentials, portal links"
           >
             <div className="flex items-center space-x-2.5 min-w-0">
               <div className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
-                <ShieldAlert className="w-3.5 h-3.5" />
+                <NavIcon icon={FI.superAdmin} size={18} />
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-bold truncate">Super Admin</div>
@@ -166,12 +190,12 @@ export function Sidebar() {
               href="/"
               className={`flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg transition-colors font-medium ${
                 isLinkActive("/")
-                  ? "bg-emerald-600 text-white shadow-sm font-semibold"
+                  ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-semibold shadow-[inset_3px_0_0_0_#6ee7b7]"
                   : "text-slate-300 hover:bg-slate-800 hover:text-white"
               }`}
             >
-              <LayoutDashboard className="w-4 h-4 shrink-0 text-emerald-400" />
-              <span>Overview</span>
+              <NavIcon icon={FI.overview} size={18} />
+                      <span>Overview</span>
             </Link>
 
             {/* Session Control Module (Sub-group) - AT FIRST POSITION */}
@@ -183,13 +207,13 @@ export function Sidebar() {
                   className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group font-semibold cursor-pointer"
                 >
                   <div className="flex items-center space-x-2.5 min-w-0">
-                    <CalendarRange className="w-4 h-4 shrink-0 text-emerald-400" />
-                    <span className="truncate">Sessions</span>
+                    <NavIcon icon={FI.sessions} size={18} />
+                      <span>Sessions</span>
                   </div>
                   {collapsed["session-mod"] ? (
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                    <NavIcon icon={FI.chevronRight} size={14} />
                   ) : (
-                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                    <NavIcon icon={FI.chevronDown} size={14} />
                   )}
                 </button>
 
@@ -200,11 +224,11 @@ export function Sidebar() {
                       href="/setup/classes"
                       className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                         isLinkActive("/setup/classes")
-                          ? "bg-emerald-600 text-white font-medium"
+                          ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
-                      <School className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                      <NavIcon icon={FI.classes} size={15} />
                       <span>Classes & Sections</span>
                     </Link>
 
@@ -212,11 +236,11 @@ export function Sidebar() {
                       href="/setup/subject-mapping"
                       className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                         isLinkActive("/setup/subject-mapping")
-                          ? "bg-emerald-600 text-white font-medium"
+                          ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
-                      <BookOpen className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                      <NavIcon icon={FI.subjects} size={15} />
                       <span>Subject Mapping</span>
                     </Link>
 
@@ -224,11 +248,11 @@ export function Sidebar() {
                       href="/session/create"
                       className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                         isLinkActive("/session/create")
-                          ? "bg-emerald-600 text-white font-medium"
+                          ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
-                      <PlusCircle className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+                      <NavIcon icon={FI.createSession} size={15} />
                       <span>Create Session</span>
                     </Link>
 
@@ -236,11 +260,11 @@ export function Sidebar() {
                       href="/session/manager"
                       className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                         isLinkActive("/session/manager") || isLinkActive("/session")
-                          ? "bg-emerald-600 text-white font-medium"
+                          ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
-                      <Calendar className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                      <NavIcon icon={FI.sessionManager} size={15} />
                       <span>Session Manager</span>
                     </Link>
                   </div>
@@ -257,13 +281,13 @@ export function Sidebar() {
                   className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group font-semibold"
                 >
                   <div className="flex items-center space-x-2.5 min-w-0">
-                    <GraduationCap className="w-4 h-4 shrink-0 text-sky-400" />
-                    <span className="truncate">Students</span>
+                    <NavIcon icon={FI.students} size={18} />
+                      <span>Students</span>
                   </div>
                   {collapsed["student-info-mod"] ? (
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                    <NavIcon icon={FI.chevronRight} size={14} />
                   ) : (
-                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                    <NavIcon icon={FI.chevronDown} size={14} />
                   )}
                 </button>
 
@@ -274,11 +298,11 @@ export function Sidebar() {
                       href="/setup/students"
                       className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                         isLinkActive("/setup/students")
-                          ? "bg-emerald-600 text-white font-medium"
+                          ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
-                      <Users className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                      <NavIcon icon={FI.enrollment} size={15} />
                       <span>Enrollment</span>
                     </Link>
 
@@ -286,11 +310,11 @@ export function Sidebar() {
                       href="/academic/subject-mapping"
                       className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                         isLinkActive("/academic/subject-mapping")
-                          ? "bg-emerald-600 text-white font-medium"
+                          ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
-                      <BookOpen className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                      <NavIcon icon={FI.subjectAlloc} size={15} />
                       <span>Subject Allocation</span>
                     </Link>
 
@@ -298,11 +322,11 @@ export function Sidebar() {
                       href="/student/profile"
                       className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                         isLinkActive("/student/profile")
-                          ? "bg-emerald-600 text-white font-medium shadow-2xs"
+                          ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
-                      <UserCheck className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+                      <NavIcon icon={FI.profiles} size={15} />
                       <span>Student Profiles</span>
                     </Link>
 
@@ -310,11 +334,11 @@ export function Sidebar() {
                       href="/student/attendance"
                       className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                         isLinkActive("/student/attendance")
-                          ? "bg-emerald-600 text-white font-medium"
+                          ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
-                      <CalendarCheck className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                      <NavIcon icon={FI.attendance} size={15} />
                       <span>Attendance</span>
                     </Link>
 
@@ -322,11 +346,11 @@ export function Sidebar() {
                       href="/student/status"
                       className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                         isLinkActive("/student/status")
-                          ? "bg-emerald-600 text-white font-medium"
+                          ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
-                      <UserX className="w-3.5 h-3.5 shrink-0 text-rose-400" />
+                      <NavIcon icon={FI.studentStatus} size={15} />
                       <span>Student Status</span>
                     </Link>
                   </div>
@@ -347,13 +371,13 @@ export function Sidebar() {
             className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group font-semibold"
           >
             <div className="flex items-center space-x-2.5 min-w-0">
-              <Award className="w-4 h-4 shrink-0 text-emerald-400" />
-              <span className="truncate">Results & Exams</span>
+              <NavIcon icon={FI.results} size={18} />
+                      <span>Results & Exams</span>
             </div>
             {collapsed["result-mod"] ? (
-              <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+              <NavIcon icon={FI.chevronRight} size={14} />
             ) : (
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+              <NavIcon icon={FI.chevronDown} size={14} />
             )}
           </button>
 
@@ -368,9 +392,9 @@ export function Sidebar() {
               >
                 <span className="truncate text-slate-200">Phase 1: Rules</span>
                 {collapsed["phase-1"] ? (
-                  <ChevronRight className="w-3 h-3 text-slate-500 group-hover:text-slate-300 shrink-0" />
+                  <NavIcon icon={FI.chevronRight} size={12} />
                 ) : (
-                  <ChevronDown className="w-3 h-3 text-slate-500 group-hover:text-slate-300 shrink-0" />
+                  <NavIcon icon={FI.chevronDown} size={12} />
                 )}
               </button>
 
@@ -380,12 +404,12 @@ export function Sidebar() {
                     href="/academic/rules"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/academic/rules")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <Sliders className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                    <span>Grading Rules</span>
+                    <NavIcon icon={FI.grading} size={15} />
+                      <span>Grading Rules</span>
                   </Link>
                 </div>
               )}
@@ -400,9 +424,9 @@ export function Sidebar() {
               >
                 <span className="truncate text-slate-200">Phase 2: Setup</span>
                 {collapsed["phase-2"] ? (
-                  <ChevronRight className="w-3 h-3 text-slate-500 group-hover:text-slate-300 shrink-0" />
+                  <NavIcon icon={FI.chevronRight} size={12} />
                 ) : (
-                  <ChevronDown className="w-3 h-3 text-slate-500 group-hover:text-slate-300 shrink-0" />
+                  <NavIcon icon={FI.chevronDown} size={12} />
                 )}
               </button>
 
@@ -412,24 +436,24 @@ export function Sidebar() {
                     href="/setup/exams"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/setup/exams")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <Calendar className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                    <span>Exam Configuration</span>
+                    <NavIcon icon={FI.examConfig} size={15} />
+                      <span>Exam Configuration</span>
                   </Link>
 
                   <Link
                     href="/setup/exam-routine"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/setup/exam-routine")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <CalendarRange className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                    <span>Exam Routine</span>
+                    <NavIcon icon={FI.examRoutine} size={15} />
+                      <span>Exam Routine</span>
                   </Link>
                 </div>
               )}
@@ -444,9 +468,9 @@ export function Sidebar() {
               >
                 <span className="truncate text-slate-200">Phase 3: Mark Entry</span>
                 {collapsed["phase-3"] ? (
-                  <ChevronRight className="w-3 h-3 text-slate-500 group-hover:text-slate-300 shrink-0" />
+                  <NavIcon icon={FI.chevronRight} size={12} />
                 ) : (
-                  <ChevronDown className="w-3 h-3 text-slate-500 group-hover:text-slate-300 shrink-0" />
+                  <NavIcon icon={FI.chevronDown} size={12} />
                 )}
               </button>
 
@@ -456,24 +480,24 @@ export function Sidebar() {
                     href="/marks/entry"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/marks/entry")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <TableProperties className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                    <span>Mark Entry</span>
+                    <NavIcon icon={FI.markEntry} size={15} />
+                      <span>Mark Entry</span>
                   </Link>
 
                   <Link
                     href="/results/review"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/results/review")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <CheckCircle className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                    <span>Process & Review</span>
+                    <NavIcon icon={FI.processReview} size={15} />
+                      <span>Process & Review</span>
                   </Link>
                 </div>
               )}
@@ -488,9 +512,9 @@ export function Sidebar() {
               >
                 <span className="truncate text-slate-200">Phase 4: Reports</span>
                 {collapsed["phase-4"] ? (
-                  <ChevronRight className="w-3 h-3 text-slate-500 group-hover:text-slate-300 shrink-0" />
+                  <NavIcon icon={FI.chevronRight} size={12} />
                 ) : (
-                  <ChevronDown className="w-3 h-3 text-slate-500 group-hover:text-slate-300 shrink-0" />
+                  <NavIcon icon={FI.chevronDown} size={12} />
                 )}
               </button>
 
@@ -500,60 +524,60 @@ export function Sidebar() {
                     href="/results/publish"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/results/publish")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                    <span>Publish Results</span>
+                    <NavIcon icon={FI.publish} size={15} />
+                      <span>Publish Results</span>
                   </Link>
 
                   <Link
                     href="/reports/tabulation"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/reports/tabulation")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <FileSpreadsheet className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                    <span>Tabulation Sheet</span>
+                    <NavIcon icon={FI.tabulation} size={15} />
+                      <span>Tabulation Sheet</span>
                   </Link>
 
                   <Link
                     href="/reports/at-a-glance"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/reports/at-a-glance")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <FileBarChart className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                    <span>At a Glance</span>
+                    <NavIcon icon={FI.glance} size={15} />
+                      <span>At a Glance</span>
                   </Link>
 
                   <Link
                     href="/reports/marksheet"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/reports/marksheet")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <Award className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                    <span>Report Cards</span>
+                    <NavIcon icon={FI.reportCards} size={15} />
+                      <span>Report Cards</span>
                   </Link>
 
                   <Link
                     href="/reports/fail-list"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/reports/fail-list")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                    <span>Failed Students</span>
+                    <NavIcon icon={FI.failList} size={15} />
+                      <span>Failed Students</span>
                   </Link>
                 </div>
               )}
@@ -575,13 +599,13 @@ export function Sidebar() {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group font-semibold cursor-pointer"
               >
                 <div className="flex items-center space-x-2.5 min-w-0">
-                  <Send className="w-4 h-4 shrink-0 text-violet-400" />
-                  <span className="truncate">SMS & Notices</span>
+                  <NavIcon icon={FI.sms} size={18} />
+                      <span>SMS & Notices</span>
                 </div>
                 {collapsed["sms-mod"] ? (
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                  <NavIcon icon={FI.chevronRight} size={14} />
                 ) : (
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                  <NavIcon icon={FI.chevronDown} size={14} />
                 )}
               </button>
 
@@ -592,24 +616,24 @@ export function Sidebar() {
                     href="/notifications/sms"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/notifications/sms") || isLinkActive("/sms/result")
-                        ? "bg-violet-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-violet-400/30 via-violet-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#c4b5fd]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <Send className="w-3.5 h-3.5 shrink-0 text-violet-400" />
-                    <span>Result SMS</span>
+                    <NavIcon icon={FI.sms} size={15} />
+                      <span>Result SMS</span>
                   </Link>
 
                   <Link
                     href="/sms/custom"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/sms/custom")
-                        ? "bg-violet-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-violet-400/30 via-violet-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#c4b5fd]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <MessageSquare className="w-3.5 h-3.5 shrink-0 text-violet-400" />
-                    <span>Custom SMS</span>
+                    <NavIcon icon={FI.chat} size={15} />
+                      <span>Custom SMS</span>
                   </Link>
                 </div>
               )}
@@ -629,13 +653,13 @@ export function Sidebar() {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group font-semibold"
               >
                 <div className="flex items-center space-x-2.5 min-w-0">
-                  <Receipt className="w-4 h-4 shrink-0 text-amber-400" />
-                  <span className="truncate">Student Fees</span>
+                  <NavIcon icon={FI.fees} size={18} />
+                      <span>Student Fees</span>
                 </div>
                 {collapsed["student-fee-mod"] ? (
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                  <NavIcon icon={FI.chevronRight} size={14} />
                 ) : (
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                  <NavIcon icon={FI.chevronDown} size={14} />
                 )}
               </button>
 
@@ -646,24 +670,24 @@ export function Sidebar() {
                     href="/fees"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/fees")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <CreditCard className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                    <span>Fee Setup</span>
+                    <NavIcon icon={FI.feeSetup} size={15} />
+                      <span>Fee Setup</span>
                   </Link>
 
                   <Link
                     href="/fees/waiver"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/fees/waiver")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <Sparkles className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                    <span className="truncate">Waivers & Scholarships</span>
+                    <NavIcon icon={FI.waiver} size={15} />
+                      <span>Waivers & Scholarships</span>
                   </Link>
                 </div>
               )}
@@ -683,13 +707,13 @@ export function Sidebar() {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group font-semibold cursor-pointer"
               >
                 <div className="flex items-center space-x-2.5 min-w-0">
-                  <HandCoins className="w-4 h-4 shrink-0 text-emerald-400" />
-                  <span className="truncate">Fee Collection</span>
+                  <NavIcon icon={FI.collection} size={18} />
+                      <span>Fee Collection</span>
                 </div>
                 {collapsed["manual-fee-mod"] ? (
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                  <NavIcon icon={FI.chevronRight} size={14} />
                 ) : (
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                  <NavIcon icon={FI.chevronDown} size={14} />
                 )}
               </button>
 
@@ -700,36 +724,36 @@ export function Sidebar() {
                     href="/fees/collection"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/fees/collection")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <Banknote className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                    <span>Cash Counter</span>
+                    <NavIcon icon={FI.cash} size={15} />
+                      <span>Cash Counter</span>
                   </Link>
 
                   <Link
                     href="/fees/collection/history"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/fees/collection/history")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <FileText className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
-                    <span className="truncate">Receipts & Ledger</span>
+                    <NavIcon icon={FI.ledger} size={15} />
+                      <span>Receipts & Ledger</span>
                   </Link>
 
                   <Link
                     href="/fees/absent-fine"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/fees/absent-fine")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <CalendarX2 className="w-3.5 h-3.5 shrink-0 text-rose-400" />
-                    <span className="truncate">Absent Fines</span>
+                    <NavIcon icon={FI.absentFine} size={15} />
+                      <span>Absent Fines</span>
                   </Link>
                 </div>
               )}
@@ -749,13 +773,13 @@ export function Sidebar() {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group font-semibold cursor-pointer"
               >
                 <div className="flex items-center space-x-2.5 min-w-0">
-                  <Landmark className="w-4 h-4 shrink-0 text-emerald-400" />
-                  <span className="truncate">Accounts & Finance</span>
+                  <NavIcon icon={FI.accounts} size={18} />
+                      <span>Accounts & Finance</span>
                 </div>
                 {collapsed["accountant-mod"] ? (
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                  <NavIcon icon={FI.chevronRight} size={14} />
                 ) : (
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                  <NavIcon icon={FI.chevronDown} size={14} />
                 )}
               </button>
 
@@ -766,60 +790,60 @@ export function Sidebar() {
                     href="/accountant"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/accountant")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <BarChart3 className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                    <span>Overview & Ledger</span>
+                    <NavIcon icon={FI.accountsOverview} size={15} />
+                      <span>Overview & Ledger</span>
                   </Link>
 
                   <Link
                     href="/accountant/income"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/accountant/income")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <TrendingUp className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
-                    <span>Income</span>
+                    <NavIcon icon={FI.income} size={15} />
+                      <span>Income</span>
                   </Link>
 
                   <Link
                     href="/accountant/expense"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/accountant/expense")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <TrendingDown className="w-3.5 h-3.5 shrink-0 text-rose-400" />
-                    <span>Expenses</span>
+                    <NavIcon icon={FI.expense} size={15} />
+                      <span>Expenses</span>
                   </Link>
 
                   <Link
                     href="/accountant/payroll"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/accountant/payroll")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <Users className="w-3.5 h-3.5 shrink-0 text-sky-400" />
-                    <span>Payroll</span>
+                    <NavIcon icon={FI.payroll} size={15} />
+                      <span>Payroll</span>
                   </Link>
 
                   <Link
                     href="/accountant/audit"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/accountant/audit")
-                        ? "bg-emerald-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-emerald-400/25 via-emerald-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#6ee7b7]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                    <span>Trial Balance</span>
+                    <NavIcon icon={FI.trial} size={15} />
+                      <span>Trial Balance</span>
                   </Link>
                 </div>
               )}
@@ -839,13 +863,13 @@ export function Sidebar() {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group font-semibold cursor-pointer"
               >
                 <div className="flex items-center space-x-2.5 min-w-0">
-                  <Download className="w-4 h-4 shrink-0 text-amber-400" />
-                  <span className="truncate">Downloads</span>
+                  <NavIcon icon={FI.downloads} size={18} />
+                      <span>Downloads</span>
                 </div>
                 {collapsed["download-mod"] ? (
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                  <NavIcon icon={FI.chevronRight} size={14} />
                 ) : (
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                  <NavIcon icon={FI.chevronDown} size={14} />
                 )}
               </button>
 
@@ -856,84 +880,84 @@ export function Sidebar() {
                     href="/download/banbeis"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/download/banbeis")
-                        ? "bg-amber-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-amber-400/30 via-amber-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#fcd34d]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <FileSpreadsheet className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                    <span>BANBEIS Census</span>
+                    <NavIcon icon={FI.banbeis} size={15} />
+                      <span>BANBEIS Census</span>
                   </Link>
 
                   <Link
                     href="/download/admission-form"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/download/admission-form")
-                        ? "bg-amber-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-amber-400/30 via-amber-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#fcd34d]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <FileText className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                    <span>Admission Form</span>
+                    <NavIcon icon={FI.admission} size={15} />
+                      <span>Admission Form</span>
                   </Link>
 
                   <Link
                     href="/download/academic-calendar"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/download/academic-calendar")
-                        ? "bg-amber-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-amber-400/30 via-amber-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#fcd34d]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <CalendarRange className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                    <span>Academic Calendar</span>
+                    <NavIcon icon={FI.academicCal} size={15} />
+                      <span>Academic Calendar</span>
                   </Link>
 
                   <Link
                     href="/setup/student-info"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/setup/student-info")
-                        ? "bg-amber-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-amber-400/30 via-amber-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#fcd34d]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <Contact className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                    <span>Student Register</span>
+                    <NavIcon icon={FI.register} size={15} />
+                      <span>Student Register</span>
                   </Link>
 
                   <Link
                     href="/student/id-cards"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/student/id-cards")
-                        ? "bg-amber-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-amber-400/30 via-amber-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#fcd34d]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <CreditCard className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                    <span>ID Cards</span>
+                    <NavIcon icon={FI.idCards} size={15} />
+                      <span>ID Cards</span>
                   </Link>
 
                   <Link
                     href="/student/transcript"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/student/transcript")
-                        ? "bg-amber-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-amber-400/30 via-amber-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#fcd34d]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <FileText className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                    <span>Transcripts</span>
+                    <NavIcon icon={FI.transcripts} size={15} />
+                      <span>Transcripts</span>
                   </Link>
 
                   <Link
                     href="/student/seat-plan"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/student/seat-plan")
-                        ? "bg-amber-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-amber-400/30 via-amber-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#fcd34d]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <LayoutGrid className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                    <span>Seat Plan</span>
+                    <NavIcon icon={FI.seatPlan} size={15} />
+                      <span>Seat Plan</span>
                   </Link>
                 </div>
               )}
@@ -952,13 +976,13 @@ export function Sidebar() {
               className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group font-semibold cursor-pointer"
             >
               <div className="flex items-center space-x-2.5 min-w-0">
-                <Settings className="w-4 h-4 shrink-0 text-cyan-400" />
-                <span className="truncate">Settings</span>
+                <NavIcon icon={FI.settings} size={18} />
+                      <span>Settings</span>
               </div>
               {collapsed["setting-mod"] ? (
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                <NavIcon icon={FI.chevronRight} size={14} />
               ) : (
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                <NavIcon icon={FI.chevronDown} size={14} />
               )}
             </button>
 
@@ -969,36 +993,36 @@ export function Sidebar() {
                   href="/settings"
                   className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                     isLinkActive("/settings")
-                      ? "bg-cyan-700 text-white font-medium"
+                      ? "bg-gradient-to-r from-cyan-400/25 via-cyan-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#67e8f9]"
                       : "text-slate-300 hover:bg-slate-800 hover:text-white"
                   }`}
                 >
-                  <Building2 className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
-                  <span>Institution Profile</span>
+                  <NavIcon icon={FI.institution} size={15} />
+                      <span>Institution Profile</span>
                 </Link>
 
                 <Link
                   href="/settings/staff"
                   className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                     isLinkActive("/settings/staff") || isLinkActive("/settings/teachers")
-                      ? "bg-cyan-700 text-white font-medium"
+                      ? "bg-gradient-to-r from-cyan-400/25 via-cyan-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#67e8f9]"
                       : "text-slate-300 hover:bg-slate-800 hover:text-white"
                   }`}
                 >
-                  <UserCheck className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
-                  <span>Teachers & Staff</span>
+                  <NavIcon icon={FI.staff} size={15} />
+                      <span>Teachers & Staff</span>
                 </Link>
 
                 <Link
                   href="/settings/signatures"
                   className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                     isLinkActive("/settings/signatures")
-                      ? "bg-cyan-700 text-white font-medium"
+                      ? "bg-gradient-to-r from-cyan-400/25 via-cyan-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#67e8f9]"
                       : "text-slate-300 hover:bg-slate-800 hover:text-white"
                   }`}
                 >
-                  <FileSignature className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
-                  <span>Signatures</span>
+                  <NavIcon icon={FI.signatures} size={15} />
+                      <span>Signatures</span>
                 </Link>
 
                 {/* User Role Sub-group */}
@@ -1010,13 +1034,13 @@ export function Sidebar() {
                       className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group font-semibold cursor-pointer"
                     >
                       <div className="flex items-center space-x-2 min-w-0">
-                        <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-purple-400" />
-                        <span className="truncate">User Roles</span>
+                        <NavIcon icon={FI.rolesGroup} size={15} />
+                      <span>User Roles</span>
                       </div>
                       {collapsed["user-role-mod"] ? (
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                        <NavIcon icon={FI.chevronRight} size={14} />
                       ) : (
-                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                        <NavIcon icon={FI.chevronDown} size={14} />
                       )}
                     </button>
 
@@ -1026,48 +1050,48 @@ export function Sidebar() {
                           href="/user-role/roles"
                           className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                             isLinkActive("/user-role/roles")
-                              ? "bg-purple-700 text-white font-medium"
+                              ? "bg-gradient-to-r from-purple-400/30 via-fuchsia-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#e9d5ff]"
                               : "text-slate-300 hover:bg-slate-800 hover:text-white"
                           }`}
                         >
-                          <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-blue-400" />
-                          <span>Roles & Permissions</span>
+                          <NavIcon icon={FI.roles} size={15} />
+                      <span>Roles & Permissions</span>
                         </Link>
 
                         <Link
                           href="/user-role"
                           className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                             isLinkActive("/user-role")
-                              ? "bg-purple-700 text-white font-medium"
+                              ? "bg-gradient-to-r from-purple-400/30 via-fuchsia-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#e9d5ff]"
                               : "text-slate-300 hover:bg-slate-800 hover:text-white"
                           }`}
                         >
-                          <Users className="w-3.5 h-3.5 shrink-0 text-purple-400" />
-                          <span>User Accounts</span>
+                          <NavIcon icon={FI.userAccounts} size={15} />
+                      <span>User Accounts</span>
                         </Link>
 
                         <Link
                           href="/user-role/delegation"
                           className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                             isLinkActive("/user-role/delegation")
-                              ? "bg-purple-700 text-white font-medium"
+                              ? "bg-gradient-to-r from-purple-400/30 via-fuchsia-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#e9d5ff]"
                               : "text-slate-300 hover:bg-slate-800 hover:text-white"
                           }`}
                         >
-                          <UserCheck className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                          <span>Teacher Access</span>
+                          <NavIcon icon={FI.teacherAccess} size={15} />
+                      <span>Teacher Access</span>
                         </Link>
 
                         <Link
                           href="/user-role/audit-logs"
                           className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                             isLinkActive("/user-role/audit-logs")
-                              ? "bg-purple-700 text-white font-medium"
+                              ? "bg-gradient-to-r from-purple-400/30 via-fuchsia-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#e9d5ff]"
                               : "text-slate-300 hover:bg-slate-800 hover:text-white"
                           }`}
                         >
-                          <ShieldAlert className="w-3.5 h-3.5 shrink-0 text-rose-400" />
-                          <span>Audit Logs</span>
+                          <NavIcon icon={FI.audit} size={15} />
+                      <span>Audit Logs</span>
                         </Link>
                       </div>
                     )}
@@ -1090,13 +1114,13 @@ export function Sidebar() {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group font-semibold cursor-pointer"
               >
                 <div className="flex items-center space-x-2.5 min-w-0">
-                  <Boxes className="w-4 h-4 shrink-0 text-cyan-400" />
-                  <span className="truncate">Assets</span>
+                  <NavIcon icon={FI.assets} size={18} />
+                      <span>Assets</span>
                 </div>
                 {collapsed["assets-mod"] ? (
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                  <NavIcon icon={FI.chevronRight} size={14} />
                 ) : (
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-white shrink-0" />
+                  <NavIcon icon={FI.chevronDown} size={14} />
                 )}
               </button>
 
@@ -1106,48 +1130,48 @@ export function Sidebar() {
                     href="/assets"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/assets")
-                        ? "bg-cyan-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-sky-400/25 via-cyan-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#7dd3fc]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <Boxes className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
-                    <span>Asset Register</span>
+                    <NavIcon icon={FI.assetRegister} size={15} />
+                      <span>Asset Register</span>
                   </Link>
 
                   <Link
                     href="/assets/categories"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/assets/categories")
-                        ? "bg-cyan-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-sky-400/25 via-cyan-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#7dd3fc]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <Building2 className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
-                    <span>Rooms & Locations</span>
+                    <NavIcon icon={FI.rooms} size={15} />
+                      <span>Rooms & Locations</span>
                   </Link>
 
                   <Link
                     href="/assets/maintenance"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/assets/maintenance")
-                        ? "bg-cyan-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-sky-400/25 via-cyan-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#7dd3fc]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <Wrench className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                    <span>Maintenance</span>
+                    <NavIcon icon={FI.maintenance} size={15} />
+                      <span>Maintenance</span>
                   </Link>
 
                   <Link
                     href="/assets/depreciation"
                     className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md transition-colors ${
                       isLinkActive("/assets/depreciation")
-                        ? "bg-cyan-600 text-white font-medium"
+                        ? "bg-gradient-to-r from-sky-400/25 via-cyan-400/10 to-transparent text-white font-medium shadow-[inset_3px_0_0_0_#7dd3fc]"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
-                    <BarChart3 className="w-3.5 h-3.5 shrink-0 text-violet-400" />
-                    <span>Depreciation</span>
+                    <NavIcon icon={FI.depreciation} size={15} />
+                      <span>Depreciation</span>
                   </Link>
                 </div>
               )}

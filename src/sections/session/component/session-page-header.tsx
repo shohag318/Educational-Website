@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import { AddCircleOutlineIcon } from "@/components/iconify/mui-icons";
 import { CustomBreadcrumbs } from "@/components";
 import { PATHS } from "@/config-global";
 

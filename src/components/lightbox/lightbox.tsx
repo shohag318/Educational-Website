@@ -1,8 +1,7 @@
 "use client";
 
 import { Dialog, IconButton } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-
+import { CloseIcon } from "@/components/iconify/mui-icons";
 interface LightboxProps {
   open: boolean;
   src?: string;

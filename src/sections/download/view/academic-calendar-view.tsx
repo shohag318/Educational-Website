@@ -34,7 +34,7 @@ import {
   Building2,
   Bookmark,
   Share2,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { DownloadNavHeader } from "@/sections/download/component/download-nav-header";
 import { DatePicker } from "@/components/date-picker/date-picker";
 import { AppButton } from "@/components/button/app-button";

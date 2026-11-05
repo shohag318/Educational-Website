@@ -19,7 +19,7 @@ import {
   Landmark,
   Layers,
   ArrowRight,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { AccountantNavHeader } from "@/sections/accountant/component/accountant-nav-header";
 import {
   AuditRecord,

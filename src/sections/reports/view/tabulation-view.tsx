@@ -2,7 +2,7 @@
 
 import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState } from "react";
-import { FileSpreadsheet, Printer, Filter, RotateCcw } from "lucide-react";
+import { FileSpreadsheet, Printer, Filter, RotateCcw } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import { SessionSelect } from "@/components/SessionSelect";
 import { ResultNavHeader } from "@/sections/results/component/result-nav-header";

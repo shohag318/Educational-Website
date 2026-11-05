@@ -25,7 +25,7 @@ import {
   Check,
   Receipt,
   Save,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import { getScopedStorageKey, TENANT_SWITCH_EVENT } from "@/lib/clientTenant";
 

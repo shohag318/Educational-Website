@@ -36,7 +36,7 @@ import {
   Dice5,
   LogIn,
   ChevronDown,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { saveStoredSchoolInfo, DEFAULT_SCHOOL_INFO } from "@/lib/settingsStore";
 import {
   isInstitutionLoggedIn,

@@ -4,11 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppBar, Box, Chip, IconButton, Stack, Toolbar, Typography } from "@mui/material";
-import SettingsIcon from "@mui/icons-material/Settings";
-import ShieldIcon from "@mui/icons-material/GppMaybe";
-import LogoutIcon from "@mui/icons-material/Logout";
-import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import MenuIcon from "@mui/icons-material/Menu";
+import { SettingsIcon, ShieldIcon, LogoutIcon, VerifiedUserIcon, MenuIcon } from "@/components/iconify/mui-icons";
 import { getStoredSchoolInfo, SchoolBasicInfo, SETTINGS_UPDATED_EVENT, DEFAULT_SCHOOL_INFO } from "@/utils/settings-store";
 import {
   isInstitutionLoggedIn,

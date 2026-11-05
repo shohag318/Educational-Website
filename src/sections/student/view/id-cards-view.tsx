@@ -25,7 +25,7 @@ import {
   Trash2,
   CheckCircle2,
   Image as ImageIcon,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
 import { DownloadNavHeader } from "@/sections/download/component/download-nav-header";

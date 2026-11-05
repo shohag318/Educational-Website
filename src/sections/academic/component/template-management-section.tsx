@@ -25,7 +25,7 @@ import {
   AlertCircle,
   FileSpreadsheet,
   ExternalLink,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 
 export interface TemplateItemInput {
   subjectId: string;

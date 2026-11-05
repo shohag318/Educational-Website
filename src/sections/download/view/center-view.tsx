@@ -11,7 +11,7 @@ import {
   CreditCard,
   LayoutGrid,
   CalendarRange,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { DownloadNavHeader } from "@/sections/download/component/download-nav-header";
 import { getStoredSchoolInfo } from "@/lib/settingsStore";
 import { useEffect, useState } from "react";

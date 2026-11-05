@@ -1,10 +1,7 @@
 "use client";
 
 import { Box, Stack, Tooltip, Typography } from "@mui/material";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import ImageIcon from "@mui/icons-material/Image";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-
+import { InsertDriveFileIcon, ImageIcon, PictureAsPdfIcon } from "@/components/iconify/mui-icons";
 interface FileThumbnailProps {
   file: File | string;
   tooltip?: boolean;

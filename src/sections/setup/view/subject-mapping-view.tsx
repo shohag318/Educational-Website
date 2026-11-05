@@ -2,14 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
-import SyncIcon from "@mui/icons-material/Sync";
-import PeopleIcon from "@mui/icons-material/People";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { AutoAwesomeIcon, ContentCopyIcon, AddIcon, SearchIcon, DeleteOutlineIcon, SyncIcon, PeopleIcon, ArrowForwardIcon } from "@/components/iconify/mui-icons";
 import { AdminPageShell } from "@/sections/session/component/admin-page-shell";
 import { SessionPageHeader } from "@/sections/session/component/session-page-header";
 import {
@@ -398,7 +391,7 @@ export default function ClassSubjectMappingPage() {
     <Stack spacing={1.25}>
                   {filteredMappings.map((item) => {
         const selected = selectedMappingIds.includes(item.subjectId);
-                    return (
+              return (
           <Box
                         key={item.id}
             sx={{
@@ -445,8 +438,8 @@ export default function ClassSubjectMappingPage() {
               </Box>
             </Stack>
           </Box>
-                    );
-                  })}
+              );
+            })}
     </Stack>
   );
 
@@ -479,15 +472,15 @@ export default function ClassSubjectMappingPage() {
                 <Checkbox
                   checked={selectedMappingIds.includes(item.subjectId)}
                   onChange={(e) =>
-                    setSelectedMappingIds(
+                                setSelectedMappingIds(
                       e.target.checked ? [...selectedMappingIds, item.subjectId] : selectedMappingIds.filter((id) => id !== item.subjectId)
                     )
-                  }
-                />
+                              }
+                          />
               </TableCell>
               <TableCell>
                 <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                  {item.subject.subjectCode || "—"}
+                          {item.subject.subjectCode || "—"}
                 </Typography>
               </TableCell>
               <TableCell>
@@ -503,7 +496,7 @@ export default function ClassSubjectMappingPage() {
               </TableCell>
               <TableCell align="center" sx={{ display: { xs: "none", md: "table-cell" } }}>
                 <Label color={roleChipColor(item.subjectType)} variant="soft">
-                  {item.creditWeight.toFixed(2)}
+                          {item.creditWeight.toFixed(2)}
                 </Label>
               </TableCell>
               <TableCell align="right">

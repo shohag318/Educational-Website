@@ -15,7 +15,7 @@ import {
   FileSpreadsheet,
   X,
   Check,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import * as XLSX from "xlsx";
 import { AssetNavHeader } from "@/sections/assets/component/asset-nav-header";
 import {

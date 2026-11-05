@@ -33,7 +33,7 @@ import {
   ChevronRight,
   School,
   ExternalLink,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { SettingNavHeader } from "@/sections/settings/component/setting-nav-header";
 import { SessionSelect } from "@/components/SessionSelect";
 import { DatePicker } from "@/components/date-picker/date-picker";

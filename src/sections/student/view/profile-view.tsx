@@ -43,7 +43,7 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertCircle,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { getStoredWaivers, calculateStudentWaiver } from "@/sections/fees/schema/waiver-store";
 import { StudentAdminPageShell } from "@/sections/student/component/admin-page-shell";
 import { StudentPageHeader } from "@/sections/student/component/student-page-header";
@@ -66,18 +66,7 @@ import {
   Tab,
   Typography,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import PrintOutlinedIcon from "@mui/icons-material/PrintOutlined";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import PhotoCameraOutlinedIcon from "@mui/icons-material/PhotoCameraOutlined";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
-import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
-import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-
+import { SearchIcon, PrintOutlinedIcon, ChevronLeftIcon, ChevronRightIcon, PhotoCameraOutlinedIcon, PersonOutlinedIcon, EmojiEventsOutlinedIcon, ReceiptLongOutlinedIcon, NotificationsNoneOutlinedIcon, MenuBookOutlinedIcon, EditOutlinedIcon } from "@/components/iconify/mui-icons";
 const formatGroupName = (g?: string) => {
   if (!g) return "General";
   const upper = g.toUpperCase().replace(/\s+/g, "_");

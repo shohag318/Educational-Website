@@ -27,7 +27,7 @@ import {
   ChevronDown,
   Info,
   Check,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import * as XLSX from "xlsx";
 import { AssetNavHeader } from "@/sections/assets/component/asset-nav-header";
 import { DatePicker } from "@/components/date-picker/date-picker";

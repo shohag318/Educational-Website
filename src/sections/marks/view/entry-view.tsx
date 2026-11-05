@@ -25,7 +25,7 @@ import {
   X,
   XCircle,
   Printer,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import * as XLSX from "xlsx";
 import { MarkInputPdfModal } from "@/sections/marks/component/mark-input-pdf-modal";
 import { AppButton } from "@/components/button/app-button";

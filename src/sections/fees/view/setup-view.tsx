@@ -27,7 +27,7 @@ import {
   Phone,
   Layers,
   Settings2,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import * as XLSX from "xlsx";
 import {
   MonthlyFeeTemplate,

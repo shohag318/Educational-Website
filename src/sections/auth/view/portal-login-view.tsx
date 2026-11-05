@@ -18,7 +18,7 @@ import {
   ExternalLink,
   Sparkles,
   HelpCircle,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { saveStoredSchoolInfo, DEFAULT_SCHOOL_INFO } from "@/lib/settingsStore";
 import { saveAuthSession } from "@/lib/authSession";
 import { AppButton } from "@/components/button/app-button";

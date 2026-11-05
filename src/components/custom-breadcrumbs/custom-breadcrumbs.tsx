@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Box, Breadcrumbs, Link as MuiLink, Stack, Typography } from "@mui/material";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import { NavigateNextIcon } from "@/components/iconify/mui-icons";
 import type { ReactNode } from "react";
 
 export interface BreadcrumbLink {

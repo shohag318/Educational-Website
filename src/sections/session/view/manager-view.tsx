@@ -30,15 +30,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import PeopleIcon from "@mui/icons-material/People";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import EditIcon from "@mui/icons-material/Edit";
-import ArchiveIcon from "@mui/icons-material/Archive";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import SearchIcon from "@mui/icons-material/Search";
+import { CalendarMonthIcon, AddCircleOutlineIcon, PeopleIcon, EmojiEventsIcon, EditIcon, ArchiveIcon, DeleteOutlineIcon, CheckCircleIcon, SearchIcon } from "@/components/iconify/mui-icons";
 import { AdminPageShell } from "@/sections/session/component/admin-page-shell";
 import { SessionPageHeader } from "@/sections/session/component/session-page-header";
 import { AppCard } from "@/components/card/app-card";

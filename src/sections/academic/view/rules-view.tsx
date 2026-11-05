@@ -19,7 +19,7 @@ import {
   Link2,
   AlertTriangle,
   Bookmark,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import { SessionSelect } from "@/components/SessionSelect";
 import { TemplateManagementSection } from "@/sections/academic/component/template-management-section";

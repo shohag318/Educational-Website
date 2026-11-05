@@ -1,9 +1,7 @@
 "use client";
 
 import { Box, IconButton, Stack, Typography } from "@mui/material";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import { CloudUploadIcon, DeleteOutlineIcon, InsertDriveFileIcon } from "@/components/iconify/mui-icons";
 import { ChangeEvent, DragEvent, useCallback, useState } from "react";
 import { AppButton } from "@/components/button/app-button";
 

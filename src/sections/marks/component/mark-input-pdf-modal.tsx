@@ -7,7 +7,7 @@ import {
   FileText,
   CheckCircle,
   Edit3,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 
 export interface MarkInputPdfModalProps {

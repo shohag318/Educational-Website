@@ -18,7 +18,7 @@ import {
   RefreshCw,
   Minus,
   Plus,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import Link from "next/link";
 import { AppButton } from "@/components/button/app-button";
 import { SessionSelect } from "@/components/SessionSelect";

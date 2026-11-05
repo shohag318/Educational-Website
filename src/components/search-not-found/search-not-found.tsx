@@ -1,8 +1,7 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import SearchOffIcon from "@mui/icons-material/SearchOff";
-
+import { SearchOffIcon } from "@/components/iconify/mui-icons";
 interface SearchNotFoundProps {
   query?: string;
 }

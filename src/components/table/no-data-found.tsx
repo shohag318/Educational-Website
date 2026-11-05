@@ -10,7 +10,7 @@ interface NoDataFoundProps {
 
 /** Centered empty state: dashed border, light grey bg, icon + "No Data Found". */
 export function NoDataFound({
-  icon = "solar:inbox-bold-duotone",
+  icon = "lucide:inbox",
   sx,
 }: NoDataFoundProps) {
   return (

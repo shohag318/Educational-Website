@@ -27,7 +27,7 @@ import {
   Users,
   Clock,
   ExternalLink,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import * as XLSX from "xlsx";
 import { ManualFeeNavHeader } from "@/sections/fees/component/manual-fee-nav-header";
 import { FeeCollectionCounterModal } from "@/sections/fees/component/fee-collection-counter-modal";

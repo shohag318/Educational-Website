@@ -3,11 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { SvgIconComponent } from "@mui/icons-material";
-import SchoolIcon from "@mui/icons-material/School";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
+import type { SvgIconComponent } from "@/components/iconify/mui-icons";
+import { SchoolIcon, CalendarMonthIcon, CloseOutlinedIcon, EventAvailableOutlinedIcon } from "@/components/iconify/mui-icons";
 import { AdminPageShell } from "@/sections/session/component/admin-page-shell";
 import { SessionPageHeader } from "@/sections/session/component/session-page-header";
 import {

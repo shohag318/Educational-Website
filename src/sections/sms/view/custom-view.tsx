@@ -27,7 +27,7 @@ import {
   Phone,
   ListPlus,
   UserPlus,
-} from "lucide-react";
+} from "@/components/iconify/lucide";
 import { SmsNavHeader } from "@/sections/sms/component/sms-nav-header";
 import { getStoredSchoolInfo } from "@/lib/settingsStore";
 import { SessionSelect } from "@/components/SessionSelect";

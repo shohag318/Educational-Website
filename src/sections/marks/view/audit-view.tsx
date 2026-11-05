@@ -1,9 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Box, Stack, Typography } from "@mui/material";
 import { AppButton } from "@/components/button/app-button";
-import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
-import { FileEdit, History, Save, Check, RefreshCw } from "@/components/iconify/lucide";
+import { FileEdit, History, Save, Check } from "@/components/iconify/lucide";
+import {
+  ResultsPageShell,
+  ResultsPageHeader,
+  ResultsPanel,
+  ResultsFilterCard,
+  ResultsNotice,
+} from "@/sections/results/component/result-page-ui";
 
 export default function MarkAuditPage() {
   const [exams, setExams] = useState<any[]>([]);
@@ -106,137 +113,161 @@ export default function MarkAuditPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <ResultNavHeader />
-      <div>
-        <h1 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
-          <FileEdit className="w-5 h-5 text-emerald-600" />
-          <span>Mark Override & Audit Trail</span>
-        </h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Perform administrative mark adjustments in Draft mode. Every change is strictly audited with previous/new values and recorded justification.
-        </p>
-      </div>
+    <ResultsPageShell>
+      <ResultsPageHeader
+        stepHint="Results workflow • Mark Entry"
+        icon={<FileEdit />}
+        title="Mark Override & Audit"
+        subtitle="Adjust marks in draft mode. Every change is logged with a required reason."
+      />
 
-      {successMsg && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-xl text-xs font-semibold flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Check className="w-4 h-4 text-emerald-600" />
-            <span>{successMsg}</span>
-          </div>
-          <a
-            href="/results/review"
-            className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[11px] font-bold hover:bg-emerald-700 transition-colors"
+      {successMsg ? (
+        <ResultsNotice severity="success">
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1.5}
+            sx={{ alignItems: { sm: "center" }, justifyContent: "space-between", width: 1 }}
           >
-            Re-calculate Now
-          </a>
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+              <Check size={16} />
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {successMsg}
+              </Typography>
+            </Stack>
+            <AppButton size="small" variant="contained" color="success" href="/results/review">
+              Re-calculate Now
+            </AppButton>
+          </Stack>
+        </ResultsNotice>
+      ) : null}
+
+      <ResultsFilterCard title="Who & which exam" columns={3}>
+        <div>
+          <label>Select Exam *</label>
+          <select value={selectedExamId} onChange={(e) => setSelectedExamId(e.target.value)}>
+            {exams.map((ex) => (
+              <option key={ex.id} value={ex.id}>
+                {ex.name} ({ex.status})
+              </option>
+            ))}
+          </select>
         </div>
-      )}
 
-      {/* Override Form */}
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
-          <History className="w-4 h-4 text-emerald-600" />
-          <span>Record Mark Override</span>
-        </h2>
+        <div>
+          <label>Select Student *</label>
+          <select
+            value={selectedEnrollmentId}
+            onChange={(e) => setSelectedEnrollmentId(e.target.value)}
+          >
+            {students.map((st) => (
+              <option key={st.id} value={st.id}>
+                Roll #{st.classRoll} - {st.student.firstName} {st.student.lastName} (
+                {st.student.studentIdNo})
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <form onSubmit={handleApplyOverride} className="space-y-4 text-xs">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div>
+          <label>Select Subject *</label>
+          <select value={selectedSubjectId} onChange={(e) => setSelectedSubjectId(e.target.value)}>
+            {subjects.map((sub) => (
+              <option key={sub.id} value={sub.id}>
+                {sub.name} ({sub.subjectCode})
+              </option>
+            ))}
+          </select>
+        </div>
+      </ResultsFilterCard>
+
+      <ResultsPanel>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 2 }}>
+          <History size={16} className="text-emerald-600" />
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+            Record Mark Override
+          </Typography>
+        </Stack>
+
+        <form onSubmit={handleApplyOverride}>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 1.5,
+              gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" },
+              mb: 2,
+              p: 1.5,
+              borderRadius: 1.5,
+              bgcolor: "grey.50",
+              border: 1,
+              borderColor: "divider",
+              "& label": { display: "block", mb: 0.75, fontSize: 12, fontWeight: 600, color: "text.secondary" },
+              "& input": {
+                width: "100%",
+                p: 1.25,
+                borderRadius: 1.5,
+                border: 1,
+                borderColor: "divider",
+                fontSize: 13,
+                bgcolor: "background.paper",
+              },
+            }}
+          >
             <div>
-              <label className="font-medium text-slate-600">Select Exam *</label>
-              <select
-                value={selectedExamId}
-                onChange={(e) => setSelectedExamId(e.target.value)}
-                className="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500"
-              >
-                {exams.map((ex) => (
-                  <option key={ex.id} value={ex.id}>
-                    {ex.name} ({ex.status})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="font-medium text-slate-600">Select Student *</label>
-              <select
-                value={selectedEnrollmentId}
-                onChange={(e) => setSelectedEnrollmentId(e.target.value)}
-                className="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 font-medium"
-              >
-                {students.map((st) => (
-                  <option key={st.id} value={st.id}>
-                    Roll #{st.classRoll} - {st.student.firstName} {st.student.lastName} ({st.student.studentIdNo})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="font-medium text-slate-600">Select Subject *</label>
-              <select
-                value={selectedSubjectId}
-                onChange={(e) => setSelectedSubjectId(e.target.value)}
-                className="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500"
-              >
-                {subjects.map((sub) => (
-                  <option key={sub.id} value={sub.id}>
-                    {sub.name} ({sub.subjectCode})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
-            <div>
-              <label className="font-semibold text-slate-700">New CQ Mark:</label>
+              <label>New CQ Mark</label>
               <input
                 type="number"
                 step="0.5"
                 placeholder="e.g. 55"
                 value={cqMark}
                 onChange={(e) => setCqMark(e.target.value)}
-                className="w-full mt-1 p-2 border rounded bg-white"
               />
             </div>
             <div>
-              <label className="font-semibold text-slate-700">New MCQ Mark:</label>
+              <label>New MCQ Mark</label>
               <input
                 type="number"
                 step="0.5"
                 placeholder="e.g. 24"
                 value={mcqMark}
                 onChange={(e) => setMcqMark(e.target.value)}
-                className="w-full mt-1 p-2 border rounded bg-white"
               />
             </div>
             <div>
-              <label className="font-semibold text-slate-700">New Practical Mark:</label>
+              <label>New Practical Mark</label>
               <input
                 type="number"
                 step="0.5"
                 placeholder="e.g. 22"
                 value={practicalMark}
                 onChange={(e) => setPracticalMark(e.target.value)}
-                className="w-full mt-1 p-2 border rounded bg-white"
               />
             </div>
-          </div>
+          </Box>
 
-          <div>
-            <label className="font-semibold text-slate-700">
-              Audit Reason & Justification (Required) *
-            </label>
+          <Box
+            sx={{
+              mb: 2,
+              "& label": { display: "block", mb: 0.75, fontSize: 12, fontWeight: 600, color: "text.secondary" },
+              "& textarea": {
+                width: "100%",
+                p: 1.25,
+                borderRadius: 1.5,
+                border: 1,
+                borderColor: "divider",
+                fontSize: 13,
+                bgcolor: "background.paper",
+              },
+            }}
+          >
+            <label>Audit Reason & Justification (Required) *</label>
             <textarea
               rows={2}
               placeholder="e.g. Script re-evaluation requested by Head of Department. 5 marks added to CQ."
               value={auditReason}
               onChange={(e) => setAuditReason(e.target.value)}
-              className="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500"
               required
             />
-          </div>
+          </Box>
 
           <AppButton
             type="submit"
@@ -249,7 +280,7 @@ export default function MarkAuditPage() {
             {saving ? "Recording Override..." : "Save Override with Audit Trail"}
           </AppButton>
         </form>
-      </div>
-    </div>
+      </ResultsPanel>
+    </ResultsPageShell>
   );
 }

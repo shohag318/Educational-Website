@@ -22,7 +22,12 @@ import {
 import Link from "next/link";
 import { AppButton } from "@/components/button/app-button";
 import { SessionSelect } from "@/components/SessionSelect";
-import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
+import {
+  ResultsPageShell,
+  ResultsPageHeader,
+  ResultsFilterCard,
+  ResultsPanel,
+} from "@/sections/results/component/result-page-ui";
 
 export default function ResultReviewPage() {
   const [selectedSession, setSelectedSession] = useState("ALL");
@@ -345,24 +350,22 @@ export default function ResultReviewPage() {
     }
   }
 
-  const hasActiveFilters = selectedSession !== "ALL" || selectedClassId || selectedGroup !== "ALL" || (selectedShift && selectedShift !== "ALL") || selectedSectionId;
+  const hasActiveFilters = Boolean(
+    selectedSession !== "ALL" ||
+      selectedClassId ||
+      selectedGroup !== "ALL" ||
+      (selectedShift && selectedShift !== "ALL") ||
+      selectedSectionId
+  );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <ResultNavHeader />
-      {/* Page Header & Run Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
-            <CheckCircle className="w-5 h-5 text-emerald-600" />
-            <span>Process & Review Results</span>
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Calculate student GPA, apply pass/fail rules, and review draft results before publishing.
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-3">
+    <ResultsPageShell>
+      <ResultsPageHeader
+        stepHint="Results workflow • Process"
+        icon={<CheckCircle />}
+        title="Process & Review Results"
+        subtitle="Calculate GPA, apply pass/fail rules, and review drafts before publishing."
+        action={
           <AppButton
             variant="contained"
             color="success"
@@ -374,43 +377,21 @@ export default function ResultReviewPage() {
           >
             {processing ? "Processing..." : "Process Results"}
           </AppButton>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Filter Bar: Class, Exam Name, Shift, Group, Section */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Filter className="w-4 h-4 text-emerald-600" />
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              Result Verification Filters
-            </span>
-            {hasActiveFilters && (
-              <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold px-2 py-0.5 rounded-full">
-                Active Filter
-              </span>
-            )}
-          </div>
-          {hasActiveFilters && (
-            <AppButton
-              variant="link"
-              color="success"
-              size="small"
-              startIcon={<RotateCcw size={12} />}
-              onClick={handleResetFilters}
-            >
-              Reset Filters
-            </AppButton>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 text-xs">
+      <ResultsFilterCard
+        title="Choose class & exam to process"
+        active={hasActiveFilters}
+        onReset={handleResetFilters}
+        columns={6}
+      >
           {/* Session Filter */}
           <div>
             <SessionSelect
               value={selectedSession}
               onChange={(val) => setSelectedSession(val)}
-              label="Session:"
+              label="Session"
               labelClassName="font-semibold text-slate-600 block mb-1"
               selectClassName="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
             />
@@ -508,28 +489,14 @@ export default function ResultReviewPage() {
               })}
             </select>
           </div>
-        </div>
-
-        {filteredTabulation.length > 0 && (
-          <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-600 font-medium no-print">
-            <div className="flex items-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-              <span>Showing 15 rows at a time • Scroll down to view all students</span>
-            </div>
-            <span className="text-[11px] font-mono text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
-              Total: {filteredTabulation.length} students
-            </span>
-          </div>
-        )}
-      </div>
+      </ResultsFilterCard>
 
       {/* Class Test (CT) Marks Auto-Sync & Term Weighting Panel */}
-      <div
-        className={`border rounded-xl p-4 shadow-xs transition-colors ${
-          isCtActive
-            ? "bg-linear-to-r from-purple-50 via-indigo-50 to-emerald-50 border-purple-200/80"
-            : "bg-slate-50 border-slate-200"
-        }`}
+      <ResultsPanel
+        sx={{
+          bgcolor: isCtActive ? "primary.lighter" : "grey.50",
+          borderColor: isCtActive ? "primary.light" : "divider",
+        }}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/70">
           <div className="flex items-center space-x-2">
@@ -763,25 +730,25 @@ export default function ResultReviewPage() {
             </div>
           </div>
         )}
-      </div>
+      </ResultsPanel>
 
       {/* Anomaly Detection Banner */}
       {anomalies.length > 0 && (
-        <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 text-xs space-y-1.5 shadow-sm">
-          <div className="font-bold text-amber-900 flex items-center space-x-1.5">
+        <ResultsPanel sx={{ bgcolor: "warning.lighter", borderColor: "warning.light" }}>
+          <div className="font-bold text-amber-900 flex items-center space-x-1.5 text-xs">
             <AlertTriangle className="w-4 h-4 text-amber-600" />
             <span>Automated Anomaly Detection Insights</span>
           </div>
-          <ul className="list-disc list-inside space-y-1 text-amber-800">
+          <ul className="list-disc list-inside space-y-1 text-amber-800 text-xs mt-1.5">
             {anomalies.map((a, idx) => (
               <li key={idx}>{a}</li>
             ))}
           </ul>
-        </div>
+        </ResultsPanel>
       )}
 
       {/* Draft Result Preview Table */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+      <ResultsPanel padded={false}>
         <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center space-x-2">
             <h2 className="text-sm font-bold text-slate-800">Final Results &amp; Ranks Preview</h2>
@@ -941,7 +908,7 @@ export default function ResultReviewPage() {
             </span>
           </div>
         )}
-      </div>
-    </div>
+      </ResultsPanel>
+    </ResultsPageShell>
   );
 }

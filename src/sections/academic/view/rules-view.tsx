@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
+import {
+  ResultsPageShell,
+  ResultsPageHeader,
+  ResultsPanel,
+  ResultsNotice,
+} from "@/sections/results/component/result-page-ui";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import {
   Sliders,
   Save,
@@ -419,72 +425,56 @@ export default function DynamicRulesPage() {
   const selectedClassObj = classes.find((c) => c.id === combinedClassFilter);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <ResultNavHeader />
+    <ResultsPageShell>
+      <ResultsPageHeader
+        stepHint="Results workflow • Step 1"
+        icon={<Sliders />}
+        title="Grading & Assessment Rules"
+        subtitle="Set pass marks, combined paper rules, 4th-subject surplus, and GPA grade slabs."
+      />
 
-      <div>
-        <h1 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
-          <Sliders className="w-5 h-5 text-emerald-600" />
-          <span>Grading & Assessment Rules</span>
-        </h1>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Configure component pass marks, combined papers, 4th-subject surplus rules, and GPA grade slabs.
-        </p>
-      </div>
-
-      {/* Step Navigation Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-1.5 shadow-xs flex flex-wrap items-center gap-1.5 text-xs">
-        <AppButton
-          type="button"
+      <ResultsPanel padded sx={{ py: 1.5 }}>
+        <ToggleButtonGroup
+          exclusive
           size="small"
-          variant="soft"
-          color={activeStepTab === "STEP_1_TEMPLATES" ? "primary" : "inherit"}
-          startIcon={<Bookmark size={16} />}
-          onClick={() => setActiveStepTab("STEP_1_TEMPLATES")}
+          value={activeStepTab}
+          onChange={(_, value) => value && setActiveStepTab(value)}
+          sx={{
+            flexWrap: "wrap",
+            gap: 1,
+            "& .MuiToggleButton-root": {
+              textTransform: "none",
+              borderRadius: "8px !important",
+              border: "1px solid",
+              borderColor: "divider !important",
+              px: 1.5,
+              py: 0.75,
+              fontSize: 12,
+              fontWeight: 600,
+            },
+          }}
         >
-          Step 1: Template Management ({dbTemplates.length})
-        </AppButton>
-
-        <AppButton
-          type="button"
-          size="small"
-          variant="soft"
-          color={activeStepTab === "STEP_3_COMBINED" ? "primary" : "inherit"}
-          startIcon={<GitMerge size={16} />}
-          onClick={() => setActiveStepTab("STEP_3_COMBINED")}
-        >
-          Step 2: Combined 1st & 2nd Paper Rules ({combinedRules.length})
-        </AppButton>
-
-        <AppButton
-          type="button"
-          size="small"
-          variant="soft"
-          color={activeStepTab === "STEP_4_GRADING" ? "primary" : "inherit"}
-          startIcon={<Award size={16} />}
-          onClick={() => setActiveStepTab("STEP_4_GRADING")}
-        >
-          Step 3: Grading Scale & 4th-Subject Rules
-        </AppButton>
-
-        <AppButton
-          type="button"
-          size="small"
-          variant="soft"
-          color={activeStepTab === "ALL" ? "primary" : "inherit"}
-          startIcon={<Sliders size={14} />}
-          onClick={() => setActiveStepTab("ALL")}
-          sx={{ ml: { sm: "auto" } }}
-        >
-          All Steps Overview
-        </AppButton>
-      </div>
+          <ToggleButton value="STEP_1_TEMPLATES">
+            <Bookmark size={14} style={{ marginRight: 6 }} />
+            1. Templates ({dbTemplates.length})
+          </ToggleButton>
+          <ToggleButton value="STEP_3_COMBINED">
+            <GitMerge size={14} style={{ marginRight: 6 }} />
+            2. Combined Papers ({combinedRules.length})
+          </ToggleButton>
+          <ToggleButton value="STEP_4_GRADING">
+            <Award size={14} style={{ marginRight: 6 }} />
+            3. Grading Scale
+          </ToggleButton>
+          <ToggleButton value="ALL">
+            <Sliders size={14} style={{ marginRight: 6 }} />
+            All steps
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </ResultsPanel>
 
       {saveSuccess && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-xl text-xs font-semibold flex items-center space-x-2 shadow-xs">
-          <Check className="w-4 h-4 text-emerald-600" />
-          <span>Rules updated successfully.</span>
-        </div>
+        <ResultsNotice severity="success">Rules updated successfully.</ResultsNotice>
       )}
 
       {/* STEP 1: TEMPLATE MANAGEMENT */}
@@ -969,6 +959,6 @@ export default function DynamicRulesPage() {
           </button>
         </div>
       )}
-    </div>
+    </ResultsPageShell>
   );
 }

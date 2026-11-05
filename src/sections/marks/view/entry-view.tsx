@@ -3,7 +3,10 @@
 import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
+import {
+  ResultsPageShell,
+  ResultsPageHeader,
+} from "@/sections/results/component/result-page-ui";
 import {
   TableProperties,
   Save,
@@ -889,20 +892,14 @@ export default function MarkEntryPage() {
   const isLocked = activeExam?.status === "PUBLISHED";
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <ResultNavHeader />
+    <ResultsPageShell>
       <div className="no-print space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
-            <TableProperties className="w-5 h-5 text-emerald-600" />
-            <span>Mark Entry</span>
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Enter or import student marks by exam, class, and subject.
-          </p>
-        </div>
-
+        <ResultsPageHeader
+          stepHint="Results workflow • Step 3"
+          icon={<TableProperties />}
+          title="Mark Entry"
+          subtitle="Enter or import student marks by exam, class, and subject."
+          action={
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Download Excel Form Button */}
           <AppButton
@@ -964,7 +961,8 @@ export default function MarkEntryPage() {
               : "Save Marks (Batch)"}
           </AppButton>
         </div>
-      </div>
+          }
+        />
 
       {/* Filter Bar */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3 text-xs shadow-sm">
@@ -983,7 +981,7 @@ export default function MarkEntryPage() {
                 handleExamChange(matching[0].id);
               }
             }}
-            label="Session:"
+            label="Session"
             labelClassName="font-semibold text-slate-700 block mb-1"
             selectClassName="w-full p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 font-medium bg-white"
           />
@@ -2655,6 +2653,6 @@ export default function MarkEntryPage() {
         mainExamPercentage={mainExamPercentage}
         isClassTest={isClassTest}
       />
-    </div>
+    </ResultsPageShell>
   );
 }

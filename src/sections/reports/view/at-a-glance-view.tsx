@@ -6,7 +6,6 @@ import {
   FileBarChart,
   Printer,
   Sparkles,
-  Filter,
   Check,
   RefreshCw,
   Layers,
@@ -14,11 +13,15 @@ import {
   AlertTriangle,
   Award,
   AlertOctagon,
-  RotateCcw,
 } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import { SessionSelect } from "@/components/SessionSelect";
-import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
+import {
+  ResultsPageShell,
+  ResultsPageHeader,
+  ResultsFilterCard,
+  ResultsPanel,
+} from "@/sections/results/component/result-page-ui";
 
 export default function AtAGlancePage() {
   const [selectedSession, setSelectedSession] = useState("ALL");
@@ -287,86 +290,54 @@ export default function AtAGlancePage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-16">
-      <ResultNavHeader />
-      {/* Controls Bar (No Print) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="p-1.5 bg-emerald-100 text-emerald-800 rounded-lg">
-              <FileBarChart className="w-5 h-5 text-emerald-700" />
-            </span>
-            <h1 className="text-xl font-bold text-slate-900">
-              Result At a Glance
-            </h1>
-          </div>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Statistical summary, grade distribution, pass rates, and failure analytics.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <AppButton
-            size="small"
-            variant={seedSuccess ? "contained" : "outline"}
-            color={seedSuccess ? "success" : "inherit"}
-            startIcon={
-              seeding ? undefined : seedSuccess ? <Check size={16} /> : <Sparkles size={16} />
-            }
-            loading={seeding}
-            disabled={seeding}
-            onClick={handleSeedDalta}
-            title="Load the exact 26-student Dalta Degree College demo dataset from the reference PDF"
-          >
-            {seeding ? "Seeding..." : seedSuccess ? "PDF Demo Loaded!" : "Load PDF Demo Data"}
-          </AppButton>
-
-          <AppButton
-            variant="contained"
-            color="secondary"
-            size="small"
-            startIcon={<Printer size={16} />}
-            onClick={() => window.print()}
-          >
-            Print Report
-          </AppButton>
-        </div>
-      </div>
-
-      {/* Filter Bar: Class, Exam Name, Shift, Group, Section */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3 no-print">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Filter className="w-4 h-4 text-emerald-600" />
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              At a Glance Report Filters
-            </span>
-            {hasActiveFilters && (
-              <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold px-2 py-0.5 rounded-full">
-                Active Filter
-              </span>
-            )}
-          </div>
-          {hasActiveFilters && (
+    <ResultsPageShell>
+      <ResultsPageHeader
+        stepHint="Reports"
+        icon={<FileBarChart />}
+        title="Result At a Glance"
+        subtitle="Pass rates, grade distribution, and failure analytics in one summary."
+        action={
+          <div className="flex flex-wrap items-center gap-2">
             <AppButton
-              variant="link"
-              color="success"
               size="small"
-              startIcon={<RotateCcw size={12} />}
-              onClick={handleResetFilters}
+              variant={seedSuccess ? "contained" : "outline"}
+              color={seedSuccess ? "success" : "inherit"}
+              startIcon={
+                seeding ? undefined : seedSuccess ? <Check size={16} /> : <Sparkles size={16} />
+              }
+              loading={seeding}
+              disabled={seeding}
+              onClick={handleSeedDalta}
+              title="Load the exact 26-student Dalta Degree College demo dataset from the reference PDF"
             >
-              Reset Filters
+              {seeding ? "Seeding..." : seedSuccess ? "PDF Demo Loaded!" : "Load PDF Demo Data"}
             </AppButton>
-          )}
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 text-xs">
+            <AppButton
+              variant="contained"
+              color="secondary"
+              size="small"
+              startIcon={<Printer size={16} />}
+              onClick={() => window.print()}
+            >
+              Print Report
+            </AppButton>
+          </div>
+        }
+      />
+
+      <ResultsFilterCard
+        title="Choose class & exam"
+        active={hasActiveFilters}
+        onReset={handleResetFilters}
+        columns={6}
+      >
           {/* Session Filter */}
           <div>
             <SessionSelect
               value={selectedSession}
               onChange={(val) => setSelectedSession(val)}
-              label="Session:"
+              label="Session"
               labelClassName="font-semibold text-slate-600 block mb-1"
               selectClassName="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
             />
@@ -464,24 +435,21 @@ export default function AtAGlancePage() {
               })}
             </select>
           </div>
+      </ResultsFilterCard>
+
+      <ResultsPanel className="no-print">
+        <div className="max-w-md mb-3">
+          <label className="font-semibold text-slate-600 block mb-1">Class Teacher (For Print Header)</label>
+          <input
+            type="text"
+            value={classTeacher}
+            onChange={(e) => setClassTeacher(e.target.value)}
+            placeholder="e.g. Md Shohag Mia"
+            className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
+          />
         </div>
 
-        {/* Ledger Metadata Configuration (Class Teacher) */}
-        <div className="pt-2 border-t border-slate-100 text-xs">
-          <div className="max-w-md">
-            <label className="font-semibold text-slate-600 block mb-1">Class Teacher (For Print Header):</label>
-            <input
-              type="text"
-              value={classTeacher}
-              onChange={(e) => setClassTeacher(e.target.value)}
-              placeholder="e.g. Md Shohag Mia"
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            />
-          </div>
-        </div>
-
-        {/* View Mode Tabs */}
-        <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100">
           <span className="text-[11px] font-bold text-slate-500 mr-2 uppercase tracking-wide">
             View / Print Target:
           </span>
@@ -509,14 +477,16 @@ export default function AtAGlancePage() {
             );
           })}
         </div>
-      </div>
+      </ResultsPanel>
 
       {/* Loading State */}
       {loading && (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-500">
-          <RefreshCw className="w-6 h-6 animate-spin mx-auto text-emerald-600 mb-2" />
-          <p className="text-sm font-semibold">Compiling comprehensive At a Glance report...</p>
-        </div>
+        <ResultsPanel>
+          <div className="py-10 text-center text-slate-500">
+            <RefreshCw className="w-6 h-6 animate-spin mx-auto text-emerald-600 mb-2" />
+            <p className="text-sm font-semibold">Compiling comprehensive At a Glance report...</p>
+          </div>
+        </ResultsPanel>
       )}
 
       {/* Report Canvas Container */}
@@ -920,14 +890,16 @@ export default function AtAGlancePage() {
 
       {/* No Data State */}
       {!loading && !reportData && (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-500">
-          <FileBarChart className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-800">No Exam Results Available</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-            Please select an exam that has processed results, or click &quot;Load PDF Demo Data&quot; to test with the 26-student Dalta Degree College dataset.
-          </p>
-        </div>
+        <ResultsPanel>
+          <div className="py-10 text-center text-slate-500">
+            <FileBarChart className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-slate-800">No Exam Results Available</h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              Please select an exam that has processed results, or click &quot;Load PDF Demo Data&quot; to test with the 26-student Dalta Degree College dataset.
+            </p>
+          </div>
+        </ResultsPanel>
       )}
-    </div>
+    </ResultsPageShell>
   );
 }

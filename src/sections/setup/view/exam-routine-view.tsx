@@ -31,7 +31,10 @@ import {
   BookmarkPlus,
   EyeOff,
 } from "@/components/iconify/lucide";
-import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
+import {
+  ResultsPageShell,
+  ResultsPageHeader,
+} from "@/sections/results/component/result-page-ui";
 import { SessionSelect } from "@/components/SessionSelect";
 import { DatePicker, TimePicker } from "@/components/date-picker/date-picker";
 import { AppButton } from "@/components/button/app-button";
@@ -864,10 +867,7 @@ export default function ExamRoutinePage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20">
-      {/* Result Module Navigation Bar */}
-      <ResultNavHeader />
-
+    <ResultsPageShell>
       {/* Global Print Stylesheet for Official NCTB Routine Sheet */}
       <style jsx global>{`
         @media print {
@@ -930,27 +930,12 @@ export default function ExamRoutinePage() {
         </div>
       )}
 
-      {/* Header Banner */}
-      <div className="no-print">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <div className="flex items-center space-x-2 text-xs text-slate-500 mb-1">
-              <Link href="/setup/exams" className="hover:underline">
-                Exams
-              </Link>
-              <span>/</span>
-              <span className="text-slate-800 font-medium">Exam Routine</span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <CalendarRange className="w-6 h-6 text-emerald-600" />
-              Exam Routine
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Set examination dates, times, rooms, and print official routines.
-            </p>
-          </div>
-
-          {/* Tab Navigation & Fast Print Action */}
+      <ResultsPageHeader
+        stepHint="Results workflow • Step 2"
+        icon={<CalendarRange />}
+        title="Exam Routine"
+        subtitle="Set examination dates, times, rooms, and print official routines."
+        action={
           <div className="flex items-center gap-2.5 shrink-0">
             <div className="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200">
               <AppButton
@@ -986,8 +971,8 @@ export default function ExamRoutinePage() {
               <span className="hidden sm:inline">Print Routine</span>
             </AppButton>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* =========================================================================
           SECTION 1: FILTER SECTION (Session, Class, Exam, Shift, Group, Search)
@@ -1000,10 +985,10 @@ export default function ExamRoutinePage() {
             </div>
             <div>
               <h2 className="text-xs sm:text-sm font-bold text-slate-800">
-                Routine Selection & Filtering
+                Choose exam to schedule
               </h2>
               <p className="text-[11px] text-slate-500">
-                Filter examination schedules by Academic Session, Class, Examination Term, Shift and Group
+                Filter by session, class, exam, shift and group
               </p>
             </div>
             {hasActiveFilters && (
@@ -2209,6 +2194,6 @@ export default function ExamRoutinePage() {
           </div>
         </div>
       )}
-    </div>
+    </ResultsPageShell>
   );
 }

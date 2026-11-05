@@ -27,7 +27,11 @@ import {
 } from "@/components/iconify/lucide";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
-import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
+import {
+  ResultsPageShell,
+  ResultsPageHeader,
+  ResultsPanel,
+} from "@/sections/results/component/result-page-ui";
 
 interface AssessmentComponent {
   id?: string;
@@ -844,8 +848,7 @@ export default function ExamsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-16">
-      <ResultNavHeader />
+    <ResultsPageShell>
       {/* Toast Notification */}
       {notification && (
         <div
@@ -864,19 +867,15 @@ export default function ExamsPage() {
         </div>
       )}
 
-      {/* Page Header */}
-      <div>
-        <h1 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
-          <Calendar className="w-5 h-5 text-emerald-600" />
-          <span>Exam Configuration</span>
-        </h1>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Configure exam terms, assessment components, and subject mark distributions.
-        </p>
-      </div>
+      <ResultsPageHeader
+        stepHint="Results workflow • Step 2"
+        icon={<Calendar />}
+        title="Exam Configuration"
+        subtitle="Create exam terms, assessment components, and subject mark distributions."
+      />
 
       {/* Create Exam Card */}
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+      <ResultsPanel className="space-y-4">
         <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
           <Plus className="w-4 h-4 text-emerald-600" />
           <span>Create New Exam Instance</span>
@@ -1033,10 +1032,10 @@ export default function ExamsPage() {
             </AppButton>
           </div>
         </form>
-      </div>
+      </ResultsPanel>
 
       {/* Exam Catalog Header & Cards */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <ResultsPanel padded={false}>
         <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50/50">
           <div>
             <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
@@ -1592,7 +1591,7 @@ export default function ExamsPage() {
             </div>
           )}
         </div>
-      </div>
+      </ResultsPanel>
 
       {/* Redesigned Multi-Subject Assign Modal */}
       {showAssignModal && assignModalExam && (
@@ -2247,6 +2246,6 @@ export default function ExamsPage() {
           </div>
         </div>
       )}
-    </div>
+    </ResultsPageShell>
   );
 }

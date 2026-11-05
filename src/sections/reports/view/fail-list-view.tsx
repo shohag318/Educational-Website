@@ -5,7 +5,12 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, Filter, Phone, Printer, RotateCcw } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import { SessionSelect } from "@/components/SessionSelect";
-import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
+import {
+  ResultsPageShell,
+  ResultsPageHeader,
+  ResultsFilterCard,
+  ResultsPanel,
+} from "@/sections/results/component/result-page-ui";
 
 export default function FailListPage() {
   const [selectedSession, setSelectedSession] = useState("ALL");
@@ -218,21 +223,13 @@ export default function FailListPage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <ResultNavHeader />
-      {/* Controls Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
-            <AlertTriangle className="w-5 h-5 text-red-600" />
-            <span>Failed Students by Subject</span>
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Identify and review students who failed specific subjects or components.
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-3">
+    <ResultsPageShell>
+      <ResultsPageHeader
+        stepHint="Reports"
+        icon={<AlertTriangle />}
+        title="Failed Students by Subject"
+        subtitle="Find students who failed a subject or component, then print a remedial roster."
+        action={
           <AppButton
             variant="contained"
             color="secondary"
@@ -242,45 +239,23 @@ export default function FailListPage() {
           >
             Print Fail List
           </AppButton>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Filter Bar: Class, Exam Name, Group, Section, Subject */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3 no-print">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Filter className="w-4 h-4 text-red-600" />
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              Remedial Roster Filters
-            </span>
-            {hasActiveFilters && (
-              <span className="text-[10px] bg-red-50 text-red-700 border border-red-200 font-semibold px-2 py-0.5 rounded-full">
-                Active Filter
-              </span>
-            )}
-          </div>
-          {hasActiveFilters && (
-            <AppButton
-              variant="link"
-              color="error"
-              size="small"
-              startIcon={<RotateCcw size={12} />}
-              onClick={handleResetFilters}
-            >
-              Reset Filters
-            </AppButton>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 text-xs">
+      <ResultsFilterCard
+        title="Choose class, exam & subject"
+        active={hasActiveFilters}
+        onReset={handleResetFilters}
+        columns={7}
+      >
           {/* Session Filter */}
           <div>
             <SessionSelect
               value={selectedSession}
               onChange={(val) => setSelectedSession(val)}
-              label="Session:"
+              label="Session"
               labelClassName="font-semibold text-slate-600 block mb-1"
-              selectClassName="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-500 bg-white font-medium text-slate-800"
+              selectClassName="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
             />
           </div>
 
@@ -409,11 +384,10 @@ export default function FailListPage() {
               ))}
             </select>
           </div>
-        </div>
-      </div>
+      </ResultsFilterCard>
 
       {/* Fail Roster Table */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+      <ResultsPanel padded={false}>
         <div className="p-4 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <h2 className="text-sm font-bold text-slate-800">
@@ -489,7 +463,7 @@ export default function FailListPage() {
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
+      </ResultsPanel>
+    </ResultsPageShell>
   );
 }

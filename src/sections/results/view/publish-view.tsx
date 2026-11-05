@@ -1,9 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ShieldCheck, Lock, Unlock, CheckCircle2, AlertCircle } from "@/components/iconify/lucide";
+import {
+  Box,
+  Chip,
+  CircularProgress,
+  Divider,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { ShieldCheck, Lock, Unlock } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
-import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
+import {
+  ResultsPageShell,
+  ResultsPageHeader,
+  ResultsPanel,
+  ResultsEmpty,
+  ResultsNotice,
+  ResultsStat,
+} from "@/sections/results/component/result-page-ui";
 
 export default function PublishPage() {
   const [exams, setExams] = useState<any[]>([]);
@@ -51,70 +66,97 @@ export default function PublishPage() {
     }
   };
 
+  const publishedCount = exams.filter((e) => e.status === "PUBLISHED").length;
+  const draftCount = exams.length - publishedCount;
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <ResultNavHeader />
-      <div>
-        <h1 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
-          <ShieldCheck className="w-5 h-5 text-emerald-600" />
-          <span>Publish Results</span>
-        </h1>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Publish completed examination terms to enable report cards and guardian SMS notifications.
-        </p>
-      </div>
+    <ResultsPageShell>
+      <ResultsPageHeader
+        stepHint="Results workflow • Final step"
+        icon={<ShieldCheck />}
+        title="Publish Results"
+        subtitle="Lock completed exams so report cards and guardian SMS become available."
+      />
 
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm divide-y divide-slate-100">
-        {exams.map((exam) => {
-          const isPublished = exam.status === "PUBLISHED";
+      <Box
+        sx={{
+          display: "grid",
+          gap: 1.5,
+          gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" },
+        }}
+        className="no-print"
+      >
+        <ResultsStat label="Total Exams" value={exams.length} hint="Configured in this school" />
+        <ResultsStat label="Published" value={publishedCount} hint="Locked for report cards" color="success" />
+        <ResultsStat label="Draft / Preview" value={draftCount} hint="Still editable" color="warning" />
+      </Box>
 
-          return (
-            <div key={exam.id} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="space-y-1.5">
-                <div className="flex items-center space-x-2">
-                  <span className="font-bold text-slate-900 text-sm">{exam.name}</span>
-                  <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      isPublished
-                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                        : "bg-amber-100 text-amber-800 border border-amber-300"
-                    }`}
-                  >
-                    {exam.status}
-                  </span>
-                </div>
-                <div className="text-xs text-slate-500 space-x-2">
-                  <span>Class: <strong>{exam.class?.name}</strong></span>
-                  <span>•</span>
-                  <span>Term: <strong>{exam.termCode}</strong></span>
-                  <span>•</span>
-                  <span>
-                    Processed Students: <strong>{exam._count?.processedResults || 0}</strong>
-                  </span>
-                </div>
-              </div>
+      <ResultsNotice severity="info">
+        Publishing locks mark entry. You can unlock later if corrections are needed.
+      </ResultsNotice>
 
-              <div>
-                <AppButton
-                  size="small"
-                  variant={isPublished ? "soft" : "contained"}
-                  color={isPublished ? "warning" : "success"}
-                  startIcon={isPublished ? <Unlock size={14} /> : <Lock size={14} />}
-                  onClick={() => handleTogglePublish(exam.id, exam.status)}
+      <ResultsPanel padded={false}>
+        {loading ? (
+          <Box sx={{ py: 8, display: "grid", placeItems: "center" }}>
+            <CircularProgress size={28} />
+          </Box>
+        ) : exams.length === 0 ? (
+          <ResultsEmpty
+            title="No exams found"
+            description="Create an exam first from Exam Configuration."
+          />
+        ) : (
+          exams.map((exam, index) => {
+            const isPublished = exam.status === "PUBLISHED";
+            return (
+              <Box key={exam.id}>
+                {index > 0 ? <Divider /> : null}
+                <Stack
+                  direction={{ xs: "column", md: "row" }}
+                  spacing={2}
+                  sx={{
+                    p: { xs: 2, sm: 2.5 },
+                    alignItems: { md: "center" },
+                    justifyContent: "space-between",
+                  }}
                 >
-                  {isPublished ? "Unlock & Revert to Draft" : "Lock & Publish Result"}
-                </AppButton>
-              </div>
-            </div>
-          );
-        })}
+                  <Box sx={{ minWidth: 0 }}>
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", mb: 0.75 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                        {exam.name}
+                      </Typography>
+                      <Chip
+                        size="small"
+                        label={exam.status}
+                        color={isPublished ? "success" : "warning"}
+                        variant="outlined"
+                        sx={{ fontWeight: 700, height: 22 }}
+                      />
+                    </Stack>
+                    <Typography variant="body2" color="text.secondary">
+                      Class <strong>{exam.class?.name || "—"}</strong>
+                      {" · "}
+                      Term <strong>{exam.termCode || "—"}</strong>
+                      {" · "}
+                      Processed <strong>{exam._count?.processedResults || 0}</strong>
+                    </Typography>
+                  </Box>
 
-        {exams.length === 0 && (
-          <div className="p-8 text-center text-slate-400 italic text-xs">
-            No exams found. Seed demo data to preview.
-          </div>
+                  <AppButton
+                    size="small"
+                    variant={isPublished ? "outlined" : "contained"}
+                    color={isPublished ? "warning" : "success"}
+                    startIcon={isPublished ? <Unlock size={14} /> : <Lock size={14} />}
+                    onClick={() => handleTogglePublish(exam.id, exam.status)}
+                  >
+                    {isPublished ? "Unlock to Draft" : "Lock & Publish"}
+                  </AppButton>
+                </Stack>
+              </Box>
+            );
+          })
         )}
-      </div>
-    </div>
+      </ResultsPanel>
+    </ResultsPageShell>
   );
 }

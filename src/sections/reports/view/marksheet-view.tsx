@@ -1,10 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Award, Printer, ChevronLeft, ChevronRight, User, Filter, RotateCcw, Layers } from "@/components/iconify/lucide";
+import { Award, Printer, ChevronLeft, ChevronRight, User, Layers } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import { SessionSelect } from "@/components/SessionSelect";
-import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
+import {
+  ResultsPageShell,
+  ResultsPageHeader,
+  ResultsFilterCard,
+  ResultsPanel,
+} from "@/sections/results/component/result-page-ui";
 
 // Reusable official NCTB Report Card Sheet Component
 function ReportCardSheet({ reportData }: { reportData: any }) {
@@ -552,8 +557,7 @@ export default function MarksheetPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <ResultNavHeader />
+    <ResultsPageShell>
       {/* Print Page Break Styles */}
       <style jsx global>{`
         @media print {
@@ -571,45 +575,19 @@ export default function MarksheetPage() {
         }
       `}</style>
 
-      {/* Title */}
-      <div className="no-print">
-        <h1 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
-          <Award className="w-5 h-5 text-emerald-600" />
-          <span>Student Report Cards</span>
-        </h1>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Print official individual or batch student academic transcripts and report cards.
-        </p>
-      </div>
+      <ResultsPageHeader
+        stepHint="Reports"
+        icon={<Award />}
+        title="Student Report Cards"
+        subtitle="Print individual or batch academic transcripts and report cards."
+      />
 
-      {/* Standardized Filter Bar: Class, Exam Name, Shift, Group, Section */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3 no-print">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Filter className="w-4 h-4 text-emerald-600" />
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              Report Card Selection Filters
-            </span>
-            {hasActiveFilters && (
-              <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold px-2 py-0.5 rounded-full">
-                Active Filter
-              </span>
-            )}
-          </div>
-          {hasActiveFilters && (
-            <AppButton
-              variant="link"
-              color="success"
-              size="small"
-              startIcon={<RotateCcw size={12} />}
-              onClick={handleResetFilters}
-            >
-              Reset Filters
-            </AppButton>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 text-xs">
+      <ResultsFilterCard
+        title="Choose students to print"
+        active={hasActiveFilters}
+        onReset={handleResetFilters}
+        columns={6}
+      >
           {/* Session Filter */}
           <div>
             <SessionSelect
@@ -713,11 +691,10 @@ export default function MarksheetPage() {
               })}
             </select>
           </div>
-        </div>
-      </div>
+      </ResultsFilterCard>
 
       {/* Student Selector, Roll Option & Print Controls (No Print) */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-xs space-y-3 no-print">
+      <ResultsPanel className="no-print text-xs space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* View Mode Tabs */}
           <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl w-fit">
@@ -833,7 +810,7 @@ export default function MarksheetPage() {
             </button>
           </div>
         </div>
-      </div>
+      </ResultsPanel>
 
       {/* Report Cards Rendering Canvas */}
       {viewMode === "ALL" ? (
@@ -870,12 +847,14 @@ export default function MarksheetPage() {
       ) : reportData ? (
         <ReportCardSheet reportData={reportData} />
       ) : (
-        <div className="bg-white p-12 text-center rounded-xl border border-slate-200 text-slate-400 italic text-xs">
-          {loading
-            ? "Generating printable report card..."
-            : "No report card available. Process results first."}
-        </div>
+        <ResultsPanel>
+          <div className="p-8 text-center text-slate-400 italic text-xs">
+            {loading
+              ? "Generating printable report card..."
+              : "No report card available. Process results first."}
+          </div>
+        </ResultsPanel>
       )}
-    </div>
+    </ResultsPageShell>
   );
 }

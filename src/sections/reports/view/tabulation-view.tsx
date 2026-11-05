@@ -5,7 +5,12 @@ import { useEffect, useState } from "react";
 import { FileSpreadsheet, Printer, Filter, RotateCcw } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import { SessionSelect } from "@/components/SessionSelect";
-import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
+import {
+  ResultsPageShell,
+  ResultsPageHeader,
+  ResultsFilterCard,
+  ResultsPanel,
+} from "@/sections/results/component/result-page-ui";
 
 export default function TabulationPage() {
   const [selectedSession, setSelectedSession] = useState("ALL");
@@ -183,21 +188,13 @@ export default function TabulationPage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <ResultNavHeader />
-      {/* Controls Bar (No Print) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
-            <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
-            <span>Tabulation Sheet</span>
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Full academic broadsheet with subject marks, GPA, and merit positions.
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-3">
+    <ResultsPageShell>
+      <ResultsPageHeader
+        stepHint="Reports"
+        icon={<FileSpreadsheet />}
+        title="Tabulation Sheet"
+        subtitle="Full broadsheet with subject marks, GPA, and merit positions."
+        action={
           <AppButton
             variant="contained"
             color="secondary"
@@ -207,43 +204,21 @@ export default function TabulationPage() {
           >
             Print Tabulation
           </AppButton>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Filter Bar: Class, Exam Name, Shift, Group, Section */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3 no-print">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Filter className="w-4 h-4 text-emerald-600" />
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              Tabulation Sheet Filters
-            </span>
-            {hasActiveFilters && (
-              <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold px-2 py-0.5 rounded-full">
-                Active Filter
-              </span>
-            )}
-          </div>
-          {hasActiveFilters && (
-            <AppButton
-              variant="link"
-              color="success"
-              size="small"
-              startIcon={<RotateCcw size={12} />}
-              onClick={handleResetFilters}
-            >
-              Reset Filters
-            </AppButton>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 text-xs">
+      <ResultsFilterCard
+        title="Choose class & exam"
+        active={hasActiveFilters}
+        onReset={handleResetFilters}
+        columns={6}
+      >
           {/* Session Filter */}
           <div>
             <SessionSelect
               value={selectedSession}
               onChange={(val) => setSelectedSession(val)}
-              label="Session:"
+              label="Session"
               labelClassName="font-semibold text-slate-600 block mb-1"
               selectClassName="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
             />
@@ -341,11 +316,10 @@ export default function TabulationPage() {
               })}
             </select>
           </div>
-        </div>
-      </div>
+      </ResultsFilterCard>
 
       {/* Tabulation Sheet Document Canvas */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+      <ResultsPanel sx={{ p: { xs: 2, sm: 3 } }}>
         {/* Institutional Header */}
         <div className="text-center border-b pb-4 mb-4">
           <h2 className="text-lg font-bold text-slate-900 tracking-wide">
@@ -566,7 +540,7 @@ export default function TabulationPage() {
           <div className="border-t border-slate-400 pt-2">Exam Controller</div>
           <div className="border-t border-slate-400 pt-2">Headmaster / Principal</div>
         </div>
-      </div>
-    </div>
+      </ResultsPanel>
+    </ResultsPageShell>
   );
 }

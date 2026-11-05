@@ -28,7 +28,13 @@ import {
 } from "@/components/iconify/lucide";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
-import { DownloadNavHeader } from "@/sections/download/component/download-nav-header";
+import {
+  DownloadPageShell,
+  DownloadHero,
+  DownloadEyebrow,
+  DownloadMetaChip,
+  DownloadPanel,
+} from "@/sections/download/component/download-page-ui";
 
 type CardTheme = "emerald" | "navy" | "maroon" | "slate";
 type CardOrientation = "portrait" | "landscape";
@@ -357,8 +363,7 @@ export default function StudentIdCardsPage() {
   const displayedStudents = students.filter((s) => selectedIds.includes(s.id));
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20">
-      <DownloadNavHeader />
+    <DownloadPageShell className="pb-20">
       {/* Print Styles */}
       <style jsx global>{`
         @media print {
@@ -387,53 +392,48 @@ export default function StudentIdCardsPage() {
         }
       `}</style>
 
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
-        <div>
-          <div className="flex items-center space-x-2 text-xs text-slate-500 mb-1">
-            <Link href="/" className="hover:underline">Home</Link>
-            <span>/</span>
-            <span>Students</span>
-            <span>/</span>
-            <span className="text-slate-800 font-medium">Student ID Cards</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <CreditCard className="w-6 h-6 text-emerald-600" />
-            <span>Student ID Cards</span>
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Generate, customize, and batch-print photo ID cards for enrolled students.
-          </p>
-        </div>
+      <DownloadHero
+        eyebrow={
+          <DownloadEyebrow icon={<CreditCard className="w-3.5 h-3.5" />}>
+            Downloads • ID Cards
+          </DownloadEyebrow>
+        }
+        meta={
+          <DownloadMetaChip tone="warn">
+            {displayedStudents.length} card{displayedStudents.length === 1 ? "" : "s"} selected
+          </DownloadMetaChip>
+        }
+        title="Student ID Cards"
+        description="Generate, customize, and batch-print photo ID cards with QR codes, guardian contacts, and institutional credentials."
+        actions={
+          <>
+            <Link
+              href="/setup/student-info"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-white/15"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Student Register
+            </Link>
+            <AppButton
+              onClick={() => window.print()}
+              disabled={displayedStudents.length === 0}
+              variant="contained"
+              color="warning"
+              startIcon={<Printer className="w-4 h-4" />}
+            >
+              Print {displayedStudents.length} ID Card{displayedStudents.length === 1 ? "" : "s"}
+            </AppButton>
+          </>
+        }
+      />
 
-        <div className="flex items-center gap-2">
-          <Link
-            href="/setup/student-info"
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-sm"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Student Info</span>
-          </Link>
-          <AppButton
-            onClick={() => window.print()}
-            disabled={displayedStudents.length === 0}
-            variant="contained"
-            color="success"
-            startIcon={<Printer className="w-4 h-4" />}
-          >
-            Print {displayedStudents.length} ID Card{displayedStudents.length === 1 ? "" : "s"}
-          </AppButton>
+      <DownloadPanel className="no-print flex items-start gap-3 bg-amber-50/70 border-amber-200/80" padded>
+        <Sparkles className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+        <div className="text-xs text-amber-950 leading-relaxed">
+          <p className="font-semibold mb-0.5">Official Student ID Cards Generator • NCTB Bangladesh Standard</p>
+          Configure classes and sections using the live filter below. Cards include barcodes, QR codes, emergency guardian contact, and institutional credentials.
         </div>
-      </div>
-
-      {/* Feature Notification / Banner */}
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3 no-print">
-        <Sparkles className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-        <div className="text-xs text-emerald-900 leading-relaxed">
-          <p className="font-semibold text-emerald-950 mb-0.5">Official Student ID Cards Generator • NCTB Bangladesh Standard</p>
-          Configure classes and sections using the live filter below. Cards are generated with student barcodes, QR codes, emergency guardian contact details, and institutional credentials.
-        </div>
-      </div>
+      </DownloadPanel>
 
       {/* ========================================================
           FILTER BAR (Exact format matching user specification image)
@@ -1175,7 +1175,7 @@ export default function StudentIdCardsPage() {
                 <AppButton
                   type="button"
                   variant="contained"
-                  color="success"
+                  color="warning"
                   onClick={handleSavePhoto}
                   loading={savingPhoto}
                   startIcon={<Check className="w-3.5 h-3.5" />}
@@ -1187,6 +1187,6 @@ export default function StudentIdCardsPage() {
           </div>
         </div>
       )}
-    </div>
+    </DownloadPageShell>
   );
 }

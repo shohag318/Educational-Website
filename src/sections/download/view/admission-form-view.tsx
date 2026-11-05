@@ -27,9 +27,16 @@ import {
   GraduationCap,
   Users,
 } from "@/components/iconify/lucide";
-import { DownloadNavHeader } from "@/sections/download/component/download-nav-header";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
+import {
+  DownloadPageShell,
+  DownloadHero,
+  DownloadEyebrow,
+  DownloadMetaChip,
+  DownloadPanel,
+  DownloadPanelHeader,
+} from "@/sections/download/component/download-page-ui";
 import {
   SchoolBasicInfo,
   DEFAULT_SCHOOL_INFO,
@@ -140,7 +147,7 @@ export default function StudentAdmissionBlankFormPage() {
   const isBilingual = formLanguage === "bilingual";
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20 font-sans">
+    <DownloadPageShell className="pb-20">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-20 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-emerald-500/40 flex items-center space-x-3 transition-all animate-bounce no-print">
@@ -151,43 +158,27 @@ export default function StudentAdmissionBlankFormPage() {
         </div>
       )}
 
-      {/* Top Navigation for Download Module */}
-      <DownloadNavHeader />
-
-      {/* Hero Header Banner (no-print) */}
-      <div className="bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 rounded-2xl p-6 text-white shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6 border border-slate-800 no-print">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs uppercase tracking-widest font-bold text-emerald-300 bg-emerald-950/80 px-2.5 py-1 rounded-md border border-emerald-700/60 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5" />
-              Download Module
-            </span>
-            <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono px-2 py-0.5 rounded">
-              EIIN: {schoolInfo.eiin || "108254"}
-            </span>
-            <span className="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
-              Session: {academicSession}
-            </span>
-          </div>
-
-          <h1 className="text-2xl font-bold tracking-tight">
-            Student Admission Blank Form (ছাত্র/ছাত্রী ভর্তি ফরম)
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-            Official printable admission blank form compliant with Bangladesh National Curriculum &
-            Textbook Board (NCTB) and Directorate of Secondary and Higher Education (DSHE)
-            standards. Equipped with 17-digit BRN boxes, parent details, quota, counterfoil admit
-            slip, and 1-click A4 print.
-          </p>
-        </div>
-
-        {/* Global Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+      <DownloadHero
+        eyebrow={
+          <DownloadEyebrow icon={<FileText className="w-3.5 h-3.5" />}>
+            Downloads • Admission Form
+          </DownloadEyebrow>
+        }
+        meta={
+          <>
+            <DownloadMetaChip tone="success">EIIN: {schoolInfo.eiin || "108254"}</DownloadMetaChip>
+            <DownloadMetaChip>Session: {academicSession}</DownloadMetaChip>
+          </>
+        }
+        title="Student Admission Blank Form (ছাত্র/ছাত্রী ভর্তি ফরম)"
+        description="Official printable admission form with 17-digit BRN boxes, parent details, quota, counterfoil admit slip, and 1-click A4 print."
+        actions={
+          <>
           <AppButton
             type="button"
             onClick={handlePrint}
             variant="contained"
-            color="success"
+            color="warning"
             startIcon={<Printer className="w-4 h-4" />}
             title="1-Click Print A4 Blank Admission Form"
           >
@@ -222,29 +213,28 @@ export default function StudentAdmissionBlankFormPage() {
           >
             Checklist & Rules
           </AppButton>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* ==============================================================
           INTERACTIVE CONTROLS TOOLBAR (no-print)
       ============================================================== */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4 no-print">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div className="flex items-center space-x-2">
-            <SlidersHorizontal className="w-4 h-4 text-emerald-600" />
-            <h2 className="text-sm font-bold text-slate-900">
-              Form Customization & Print Controls
-            </h2>
-          </div>
-          <Link
-            href="/settings"
-            className="text-xs text-slate-500 hover:text-emerald-700 font-medium flex items-center space-x-1"
-            title="Edit School Name, Logo & EIIN in Settings"
-          >
-            <Settings className="w-3.5 h-3.5" />
-            <span>Edit School Header Info</span>
-          </Link>
-        </div>
+      <DownloadPanel className="space-y-4 no-print">
+        <DownloadPanelHeader
+          icon={<SlidersHorizontal className="w-4 h-4" />}
+          title="Form Customization & Print Controls"
+          action={
+            <Link
+              href="/settings"
+              className="text-xs text-slate-500 hover:text-amber-700 font-medium flex items-center space-x-1"
+              title="Edit School Name, Logo & EIIN in Settings"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span>Edit School Header Info</span>
+            </Link>
+          }
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {/* Control 1: Academic Session */}
@@ -258,7 +248,7 @@ export default function StudentAdmissionBlankFormPage() {
               }}
               label="Academic Session"
               labelClassName="block text-xs font-semibold text-slate-700 mb-1"
-              selectClassName="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+              selectClassName="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
             />
           </div>
 
@@ -270,7 +260,7 @@ export default function StudentAdmissionBlankFormPage() {
             <select
               value={formCategory}
               onChange={(e) => setFormCategory(e.target.value as FormCategory)}
-              className="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+              className="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
             >
               <option value="school">High School (Class 6 - 10 / 1 - 10)</option>
               <option value="college">College / Higher Secondary (Class 11 - 12)</option>
@@ -287,7 +277,7 @@ export default function StudentAdmissionBlankFormPage() {
             <select
               value={formLayout}
               onChange={(e) => setFormLayout(e.target.value as FormLayout)}
-              className="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+              className="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
             >
               <option value="single">Single Page Compact (with Student Slip)</option>
               <option value="two_page">Two-Page Detailed (Full Subject & Rules)</option>
@@ -302,7 +292,7 @@ export default function StudentAdmissionBlankFormPage() {
             <select
               value={formLanguage}
               onChange={(e) => setFormLanguage(e.target.value as FormLanguage)}
-              className="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+              className="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
             >
               <option value="bilingual">Bilingual (English + বাংলা) - Official Standard</option>
               <option value="english">English Only</option>
@@ -317,7 +307,7 @@ export default function StudentAdmissionBlankFormPage() {
             <select
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
-              className="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+              className="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
             >
               <option value="BLANK">-- Blank Line (For Any Class) --</option>
               <option value="Play">Play</option>
@@ -350,7 +340,7 @@ export default function StudentAdmissionBlankFormPage() {
               value={academicSession}
               onChange={(e) => setAcademicSession(e.target.value)}
               placeholder="e.g. 2026 or 2026-2027"
-              className="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+              className="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
             />
           </div>
 
@@ -363,7 +353,7 @@ export default function StudentAdmissionBlankFormPage() {
               value={formSerialPrefix}
               onChange={(e) => setFormSerialPrefix(e.target.value)}
               placeholder="e.g. ADM-2026- or leave blank"
-              className="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+              className="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
             />
           </div>
 
@@ -373,7 +363,7 @@ export default function StudentAdmissionBlankFormPage() {
                 type="checkbox"
                 checked={showCounterfoil}
                 onChange={(e) => setShowCounterfoil(e.target.checked)}
-                className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                className="w-4 h-4 text-amber-600 rounded border-slate-300 focus:ring-amber-500"
               />
               <span>Tear-off Student Counterfoil Slip</span>
             </label>
@@ -383,18 +373,18 @@ export default function StudentAdmissionBlankFormPage() {
                 type="checkbox"
                 checked={showWatermark}
                 onChange={(e) => setShowWatermark(e.target.checked)}
-                className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                className="w-4 h-4 text-amber-600 rounded border-slate-300 focus:ring-amber-500"
               />
               <span>Show Official Seal Stamp</span>
             </label>
           </div>
         </div>
-      </div>
+      </DownloadPanel>
 
       {/* ==============================================================
           PRINTABLE DOCUMENT VIEWER (Screen preview & @media print)
       ============================================================== */}
-      <div className="bg-slate-200/70 p-2 sm:p-6 rounded-2xl flex justify-center overflow-x-auto">
+      <div className="bg-amber-50/40 p-2 sm:p-6 rounded-2xl border border-amber-100/80 flex justify-center overflow-x-auto">
         {/* Printable Sheet (Standard A4 Page) */}
         <div
           id="admission-form-sheet"
@@ -1433,6 +1423,6 @@ export default function StudentAdmissionBlankFormPage() {
           </div>
         </div>
       )}
-    </div>
+    </DownloadPageShell>
   );
 }

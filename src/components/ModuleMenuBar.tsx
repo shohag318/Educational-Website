@@ -22,7 +22,47 @@ export interface ModuleMenuBarProps {
   activeTheme?: "emerald" | "violet" | "amber" | "cyan" | "purple" | "blue";
 }
 
-export function ModuleMenuBar({ items }: ModuleMenuBarProps) {
+const TAB_THEME = {
+  emerald: {
+    accent: "shadow-[inset_0_2px_0_0_#059669]",
+    label: "text-emerald-950",
+    focus: "focus-visible:ring-emerald-600/35",
+    badge: "bg-emerald-600 text-white",
+  },
+  violet: {
+    accent: "shadow-[inset_0_2px_0_0_#7c3aed]",
+    label: "text-violet-950",
+    focus: "focus-visible:ring-violet-600/35",
+    badge: "bg-violet-600 text-white",
+  },
+  amber: {
+    accent: "shadow-[inset_0_2px_0_0_#d97706]",
+    label: "text-amber-950",
+    focus: "focus-visible:ring-amber-600/35",
+    badge: "bg-amber-600 text-white",
+  },
+  cyan: {
+    accent: "shadow-[inset_0_2px_0_0_#0891b2]",
+    label: "text-cyan-950",
+    focus: "focus-visible:ring-cyan-600/35",
+    badge: "bg-cyan-700 text-white",
+  },
+  purple: {
+    accent: "shadow-[inset_0_2px_0_0_#7e22ce]",
+    label: "text-purple-950",
+    focus: "focus-visible:ring-purple-600/35",
+    badge: "bg-purple-700 text-white",
+  },
+  blue: {
+    accent: "shadow-[inset_0_2px_0_0_#2563eb]",
+    label: "text-blue-950",
+    focus: "focus-visible:ring-blue-600/35",
+    badge: "bg-blue-600 text-white",
+  },
+} as const;
+
+export function ModuleMenuBar({ items, activeTheme = "emerald" }: ModuleMenuBarProps) {
+  const theme = TAB_THEME[activeTheme];
   const pathname = usePathname();
   const [optimisticHref, setOptimisticHref] = useState<string | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -65,11 +105,16 @@ export function ModuleMenuBar({ items }: ModuleMenuBarProps) {
                 if (!e.defaultPrevented) setOptimisticHref(item.href);
               }}
               className={cn(
-                "relative -mb-px inline-flex shrink-0 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-t-md rounded-b-none border border-slate-200 px-4 py-2.5 text-sm font-medium transition-colors",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/30 focus-visible:ring-offset-2",
+                "relative -mb-px inline-flex shrink-0 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-t-md rounded-b-none border px-4 py-2.5 text-sm font-medium transition-colors",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                theme.focus,
                 isActive
-                  ? "z-10 border-b-white bg-white font-semibold text-slate-900 shadow-none"
-                  : "z-[1] border-b-transparent bg-slate-100 text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                  ? cn(
+                      "z-10 border-slate-200 border-b-white bg-white font-semibold",
+                      theme.accent,
+                      theme.label
+                    )
+                  : "z-[1] border-slate-200 border-b-transparent bg-slate-100 text-slate-600 hover:border-slate-300 hover:bg-white hover:text-slate-900"
               )}
             >
               {item.label}
@@ -77,7 +122,7 @@ export function ModuleMenuBar({ items }: ModuleMenuBarProps) {
                 <span
                   className={cn(
                     "inline-flex h-[18px] items-center rounded px-1.5 text-[10px] font-bold",
-                    isActive ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-600"
+                    isActive ? theme.badge : "bg-slate-200 text-slate-600"
                   )}
                 >
                   {item.badge}

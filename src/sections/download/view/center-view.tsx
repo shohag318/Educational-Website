@@ -12,9 +12,15 @@ import {
   LayoutGrid,
   CalendarRange,
 } from "@/components/iconify/lucide";
-import { DownloadNavHeader } from "@/sections/download/component/download-nav-header";
 import { getStoredSchoolInfo } from "@/lib/settingsStore";
 import { useEffect, useState } from "react";
+import {
+  DownloadPageShell,
+  DownloadHero,
+  DownloadEyebrow,
+  DownloadMetaChip,
+  DownloadPanel,
+} from "@/sections/download/component/download-page-ui";
 
 export default function DownloadRootPage() {
   const [schoolInfo, setSchoolInfo] = useState<any>(null);
@@ -30,7 +36,7 @@ export default function DownloadRootPage() {
       href: "/download/academic-calendar",
       actionText: "Open Calendar",
       icon: CalendarRange,
-      accent: "amber",
+      tone: "amber",
       tag: "A4 Print",
     },
     {
@@ -39,7 +45,7 @@ export default function DownloadRootPage() {
       href: "/download/admission-form",
       actionText: "Print Form",
       icon: FileText,
-      accent: "emerald",
+      tone: "emerald",
       tag: "Printable",
     },
     {
@@ -48,7 +54,7 @@ export default function DownloadRootPage() {
       href: "/download/banbeis",
       actionText: "View Census",
       icon: FileSpreadsheet,
-      accent: "slate",
+      tone: "slate",
       tag: "Excel Export",
     },
     {
@@ -57,7 +63,7 @@ export default function DownloadRootPage() {
       href: "/setup/student-info",
       actionText: "View Register",
       icon: Contact,
-      accent: "blue",
+      tone: "sky",
       tag: "Excel • Print",
     },
     {
@@ -66,7 +72,7 @@ export default function DownloadRootPage() {
       href: "/student/id-cards",
       actionText: "Generate Cards",
       icon: CreditCard,
-      accent: "purple",
+      tone: "violet",
       tag: "Batch Print",
     },
     {
@@ -75,7 +81,7 @@ export default function DownloadRootPage() {
       href: "/student/transcript",
       actionText: "Open Transcripts",
       icon: FileText,
-      accent: "rose",
+      tone: "rose",
       tag: "Official PDF",
     },
     {
@@ -84,143 +90,116 @@ export default function DownloadRootPage() {
       href: "/student/seat-plan",
       actionText: "Generate Seat Plan",
       icon: LayoutGrid,
-      accent: "teal",
+      tone: "teal",
       tag: "Desk Cards",
     },
   ];
 
-  const getAccentStyles = (accent: string) => {
-    switch (accent) {
-      case "amber":
-        return {
-          iconBg: "bg-amber-100 text-amber-800",
-          button: "bg-amber-600 hover:bg-amber-700 text-white",
-          border: "hover:border-amber-500",
-        };
-      case "emerald":
-        return {
-          iconBg: "bg-emerald-100 text-emerald-800",
-          button: "bg-emerald-600 hover:bg-emerald-700 text-white",
-          border: "hover:border-emerald-500",
-        };
-      case "blue":
-        return {
-          iconBg: "bg-blue-100 text-blue-800",
-          button: "bg-blue-600 hover:bg-blue-700 text-white",
-          border: "hover:border-blue-500",
-        };
-      case "purple":
-        return {
-          iconBg: "bg-purple-100 text-purple-800",
-          button: "bg-purple-600 hover:bg-purple-700 text-white",
-          border: "hover:border-purple-500",
-        };
-      case "rose":
-        return {
-          iconBg: "bg-rose-100 text-rose-800",
-          button: "bg-rose-600 hover:bg-rose-700 text-white",
-          border: "hover:border-rose-500",
-        };
-      case "teal":
-        return {
-          iconBg: "bg-teal-100 text-teal-800",
-          button: "bg-teal-600 hover:bg-teal-700 text-white",
-          border: "hover:border-teal-500",
-        };
-      default:
-        return {
-          iconBg: "bg-slate-100 text-slate-800",
-          button: "bg-slate-900 hover:bg-slate-800 text-white",
-          border: "hover:border-slate-500",
-        };
-    }
+  const toneStyles: Record<string, { icon: string; button: string; border: string }> = {
+    amber: {
+      icon: "bg-amber-50 text-amber-700",
+      button: "bg-amber-600 hover:bg-amber-700 text-white",
+      border: "hover:border-amber-300",
+    },
+    emerald: {
+      icon: "bg-emerald-50 text-emerald-700",
+      button: "bg-emerald-600 hover:bg-emerald-700 text-white",
+      border: "hover:border-emerald-300",
+    },
+    sky: {
+      icon: "bg-sky-50 text-sky-700",
+      button: "bg-sky-600 hover:bg-sky-700 text-white",
+      border: "hover:border-sky-300",
+    },
+    violet: {
+      icon: "bg-violet-50 text-violet-700",
+      button: "bg-violet-600 hover:bg-violet-700 text-white",
+      border: "hover:border-violet-300",
+    },
+    rose: {
+      icon: "bg-rose-50 text-rose-700",
+      button: "bg-rose-600 hover:bg-rose-700 text-white",
+      border: "hover:border-rose-300",
+    },
+    teal: {
+      icon: "bg-teal-50 text-teal-700",
+      button: "bg-teal-600 hover:bg-teal-700 text-white",
+      border: "hover:border-teal-300",
+    },
+    slate: {
+      icon: "bg-slate-100 text-slate-700",
+      button: "bg-slate-800 hover:bg-slate-900 text-white",
+      border: "hover:border-slate-300",
+    },
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-16 font-sans">
-      <DownloadNavHeader />
+    <DownloadPageShell>
+      <DownloadHero
+        eyebrow={
+          <DownloadEyebrow icon={<Download className="h-3.5 w-3.5" />}>Download Center</DownloadEyebrow>
+        }
+        meta={<DownloadMetaChip tone="warn">EIIN: {schoolInfo?.eiin || "108254"}</DownloadMetaChip>}
+        title="Downloads & Official Stationery"
+        description="Printable forms, academic calendars, census reports, and student documents — all in one place."
+        actions={
+          <>
+            <Link
+              href="/download/admission-form"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-500"
+            >
+              <Printer className="h-3.5 w-3.5" />
+              Admission Form
+            </Link>
+            <Link
+              href="/download/academic-calendar"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-amber-400"
+            >
+              <CalendarRange className="h-3.5 w-3.5" />
+              Academic Calendar
+            </Link>
+          </>
+        }
+      />
 
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-amber-950 rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 border border-slate-800">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-amber-400 bg-amber-950/80 px-2.5 py-1 rounded-md border border-amber-800 flex items-center gap-1.5">
-              <Download className="w-3.5 h-3.5" />
-              Download Center
-            </span>
-            <span className="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">
-              EIIN: {schoolInfo?.eiin || "108254"}
-            </span>
-          </div>
-
-          <h1 className="text-2xl font-bold tracking-tight mt-2">
-            Downloads & Official Stationery
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-300 mt-1">
-            Printable forms, academic calendars, census reports, and student documents.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          <Link
-            href="/download/admission-form"
-            className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition shadow-sm"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Admission Form</span>
-          </Link>
-          <Link
-            href="/download/academic-calendar"
-            className="flex items-center space-x-1.5 bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition shadow-sm"
-          >
-            <CalendarRange className="w-3.5 h-3.5" />
-            <span>Academic Calendar</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {downloadCards.map((card, idx) => {
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {downloadCards.map((card) => {
           const Icon = card.icon;
-          const styles = getAccentStyles(card.accent);
+          const styles = toneStyles[card.tone] || toneStyles.slate;
 
           return (
-            <div
-              key={idx}
-              className={`bg-white rounded-xl border border-slate-200/90 ${styles.border} p-5 shadow-xs transition-all hover:shadow-xs flex flex-col justify-between group`}
+            <DownloadPanel
+              key={card.href}
+              className={`group flex flex-col justify-between transition-all hover:shadow-md ${styles.border}`}
             >
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${styles.iconBg}`}>
-                    <Icon className="w-5 h-5" />
+                <div className="mb-3 flex items-center justify-between">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${styles.icon}`}>
+                    <Icon className="h-5 w-5" />
                   </div>
-                  <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
                     {card.tag}
                   </span>
                 </div>
-
-                <h2 className="text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                <h2 className="text-base font-bold text-slate-900 transition-colors group-hover:text-amber-800">
                   {card.title}
                 </h2>
-                <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                  {card.desc}
-                </p>
+                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">{card.desc}</p>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
+              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
                 <Link
                   href={card.href}
-                  className={`inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition ${styles.button}`}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition ${styles.button}`}
                 >
                   <span>{card.actionText}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
-            </div>
+            </DownloadPanel>
           );
         })}
       </div>
-    </div>
+    </DownloadPageShell>
   );
 }

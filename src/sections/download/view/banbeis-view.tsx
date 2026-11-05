@@ -37,9 +37,15 @@ import {
   downloadBanbeisJSON,
 } from "@/lib/banbeisData";
 import { SchoolBasicInfo, getStoredSchoolInfo } from "@/lib/settingsStore";
-import { DownloadNavHeader } from "@/sections/download/component/download-nav-header";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
+import {
+  DownloadPageShell,
+  DownloadHero,
+  DownloadEyebrow,
+  DownloadMetaChip,
+  DownloadStatCard,
+} from "@/sections/download/component/download-page-ui";
 
 export default function BanbeisDownloadPage() {
   const [census, setCensus] = useState<BanbeisMasterCensus | null>(null);
@@ -524,7 +530,7 @@ export default function BanbeisDownloadPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-16 font-sans">
+    <DownloadPageShell>
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-20 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-emerald-500/40 flex items-center space-x-3 transition-all animate-bounce no-print">
@@ -535,48 +541,29 @@ export default function BanbeisDownloadPage() {
         </div>
       )}
 
-      {/* Top Navigation for Download Module */}
-      <DownloadNavHeader />
-
-      {/* ==============================================================
-          HERO BANNER: BANBEIS Download Center
-      ============================================================== */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 text-white shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6 border border-slate-800 no-print">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs uppercase tracking-widest font-bold text-amber-300 bg-amber-950/80 px-2.5 py-1 rounded-md border border-amber-700/60 flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5" />
-              BANBEIS Download Module
-            </span>
-            <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono px-2 py-0.5 rounded">
-              EIIN: {census.institution.eiin || "108254"}
-            </span>
-            <span className="text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded">
-              Board: {census.institution.board || "Dhaka"}
-            </span>
-            <span className="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
-              Academic Session: {census.academicYear}
-            </span>
-          </div>
-
-          <h1 className="text-2xl font-bold tracking-tight">
-            BANBEIS Educational Census & Statistics Export
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-            Bangladesh Bureau of Educational Information and Statistics (বার্ষিক শিক্ষাতথ্য জরিপ). 
-            Instantly download institution profile, class enrollments, gender distributions, teacher rosters, 
-            infrastructure, and student registers in official multi-sheet Excel (.xlsx), CSV, and JSON formats.
-          </p>
-        </div>
-
-        {/* Global 1-Click Master Download Actions */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+      <DownloadHero
+        eyebrow={
+          <DownloadEyebrow icon={<Building2 className="w-3.5 h-3.5" />}>
+            Downloads • BANBEIS Census
+          </DownloadEyebrow>
+        }
+        meta={
+          <>
+            <DownloadMetaChip tone="success">EIIN: {census.institution.eiin || "108254"}</DownloadMetaChip>
+            <DownloadMetaChip tone="info">Board: {census.institution.board || "Dhaka"}</DownloadMetaChip>
+            <DownloadMetaChip>Session: {census.academicYear}</DownloadMetaChip>
+          </>
+        }
+        title="BANBEIS Educational Census & Statistics Export"
+        description="Bangladesh Bureau of Educational Information and Statistics (বার্ষিক শিক্ষাতথ্য জরিপ). Download institution profile, enrollments, teachers, and infrastructure in Excel, CSV, and JSON."
+        actions={
+          <>
           <AppButton
             type="button"
             onClick={handleDownloadCompleteCensus}
             loading={isDownloadingAll}
             variant="contained"
-            color="success"
+            color="warning"
             startIcon={<ArrowDownToLine className="w-4 h-4" />}
             title="Download complete 7-sheet workbook with all statistical tables for BANBEIS"
           >
@@ -604,88 +591,50 @@ export default function BanbeisDownloadPage() {
           >
             Print Report
           </AppButton>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* ==============================================================
           KEY KPI SUMMARY CARDS
       ============================================================== */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 no-print">
-        {/* Card 1: Total Students */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-500 text-xs">
-            <span className="font-semibold">Total Students</span>
-            <Users className="w-4 h-4 text-emerald-600" />
-          </div>
-          <div className="mt-2 flex items-baseline space-x-2">
-            <span className="text-2xl font-black text-slate-900">{totalStudents}</span>
-            <span className="text-[11px] text-emerald-600 font-semibold">{femaleRatio}% Girls</span>
-          </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            Boys: <strong className="text-slate-800">{totalMale}</strong> • Girls:{" "}
-            <strong className="text-slate-800">{totalFemale}</strong>
-          </p>
-        </div>
-
-        {/* Card 2: Teaching Staff */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-500 text-xs">
-            <span className="font-semibold">Faculty & Staff</span>
-            <GraduationCap className="w-4 h-4 text-sky-600" />
-          </div>
-          <div className="mt-2 flex items-baseline space-x-2">
-            <span className="text-2xl font-black text-slate-900">{totalTeachers}</span>
-            <span className="text-[11px] text-sky-600 font-semibold">{mpoTeachers} MPO</span>
-          </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            Female Faculty: <strong className="text-slate-800">{femaleTeachers}</strong> (
-            {totalTeachers > 0 ? ((femaleTeachers / totalTeachers) * 100).toFixed(0) : 0}%)
-          </p>
-        </div>
-
-        {/* Card 3: Board Exam Success */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-500 text-xs">
-            <span className="font-semibold">SSC Board Pass Rate</span>
-            <Award className="w-4 h-4 text-amber-600" />
-          </div>
-          <div className="mt-2 flex items-baseline space-x-2">
-            <span className="text-2xl font-black text-slate-900">98.2%</span>
-            <span className="text-[11px] text-amber-600 font-semibold">48 GPA-5</span>
-          </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            Appeared: <strong className="text-slate-800">112</strong> • Passed:{" "}
-            <strong className="text-slate-800">110</strong>
-          </p>
-        </div>
-
-        {/* Card 4: ICT & Labs */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-500 text-xs">
-            <span className="font-semibold">ICT & Classrooms</span>
-            <Laptop className="w-4 h-4 text-purple-600" />
-          </div>
-          <div className="mt-2 flex items-baseline space-x-2">
-            <span className="text-2xl font-black text-slate-900">
-              {census.infrastructure.totalFunctionalComputers} PCs
-            </span>
-            <span className="text-[11px] text-purple-600 font-semibold">
-              {census.infrastructure.multimediaClassrooms} Multimedia
-            </span>
-          </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            Classrooms: <strong className="text-slate-800">{census.infrastructure.classroomsCount}</strong> • Labs:{" "}
-            <strong className="text-slate-800">{census.infrastructure.scienceLabsCount}</strong>
-          </p>
-        </div>
+        <DownloadStatCard
+          label="Total Students"
+          value={totalStudents.toLocaleString()}
+          hint={`Boys ${totalMale} • Girls ${totalFemale} (${femaleRatio}%)`}
+          tone="emerald"
+          icon={<Users className="w-3.5 h-3.5" />}
+        />
+        <DownloadStatCard
+          label="Faculty & Staff"
+          value={totalTeachers}
+          hint={`${mpoTeachers} MPO • ${femaleTeachers} female faculty`}
+          tone="sky"
+          icon={<GraduationCap className="w-3.5 h-3.5" />}
+        />
+        <DownloadStatCard
+          label="SSC Board Pass Rate"
+          value="98.2%"
+          hint="Appeared 112 • Passed 110 • 48 GPA-5"
+          tone="amber"
+          icon={<Award className="w-3.5 h-3.5" />}
+        />
+        <DownloadStatCard
+          label="ICT & Classrooms"
+          value={`${census.infrastructure.totalFunctionalComputers} PCs`}
+          hint={`${census.infrastructure.classroomsCount} rooms • ${census.infrastructure.scienceLabsCount} labs`}
+          tone="violet"
+          icon={<Laptop className="w-3.5 h-3.5" />}
+        />
       </div>
 
       {/* ==============================================================
           INTERACTIVE DATA PREVIEW TABS & VIEWER
       ============================================================== */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden no-print">
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.04)] overflow-hidden no-print">
         {/* Navigation Tabs Header */}
-        <div className="border-b border-slate-200 bg-slate-50/50 p-2 sm:px-4 flex items-center justify-between flex-wrap gap-2">
+        <div className="border-b border-slate-200 bg-amber-50/40 p-2 sm:px-4 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center space-x-1 overflow-x-auto text-xs font-semibold">
             <AppButton
               type="button"
@@ -1913,6 +1862,6 @@ export default function BanbeisDownloadPage() {
           </div>
         </div>
       </div>
-    </div>
+    </DownloadPageShell>
   );
 }

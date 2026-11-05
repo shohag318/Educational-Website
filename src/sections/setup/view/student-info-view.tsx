@@ -26,9 +26,14 @@ import {
   AlertCircle,
   Trash2,
 } from "@/components/iconify/lucide";
-import { DownloadNavHeader } from "@/sections/download/component/download-nav-header";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
+import {
+  DownloadPageShell,
+  DownloadHero,
+  DownloadEyebrow,
+  DownloadMetaChip,
+} from "@/sections/download/component/download-page-ui";
 
 interface ColumnDef {
   key: string;
@@ -682,7 +687,7 @@ export default function StudentInfoPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-16">
+    <DownloadPageShell>
       {/* Print Page Styles */}
       <style jsx global>{`
         @media print {
@@ -700,23 +705,21 @@ export default function StudentInfoPage() {
         }
       `}</style>
 
-      {/* Top Module Sub-Navigation Bar */}
-      <DownloadNavHeader />
-
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
-            <Contact className="w-5 h-5 text-emerald-600" />
-            <span>Phase 1: Student Information & Custom Column Export</span>
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Filter student records, customize visible and downloadable columns as you wish, and export custom spreadsheets (CSV, Excel) or print rosters.
-          </p>
-        </div>
-
-        {/* Global Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
+      <DownloadHero
+        eyebrow={
+          <DownloadEyebrow icon={<Contact className="w-3.5 h-3.5" />}>
+            Downloads • Student Register
+          </DownloadEyebrow>
+        }
+        meta={
+          <DownloadMetaChip tone="warn">
+            {students.length} student{students.length === 1 ? "" : "s"} filtered
+          </DownloadMetaChip>
+        }
+        title="Student Information & Custom Column Export"
+        description="Filter student records, customize visible columns, and export CSV/Excel or print rosters."
+        actions={
+          <>
           <AppButton
             onClick={handleCopyToClipboard}
             disabled={students.length === 0 || activeColumns.length === 0}
@@ -724,18 +727,18 @@ export default function StudentInfoPage() {
             title="Copy table to clipboard to paste directly into Google Sheets or Excel"
             startIcon={copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
           >
-            {copied ? "Copied to Clipboard!" : "Copy Table"}
+            {copied ? "Copied!" : "Copy Table"}
           </AppButton>
 
           <AppButton
             onClick={handleDownloadCSV}
             disabled={students.length === 0 || activeColumns.length === 0}
             variant="contained"
-            color="success"
+            color="warning"
             title="Download CSV containing only the selected columns for the filtered students"
             startIcon={<Download className="w-3.5 h-3.5" />}
           >
-            Download Selected Columns ({activeColumns.length})
+            Download ({activeColumns.length})
           </AppButton>
 
           <AppButton
@@ -747,10 +750,11 @@ export default function StudentInfoPage() {
             }}
             disabled={students.length === 0}
             variant="contained"
+            color="secondary"
             title="Promote selected or all filtered students to next class"
             startIcon={<GraduationCap className="w-3.5 h-3.5" />}
           >
-            Promote {selectedEnrollmentIds.length > 0 ? `(${selectedEnrollmentIds.length})` : "Students"}
+            Promote {selectedEnrollmentIds.length > 0 ? `(${selectedEnrollmentIds.length})` : ""}
           </AppButton>
 
           <AppButton
@@ -761,8 +765,9 @@ export default function StudentInfoPage() {
           >
             Print Roster
           </AppButton>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Status Notification Toast Banner */}
       {statusMessage && (
@@ -1600,6 +1605,6 @@ export default function StudentInfoPage() {
           </div>
         </div>
       )}
-    </div>
+    </DownloadPageShell>
   );
 }

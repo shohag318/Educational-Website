@@ -35,9 +35,16 @@ import {
   Bookmark,
   Share2,
 } from "@/components/iconify/lucide";
-import { DownloadNavHeader } from "@/sections/download/component/download-nav-header";
 import { DatePicker } from "@/components/date-picker/date-picker";
 import { AppButton } from "@/components/button/app-button";
+import {
+  DownloadPageShell,
+  DownloadHero,
+  DownloadEyebrow,
+  DownloadMetaChip,
+  DownloadStatCard,
+  DownloadPanel,
+} from "@/sections/download/component/download-page-ui";
 import { getStoredSchoolInfo, SchoolBasicInfo } from "@/lib/settingsStore";
 import {
   AcademicActivity,
@@ -322,53 +329,37 @@ export default function AcademicCalendarPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20 font-sans print:p-0 print:m-0 print:max-w-none">
-      {/* Non-printable Module Navigation Header */}
-      <div className="print:hidden">
-        <DownloadNavHeader />
-      </div>
-
+    <DownloadPageShell className="pb-20">
       {/* Floating Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-2xl flex items-center space-x-2 border border-slate-700 animate-in fade-in slide-in-from-bottom-2">
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-2xl flex items-center space-x-2 border border-slate-700 animate-in fade-in slide-in-from-bottom-2 no-print">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Header Banner (Hidden in Print View) */}
-      <div className="bg-gradient-to-r from-slate-900 via-amber-950 to-slate-900 rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 border border-slate-800 print:hidden">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs uppercase tracking-widest font-bold text-amber-300 bg-amber-950/80 px-2.5 py-1 rounded-md border border-amber-700/60 flex items-center gap-1.5">
-              <CalendarRange className="w-3.5 h-3.5" />
-              Download Module &bull; Academic Calendar
-            </span>
-            <span className="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-md font-mono">
-              EIIN: {schoolInfo?.eiin || "108254"}
-            </span>
-            <span className="text-xs bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-semibold">
-              Ministry & Board Standard
-            </span>
-          </div>
-
-          <h1 className="text-2xl font-bold tracking-tight">
-            Academic Calendar Setup & Annual Activity Planner
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-            Configure, manage and print the full-year institutional schedule. Record national holidays, extended term
-            vacations, examination windows, and co-curricular sports and cultural festivities for Session {session}.
-          </p>
-        </div>
-
-        {/* View Mode Switches */}
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
+      <DownloadHero
+        eyebrow={
+          <DownloadEyebrow icon={<CalendarRange className="w-3.5 h-3.5" />}>
+            Downloads • Academic Calendar
+          </DownloadEyebrow>
+        }
+        meta={
+          <>
+            <DownloadMetaChip>EIIN: {schoolInfo?.eiin || "108254"}</DownloadMetaChip>
+            <DownloadMetaChip tone="success">Ministry & Board Standard</DownloadMetaChip>
+          </>
+        }
+        title="Academic Calendar Setup & Annual Activity Planner"
+        description={`Configure holidays, examinations, and co-curricular events for Session ${session}. Print the full-year institutional schedule.`}
+        actions={
+          <>
           <AppButton
             type="button"
             size="small"
             onClick={() => setViewMode("TABLE")}
             variant="soft"
-            color={viewMode === "TABLE" ? "primary" : "inherit"}
+            color={viewMode === "TABLE" ? "warning" : "inherit"}
             startIcon={<Layers className="w-3.5 h-3.5" />}
           >
             Table View
@@ -378,7 +369,7 @@ export default function AcademicCalendarPage() {
             size="small"
             onClick={() => setViewMode("MATRIX")}
             variant="soft"
-            color={viewMode === "MATRIX" ? "primary" : "inherit"}
+            color={viewMode === "MATRIX" ? "warning" : "inherit"}
             startIcon={<CalendarDays className="w-3.5 h-3.5" />}
           >
             12-Month Grid
@@ -388,63 +379,49 @@ export default function AcademicCalendarPage() {
             size="small"
             onClick={() => setViewMode("PRINT")}
             variant="soft"
-            color={viewMode === "PRINT" ? "primary" : "inherit"}
+            color={viewMode === "PRINT" ? "warning" : "inherit"}
             startIcon={<Printer className="w-3.5 h-3.5" />}
           >
             Printable Calendar
           </AppButton>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* KPI Stats Bar (Print:hidden) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 print:hidden">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-          <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-            Academic / Teaching Days
-          </span>
-          <div className="flex items-baseline space-x-1 mt-1">
-            <span className="text-2xl font-bold font-mono text-emerald-700">{stats.workingDays}</span>
-            <span className="text-xs text-slate-400">/ 365 Days</span>
-          </div>
-          <span className="text-[10px] text-slate-500 mt-1 block">Active class & practical days</span>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-          <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-            Total Holidays & Vacation
-          </span>
-          <div className="flex items-baseline space-x-1 mt-1">
-            <span className="text-2xl font-bold font-mono text-rose-600">{stats.holidays}</span>
-            <span className="text-xs text-slate-400">Days</span>
-          </div>
-          <span className="text-[10px] text-slate-500 mt-1 block">Govt, religious & vacation days</span>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-          <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-            Examination Windows
-          </span>
-          <div className="flex items-baseline space-x-1 mt-1">
-            <span className="text-2xl font-bold font-mono text-purple-700">{stats.examDays}</span>
-            <span className="text-xs text-slate-400">Days</span>
-          </div>
-          <span className="text-[10px] text-slate-500 mt-1 block">Half-yearly, Test & Annual exams</span>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-          <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-            Co-curricular & Sports
-          </span>
-          <div className="flex items-baseline space-x-1 mt-1">
-            <span className="text-2xl font-bold font-mono text-amber-600">{stats.eventCount}</span>
-            <span className="text-xs text-slate-400">Events</span>
-          </div>
-          <span className="text-[10px] text-slate-500 mt-1 block">Sports, Science Fair, Cultural</span>
-        </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 print:hidden no-print">
+        <DownloadStatCard
+          label="Teaching Days"
+          value={stats.workingDays}
+          hint="/ 365 active class days"
+          tone="emerald"
+          icon={<Clock className="w-3.5 h-3.5" />}
+        />
+        <DownloadStatCard
+          label="Holidays & Vacation"
+          value={stats.holidays}
+          hint="Govt, religious & vacation"
+          tone="rose"
+          icon={<Calendar className="w-3.5 h-3.5" />}
+        />
+        <DownloadStatCard
+          label="Exam Windows"
+          value={stats.examDays}
+          hint="Half-yearly, Test & Annual"
+          tone="violet"
+          icon={<FileText className="w-3.5 h-3.5" />}
+        />
+        <DownloadStatCard
+          label="Co-curricular Events"
+          value={stats.eventCount}
+          hint="Sports, Fair & Cultural"
+          tone="amber"
+          icon={<Sparkles className="w-3.5 h-3.5" />}
+        />
       </div>
 
       {/* Control Toolbar (Print:hidden) */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-3 print:hidden">
+      <DownloadPanel className="space-y-3 print:hidden no-print">
         <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Session Switcher & Add Button */}
           <div className="flex flex-wrap items-center gap-3">
@@ -465,7 +442,7 @@ export default function AcademicCalendarPage() {
               type="button"
               onClick={() => handleOpenAddModal()}
               variant="contained"
-              color="success"
+              color="warning"
               startIcon={<Plus className="w-3.5 h-3.5" />}
             >
               Add Academic Activity
@@ -584,14 +561,14 @@ export default function AcademicCalendarPage() {
             </div>
           </div>
         </div>
-      </div>
+      </DownloadPanel>
 
       {/* VIEW 1: TABLE VIEW */}
       {viewMode === "TABLE" && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden print:hidden">
-          <div className="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.04)] overflow-hidden print:hidden">
+          <div className="p-3.5 bg-amber-50/50 border-b border-slate-200 flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4 text-emerald-600" />
+              <Calendar className="w-4 h-4 text-amber-600" />
               <h2 className="text-xs font-bold text-slate-800">
                 Annual Academic Schedule & Activity Register ({filteredActivities.length} Events)
               </h2>
@@ -1160,6 +1137,6 @@ export default function AcademicCalendarPage() {
           </div>
         </div>
       )}
-    </div>
+    </DownloadPageShell>
   );
 }

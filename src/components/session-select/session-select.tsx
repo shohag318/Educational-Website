@@ -55,17 +55,19 @@ interface SessionSelectProps {
   labelClassName?: string;
   sessions?: AcademicSessionOption[];
   activeOnly?: boolean;
+  fullWidth?: boolean;
 }
 
 export function SessionSelect({
   value,
   onChange,
-  label = "Session:",
+  label = "Session",
   includeAll = false,
   allLabel = "All Sessions",
   className,
   sessions: customSessions,
   activeOnly = true,
+  fullWidth = true,
 }: SessionSelectProps) {
   const { sessions: fetchedSessions } = useAcademicSessions({ activeOnly });
   const rawSessions = customSessions && customSessions.length > 0 ? customSessions : fetchedSessions;
@@ -88,7 +90,12 @@ export function SessionSelect({
   }, [sessions, value, includeAll, onChange]);
 
   return (
-    <FormControl size="small" className={className} sx={{ minWidth: 140 }}>
+    <FormControl
+      size="small"
+      fullWidth={fullWidth}
+      className={className}
+      sx={fullWidth ? undefined : { minWidth: 140 }}
+    >
       {label && <InputLabel>{label}</InputLabel>}
       <Select
         value={value || sessions[0]?.yearName || "2026"}

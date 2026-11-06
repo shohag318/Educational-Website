@@ -25,6 +25,7 @@ import {
   ArrowRight,
   ShieldAlert,
 } from "@/components/iconify/lucide";
+import { AppSelect, AppTextField } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
 import {
@@ -867,12 +868,7 @@ export default function ExamsPage() {
         </div>
       )}
 
-      <ResultsPageHeader
-        stepHint="Results workflow • Step 2"
-        icon={<Calendar />}
-        title="Exam Configuration"
-        subtitle="Create exam terms, assessment components, and subject mark distributions."
-      />
+      <ResultsPageHeader heading="Exam Configuration" current="Exam Configuration" />
 
       {/* Create Exam Card */}
       <ResultsPanel className="space-y-4">
@@ -883,85 +879,83 @@ export default function ExamsPage() {
         <form onSubmit={handleCreateExam} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
             <div className="lg:col-span-2">
-              <label className="font-medium text-slate-600 block">Session *</label>
-              <select
+              <SessionSelect
+                label="Session"
                 value={session}
-                onChange={(e) => setSession(e.target.value)}
-                className="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-xs text-slate-800"
-                required
-              >
-                <option value="">-- Select Session --</option>
-                {academicYears.map((ay) => (
-                  <option key={ay.id} value={ay.yearName}>
-                    {ay.yearName}{ay.isCurrent ? " (Current)" : ""}
-                  </option>
-                ))}
-                {academicYears.length === 0 && (
-                  <option value="2026">2026 (Current)</option>
-                )}
-              </select>
-            </div>
-            <div className="lg:col-span-2">
-              <label className="font-medium text-slate-600 block">Target Class *</label>
-              <select
-                value={classId}
-                onChange={(e) => {
-                  setClassId(e.target.value);
-                  setSelectedTemplateId("");
-                }}
-                className="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-xs text-slate-800"
-                required
-              >
-                <option value="">-- Select Class --</option>
-                {classes.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="lg:col-span-3">
-              <label className="font-medium text-slate-600 block">Exam Title *</label>
-              <input
-                type="text"
-                placeholder="e.g. Annual Examination 2026"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-xs text-slate-800"
-                required
+                onChange={setSession}
+                activeOnly={false}
+                fullWidth
               />
             </div>
             <div className="lg:col-span-2">
-              <label className="font-medium text-slate-600 block">Exam Type *</label>
-              <select
+              <AppSelect
+                label="Target Class"
+                value={classId}
+                onChange={(val) => {
+                  setClassId(val);
+                  setSelectedTemplateId("");
+                }}
+                options={[
+                  { value: "", label: "-- Select Class --" },
+                  ...classes.map((c) => ({ value: c.id, label: c.name })),
+                ]}
+              />
+            </div>
+            <div className="lg:col-span-3">
+              <AppTextField
+                label="Exam Title"
+                placeholder="e.g. Annual Examination 2026"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="lg:col-span-2 space-y-2">
+              <AppSelect
+                label="Exam Type"
                 value={termCode}
-                onChange={(e) => {
-                  setTermCode(e.target.value);
-                  if (e.target.value !== "Other") {
+                onChange={(val) => {
+                  setTermCode(val);
+                  if (val !== "Other") {
                     setCustomTermCode("");
                   }
                 }}
-                className="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-xs text-slate-800"
-                required
-              >
-                <option value="Semester">Semester</option>
-                <option value="Class Test">Class Test</option>
-                <option value="Other">Other</option>
-              </select>
+                options={[
+                  { value: "Semester", label: "Semester" },
+                  { value: "Class Test", label: "Class Test" },
+                  { value: "Other", label: "Other" },
+                ]}
+              />
               {termCode === "Other" && (
-                <input
-                  type="text"
-                  placeholder="Type custom exam type (e.g. Model Test, Pre-Test)"
+                <AppTextField
+                  label="Custom Exam Type"
+                  placeholder="e.g. Model Test, Pre-Test"
                   value={customTermCode}
                   onChange={(e) => setCustomTermCode(e.target.value)}
-                  className="w-full mt-1.5 p-2 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-emerald-50/30 text-slate-800 text-xs font-medium"
                   required
                 />
               )}
             </div>
             <div className="lg:col-span-3">
-              <div className="flex items-center justify-between">
-                <label className="font-medium text-slate-600 block">Exam Template</label>
+              <AppSelect
+                label="Exam Template"
+                value={selectedTemplateId}
+                onChange={setSelectedTemplateId}
+                options={[
+                  {
+                    value: "",
+                    label:
+                      filteredTemplatesForClass.length === 0
+                        ? "-- No Templates for Class --"
+                        : "-- None (Manual / Default) --",
+                  },
+                  ...filteredTemplatesForClass.map((tpl) => ({
+                    value: tpl.id,
+                    label: `${tpl.name} (${tpl.items?.length || 0} subjects)`,
+                  })),
+                ]}
+              />
+              <div className="flex justify-end mt-1">
                 <Link
                   href="/academic/rules"
                   className="text-[10px] text-emerald-600 hover:text-emerald-700 hover:underline font-semibold"
@@ -970,24 +964,6 @@ export default function ExamsPage() {
                   Manage Templates
                 </Link>
               </div>
-              <select
-                value={selectedTemplateId}
-                onChange={(e) => setSelectedTemplateId(e.target.value)}
-                className={`w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-xs text-slate-800 transition-colors ${
-                  selectedTemplateId ? "border-emerald-500 bg-emerald-50/40" : "border-slate-200"
-                }`}
-              >
-                <option value="">
-                  {filteredTemplatesForClass.length === 0
-                    ? "-- No Templates for Class --"
-                    : "-- None (Manual / Default) --"}
-                </option>
-                {filteredTemplatesForClass.map((tpl) => (
-                  <option key={tpl.id} value={tpl.id}>
-                    {tpl.name} ({tpl.items?.length || 0} subjects)
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 
@@ -1058,55 +1034,36 @@ export default function ExamsPage() {
         {/* Exam Catalog Filter Bar (Session first) */}
         <div className="p-3 bg-slate-50 border-b border-slate-200">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Session:</label>
-              <select
-                value={filterSession}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setFilterSession(val);
-                  if (val !== "ALL") {
-                    setSession(val);
-                  }
-                }}
-                className="w-full text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-medium"
-              >
-                <option value="ALL">All Sessions</option>
-                {academicYears.map((ay) => (
-                  <option key={ay.id} value={ay.yearName}>
-                    {ay.yearName}{ay.isCurrent ? " (Current)" : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Class:</label>
-              <select
-                value={filterClassId}
-                onChange={(e) => setFilterClassId(e.target.value)}
-                className="w-full text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-medium"
-              >
-                <option value="ALL">All Classes</option>
-                {classes.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Search Exam:</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Filter by exam name..."
-                  value={filterSearch}
-                  onChange={(e) => setFilterSearch(e.target.value)}
-                  className="w-full text-xs bg-white border border-slate-200 rounded-lg pl-8 pr-2.5 py-1.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                />
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
-              </div>
-            </div>
+            <SessionSelect
+              label="Session"
+              value={filterSession}
+              onChange={(val) => {
+                setFilterSession(val);
+                if (val !== "ALL") {
+                  setSession(val);
+                }
+              }}
+              includeAll
+              allLabel="All Sessions"
+              activeOnly={false}
+              fullWidth
+            />
+            <AppSelect
+              label="Class"
+              value={filterClassId}
+              onChange={setFilterClassId}
+              options={[
+                { value: "ALL", label: "All Classes" },
+                ...classes.map((c) => ({ value: c.id, label: c.name })),
+              ]}
+            />
+            <AppTextField
+              label="Search Exam"
+              placeholder="Filter by exam name..."
+              value={filterSearch}
+              onChange={(e) => setFilterSearch(e.target.value)}
+              startIcon={<Search className="w-3.5 h-3.5 text-slate-400" />}
+            />
           </div>
         </div>
 
@@ -1385,19 +1342,19 @@ export default function ExamsPage() {
                         </div>
 
                         {/* Filter by Group */}
-                        <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
-                          <span className="text-slate-500 text-[11px] whitespace-nowrap">Group:</span>
-                          <select
+                        <div className="w-full sm:w-56">
+                          <AppSelect
+                            label="Group"
                             value={groupFilter}
-                            onChange={(e) => setGroupFilter(e.target.value)}
-                            className="p-1.5 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-700 shadow-2xs focus:ring-1 focus:ring-emerald-500"
-                          >
-                            <option value="ALL">All Groups</option>
-                            <option value="GENERAL">General / Common</option>
-                            <option value="SCIENCE">Science</option>
-                            <option value="HUMANITIES">Humanities</option>
-                            <option value="BUSINESS_STUDIES">Business Studies</option>
-                          </select>
+                            onChange={setGroupFilter}
+                            options={[
+                              { value: "ALL", label: "All Groups" },
+                              { value: "GENERAL", label: "General / Common" },
+                              { value: "SCIENCE", label: "Science" },
+                              { value: "HUMANITIES", label: "Humanities" },
+                              { value: "BUSINESS_STUDIES", label: "Business Studies" },
+                            ]}
+                          />
                         </div>
                       </div>
                     )}
@@ -1578,11 +1535,7 @@ export default function ExamsPage() {
             );
           })}
 
-          {exams.length === 0 && !loading && (
-            <div className="p-8 text-center text-slate-400 italic text-xs">
-              No exams found. Create one above to get started.
-            </div>
-          )}
+          {exams.length === 0 && !loading && <NoDataFound />}
 
           {loading && (
             <div className="p-8 text-center text-slate-400 text-xs flex items-center justify-center space-x-2">

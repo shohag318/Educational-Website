@@ -6,10 +6,14 @@ import {
   Box,
   Chip,
   Container,
+  Divider,
   Paper,
   Stack,
   Typography,
 } from "@mui/material";
+import { AddCircleOutlineIcon, TuneIcon } from "@/components/iconify/mui-icons";
+import { CustomBreadcrumbs, NoDataFound } from "@/components";
+import { PATHS } from "@/config-global";
 import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
 
 /** Shared frame for every Results & Exams page. */
@@ -21,8 +25,8 @@ export function ResultsPageShell({
   maxWidth?: "lg" | "xl" | false;
 }) {
   return (
-    <Container maxWidth={maxWidth} sx={{ py: { xs: 2, md: 2.5 }, pb: 8 }}>
-      <Box className="no-print" sx={{ mb: 2.5 }}>
+    <Container maxWidth={maxWidth} sx={{ py: { xs: 2, md: 3 }, pb: 10 }}>
+      <Box className="no-print" sx={{ mb: 3 }}>
         <ResultNavHeader />
       </Box>
       <Stack spacing={2.5}>{children}</Stack>
@@ -30,87 +34,29 @@ export function ResultsPageShell({
   );
 }
 
-/** Minimal page title row — easy to scan. */
+/** Simple heading + breadcrumbs (same pattern as session/create). */
 export function ResultsPageHeader({
-  title,
-  subtitle,
-  icon,
+  heading,
+  current,
   action,
-  stepHint,
 }: {
-  title: string;
-  subtitle?: string;
-  icon?: ReactNode;
+  heading: string;
+  /** Breadcrumb leaf label — defaults to heading */
+  current?: string;
   action?: ReactNode;
-  /** Optional workflow hint, e.g. "Step 3 of 4" */
-  stepHint?: string;
 }) {
   return (
-    <Stack
-      direction={{ xs: "column", sm: "row" }}
-      spacing={2}
-      sx={{ alignItems: { sm: "flex-start" }, justifyContent: "space-between" }}
-      className="no-print"
-    >
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start", minWidth: 0 }}>
-        {icon ? (
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: 1.5,
-              display: "grid",
-              placeItems: "center",
-              bgcolor: "primary.lighter",
-              color: "primary.dark",
-              flexShrink: 0,
-              "& svg": { width: 20, height: 20 },
-            }}
-          >
-            {icon}
-          </Box>
-        ) : null}
-        <Box sx={{ minWidth: 0 }}>
-          {stepHint ? (
-            <Typography
-              variant="caption"
-              sx={{
-                display: "block",
-                mb: 0.25,
-                fontWeight: 700,
-                letterSpacing: 0.4,
-                textTransform: "uppercase",
-                color: "primary.main",
-              }}
-            >
-              {stepHint}
-            </Typography>
-          ) : null}
-          <Typography variant="h5" sx={{ fontSize: { xs: 18, sm: 22 }, fontWeight: 700, lineHeight: 1.25 }}>
-            {title}
-          </Typography>
-          {subtitle ? (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, maxWidth: 640 }}>
-              {subtitle}
-            </Typography>
-          ) : null}
-        </Box>
-      </Stack>
-      {action ? (
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 1,
-            width: { xs: 1, sm: "auto" },
-            justifyContent: { xs: "stretch", sm: "flex-end" },
-            "& > *": { flexShrink: 0 },
-          }}
-        >
-          {action}
-        </Box>
-      ) : null}
-    </Stack>
+    <Box className="no-print">
+      <CustomBreadcrumbs
+        heading={heading}
+        links={[
+          { name: "Overview", href: PATHS.root, icon: <AddCircleOutlineIcon sx={{ fontSize: 16 }} /> },
+          { name: "Results & Exams", href: PATHS.academic.rules },
+          { name: current || heading },
+        ]}
+        action={action}
+      />
+    </Box>
   );
 }
 
@@ -133,9 +79,10 @@ export function ResultsPanel({
       sx={{
         border: 1,
         borderColor: "divider",
-        borderRadius: 2,
+        borderRadius: 3,
         overflow: "hidden",
         bgcolor: "background.paper",
+        boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
         ...(padded ? { p: { xs: 2, sm: 2.5 } } : null),
         ...sx,
       }}
@@ -145,13 +92,13 @@ export function ResultsPanel({
   );
 }
 
-/** Filter / controls card with clear title. */
+/** Filter / controls card — children should be MUI fields (AppSelect, SessionSelect, AppTextField). */
 export function ResultsFilterCard({
   title = "Filters",
   active = false,
   onReset,
   children,
-  resetLabel = "Reset filters",
+  resetLabel = "Reset",
   columns = 4,
 }: {
   title?: string;
@@ -168,11 +115,27 @@ export function ResultsFilterCard({
         spacing={1}
         sx={{ alignItems: "center", justifyContent: "space-between", mb: 2 }}
       >
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "text.primary" }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", minWidth: 0 }}>
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: 1.5,
+              display: "grid",
+              placeItems: "center",
+              bgcolor: "primary.lighter",
+              color: "primary.dark",
+              flexShrink: 0,
+            }}
+          >
+            <TuneIcon sx={{ fontSize: 18 }} />
+          </Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
             {title}
           </Typography>
-          {active ? <Chip size="small" color="primary" label="Active" sx={{ height: 22, fontWeight: 700 }} /> : null}
+          {active ? (
+            <Chip size="small" color="primary" label="Filtered" sx={{ height: 22, fontWeight: 700 }} />
+          ) : null}
         </Stack>
         {active && onReset ? (
           <Chip
@@ -180,39 +143,72 @@ export function ResultsFilterCard({
             variant="outlined"
             label={resetLabel}
             onClick={onReset}
-            sx={{ height: 24, cursor: "pointer", fontWeight: 600 }}
+            sx={{ height: 26, cursor: "pointer", fontWeight: 600 }}
           />
         ) : null}
       </Stack>
       <Box
         sx={{
           display: "grid",
-          gap: 1.5,
+          gap: 2,
           gridTemplateColumns: {
             xs: "1fr",
             sm: "repeat(2, minmax(0, 1fr))",
             md: `repeat(${Math.min(columns, 3)}, minmax(0, 1fr))`,
-            lg: `repeat(${columns}, minmax(0, 1fr))`,
+            lg: `repeat(${Math.min(columns, 4)}, minmax(0, 1fr))`,
           },
-          "& label": { display: "block", mb: 0.75, fontSize: 12, fontWeight: 600, color: "text.secondary" },
-          "& select, & .MuiInputBase-root": {
-            width: "100%",
-            bgcolor: "background.paper",
-          },
-          "& select": {
-            p: 1.25,
-            borderRadius: 1.5,
-            border: 1,
-            borderColor: "divider",
-            fontSize: 13,
-            fontWeight: 500,
-            color: "text.primary",
-            outline: "none",
-          },
+          alignItems: "start",
+          "& .MuiFormControl-root": { width: "100%", bgcolor: "background.paper", borderRadius: 1 },
         }}
       >
         {children}
       </Box>
+    </ResultsPanel>
+  );
+}
+
+/** Table / list card with consistent toolbar. */
+export function ResultsTableCard({
+  title,
+  count,
+  badge,
+  action,
+  children,
+}: {
+  title: string;
+  count?: number | string;
+  badge?: ReactNode;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <ResultsPanel padded={false}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1.5}
+        sx={{
+          px: { xs: 2, sm: 2.5 },
+          py: 2,
+          alignItems: { sm: "center" },
+          justifyContent: "space-between",
+        }}
+      >
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            {title}
+            {count !== undefined ? (
+              <Typography component="span" variant="subtitle1" color="text.secondary" sx={{ fontWeight: 600 }}>
+                {" "}
+                ({count})
+              </Typography>
+            ) : null}
+          </Typography>
+          {badge}
+        </Stack>
+        {action ? <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>{action}</Box> : null}
+      </Stack>
+      <Divider />
+      {children}
     </ResultsPanel>
   );
 }
@@ -255,24 +251,18 @@ export function ResultsSectionTitle({
 }
 
 export function ResultsEmpty({
-  title = "No data found",
+  title,
   description,
+  icon,
 }: {
+  /** Ignored for UI consistency — always shows shared No Data Found. */
   title?: string;
   description?: string;
+  icon?: string;
 }) {
-  return (
-    <Box sx={{ py: 6, px: 2, textAlign: "center" }}>
-      <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600 }}>
-        {title}
-      </Typography>
-      {description ? (
-        <Typography variant="caption" color="text.disabled" sx={{ display: "block", mt: 0.5 }}>
-          {description}
-        </Typography>
-      ) : null}
-    </Box>
-  );
+  void title;
+  void description;
+  return <NoDataFound icon={icon} />;
 }
 
 export function ResultsNotice({
@@ -304,11 +294,12 @@ export function ResultsStat({
     <Paper
       elevation={0}
       sx={{
-        p: 2,
+        p: 2.25,
         border: 1,
         borderColor: "divider",
-        borderRadius: 2,
+        borderRadius: 3,
         height: 1,
+        boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
       }}
     >
       <Typography
@@ -317,11 +308,11 @@ export function ResultsStat({
       >
         {label}
       </Typography>
-      <Typography variant="h5" sx={{ mt: 0.5, fontWeight: 700, color: `${color}.dark` }}>
+      <Typography variant="h4" sx={{ mt: 0.75, fontWeight: 800, color: `${color}.dark`, fontSize: { xs: 24, sm: 28 } }}>
         {value}
       </Typography>
       {hint ? (
-        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>
+        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
           {hint}
         </Typography>
       ) : null}

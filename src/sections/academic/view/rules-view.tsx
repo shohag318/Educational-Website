@@ -4,12 +4,9 @@ import { useEffect, useState, useMemo } from "react";
 import {
   ResultsPageShell,
   ResultsPageHeader,
-  ResultsPanel,
   ResultsNotice,
 } from "@/sections/results/component/result-page-ui";
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import {
-  Sliders,
   Save,
   Check,
   Award,
@@ -24,11 +21,12 @@ import {
   Sparkles,
   Link2,
   AlertTriangle,
-  Bookmark,
 } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
+import { AppSelect, AppTextField, NoDataFound } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import { TemplateManagementSection } from "@/sections/academic/component/template-management-section";
+import { AppTabs } from "@/components/ui/tabs-component";
 
 export default function DynamicRulesPage() {
   const [gradingSystems, setGradingSystems] = useState<any[]>([]);
@@ -426,52 +424,20 @@ export default function DynamicRulesPage() {
 
   return (
     <ResultsPageShell>
-      <ResultsPageHeader
-        stepHint="Results workflow • Step 1"
-        icon={<Sliders />}
-        title="Grading & Assessment Rules"
-        subtitle="Set pass marks, combined paper rules, 4th-subject surplus, and GPA grade slabs."
-      />
+      <ResultsPageHeader heading="Grading & Assessment Rules" current="Grading Rules" />
 
-      <ResultsPanel padded sx={{ py: 1.5 }}>
-        <ToggleButtonGroup
-          exclusive
-          size="small"
-          value={activeStepTab}
-          onChange={(_, value) => value && setActiveStepTab(value)}
-          sx={{
-            flexWrap: "wrap",
-            gap: 1,
-            "& .MuiToggleButton-root": {
-              textTransform: "none",
-              borderRadius: "8px !important",
-              border: "1px solid",
-              borderColor: "divider !important",
-              px: 1.5,
-              py: 0.75,
-              fontSize: 12,
-              fontWeight: 600,
-            },
-          }}
-        >
-          <ToggleButton value="STEP_1_TEMPLATES">
-            <Bookmark size={14} style={{ marginRight: 6 }} />
-            1. Templates ({dbTemplates.length})
-          </ToggleButton>
-          <ToggleButton value="STEP_3_COMBINED">
-            <GitMerge size={14} style={{ marginRight: 6 }} />
-            2. Combined Papers ({combinedRules.length})
-          </ToggleButton>
-          <ToggleButton value="STEP_4_GRADING">
-            <Award size={14} style={{ marginRight: 6 }} />
-            3. Grading Scale
-          </ToggleButton>
-          <ToggleButton value="ALL">
-            <Sliders size={14} style={{ marginRight: 6 }} />
-            All steps
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </ResultsPanel>
+      <AppTabs
+        value={activeStepTab}
+        onValueChange={(value) =>
+          setActiveStepTab(value as "STEP_1_TEMPLATES" | "STEP_3_COMBINED" | "STEP_4_GRADING" | "ALL")
+        }
+        items={[
+          { value: "STEP_1_TEMPLATES", label: `Templates (${dbTemplates.length})` },
+          { value: "STEP_3_COMBINED", label: `Combined Papers (${combinedRules.length})` },
+          { value: "STEP_4_GRADING", label: "Grading Scale" },
+          { value: "ALL", label: "All steps" },
+        ]}
+      />
 
       {saveSuccess && (
         <ResultsNotice severity="success">Rules updated successfully.</ResultsNotice>
@@ -526,53 +492,41 @@ export default function DynamicRulesPage() {
           </div>
 
           {/* Session, Class & Target Exam Filter Toolbar */}
-          <div className="p-4 bg-slate-50/80 border-b border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Session:</label>
-              <SessionSelect
-                value={combinedSessionFilter}
-                onChange={(val) => {
-                  setCombinedSessionFilter(val);
-                }}
-                label=""
-                includeAll={true}
-                allLabel="All Sessions"
-                activeOnly={false}
-                selectClassName="w-full p-2 border border-slate-300 rounded-lg bg-white font-medium text-xs focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-              />
-            </div>
+          <div className="p-4 bg-slate-50/80 border-b border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <SessionSelect
+              value={combinedSessionFilter}
+              onChange={(val) => {
+                setCombinedSessionFilter(val);
+              }}
+              label="Session"
+              includeAll={true}
+              allLabel="All Sessions"
+              activeOnly={false}
+              fullWidth
+            />
 
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Class:</label>
-              <select
-                value={combinedClassFilter}
-                onChange={(e) => setCombinedClassFilter(e.target.value)}
-                className="w-full p-2 border border-slate-300 rounded-lg bg-white font-medium text-xs focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-              >
-                <option value="ALL">All Classes</option>
-                {classes.map((cls) => (
-                  <option key={cls.id} value={cls.id}>
-                    {cls.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <AppSelect
+              label="Class"
+              value={combinedClassFilter}
+              onChange={setCombinedClassFilter}
+              options={[
+                { value: "ALL", label: "All Classes" },
+                ...classes.map((cls) => ({ value: cls.id, label: cls.name })),
+              ]}
+            />
 
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Target Exam:</label>
-              <select
-                value={selectedExamId}
-                onChange={(e) => handleExamChange(e.target.value)}
-                className="w-full p-2 border border-slate-300 rounded-lg bg-white font-medium text-xs focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-              >
-                <option value="">-- Select Exam --</option>
-                {filteredCombinedExams.map((ex) => (
-                  <option key={ex.id} value={ex.id}>
-                    {ex.name} {ex.class?.name ? `(${ex.class.name})` : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <AppSelect
+              label="Target Exam"
+              value={selectedExamId}
+              onChange={handleExamChange}
+              options={[
+                { value: "", label: "-- Select Exam --" },
+                ...filteredCombinedExams.map((ex) => ({
+                  value: ex.id,
+                  label: `${ex.name} ${ex.class?.name ? `(${ex.class.name})` : ""}`.trim(),
+                })),
+              ]}
+            />
           </div>
 
           <div className="p-5 space-y-5">
@@ -600,148 +554,117 @@ export default function DynamicRulesPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Primary Subject (1st Paper) - Strictly Class-Wise */}
-                <div>
-                  <label className="font-semibold text-slate-700 block mb-1">
-                    1st Paper (Primary Subject):
-                  </label>
-                  <select
-                    value={primarySubjectId}
-                    onChange={(e) => {
-                      const newPrimary = e.target.value;
-                      setPrimarySubjectId(newPrimary);
-                      const p = combinedClassSubjects.find((s) => s.id === newPrimary);
-                      const s = combinedClassSubjects.find((s) => s.id === secondarySubjectId);
-                      if (p && s) {
-                        setCombinedRuleName(`${p.name.replace(/1st\s*paper/i, "").trim()} (1st & 2nd Combined)`);
-                      } else if (p) {
-                        setCombinedRuleName(`${p.name} Combined`);
-                      }
-                    }}
-                    className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-                  >
-                    <option value="">
-                      {fetchingCombinedSubjects
+                <AppSelect
+                  label="1st Paper (Primary Subject)"
+                  value={primarySubjectId}
+                  onChange={(newPrimary) => {
+                    setPrimarySubjectId(newPrimary);
+                    const p = combinedClassSubjects.find((s) => s.id === newPrimary);
+                    const s = combinedClassSubjects.find((s) => s.id === secondarySubjectId);
+                    if (p && s) {
+                      setCombinedRuleName(`${p.name.replace(/1st\s*paper/i, "").trim()} (1st & 2nd Combined)`);
+                    } else if (p) {
+                      setCombinedRuleName(`${p.name} Combined`);
+                    }
+                  }}
+                  options={[
+                    {
+                      value: "",
+                      label: fetchingCombinedSubjects
                         ? "-- Loading Class Subjects... --"
                         : combinedClassSubjects.length === 0
                         ? "-- No subjects mapped to this class --"
-                        : "-- Select 1st Paper --"}
-                    </option>
-                    {combinedClassSubjects.map((sub) => (
-                      <option key={sub.id} value={sub.id}>
-                        {sub.name} ({sub.subjectCode})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                        : "-- Select 1st Paper --",
+                    },
+                    ...combinedClassSubjects.map((sub) => ({
+                      value: sub.id,
+                      label: `${sub.name} (${sub.subjectCode})`,
+                    })),
+                  ]}
+                />
 
                 {/* Secondary Subject (2nd Paper) - Strictly Class-Wise */}
-                <div>
-                  <label className="font-semibold text-slate-700 block mb-1">
-                    2nd Paper (Secondary Subject):
-                  </label>
-                  <select
-                    value={secondarySubjectId}
-                    onChange={(e) => {
-                      const newSecondary = e.target.value;
-                      setSecondarySubjectId(newSecondary);
-                      const p = combinedClassSubjects.find((s) => s.id === primarySubjectId);
-                      const s = combinedClassSubjects.find((s) => s.id === newSecondary);
-                      if (p && s) {
-                        setCombinedRuleName(`${p.name.replace(/1st\s*paper/i, "").trim()} (1st & 2nd Combined)`);
-                      }
-                    }}
-                    className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-                  >
-                    <option value="">
-                      {fetchingCombinedSubjects
+                <AppSelect
+                  label="2nd Paper (Secondary Subject)"
+                  value={secondarySubjectId}
+                  onChange={(newSecondary) => {
+                    setSecondarySubjectId(newSecondary);
+                    const p = combinedClassSubjects.find((s) => s.id === primarySubjectId);
+                    const s = combinedClassSubjects.find((s) => s.id === newSecondary);
+                    if (p && s) {
+                      setCombinedRuleName(`${p.name.replace(/1st\s*paper/i, "").trim()} (1st & 2nd Combined)`);
+                    }
+                  }}
+                  options={[
+                    {
+                      value: "",
+                      label: fetchingCombinedSubjects
                         ? "-- Loading Class Subjects... --"
                         : combinedClassSubjects.length === 0
                         ? "-- No subjects mapped to this class --"
-                        : "-- Select 2nd Paper --"}
-                    </option>
-                    {combinedClassSubjects
+                        : "-- Select 2nd Paper --",
+                    },
+                    ...combinedClassSubjects
                       .filter((sub) => sub.id !== primarySubjectId)
-                      .map((sub) => (
-                        <option key={sub.id} value={sub.id}>
-                          {sub.name} ({sub.subjectCode})
-                        </option>
-                      ))}
-                  </select>
-                </div>
+                      .map((sub) => ({
+                        value: sub.id,
+                        label: `${sub.name} (${sub.subjectCode})`,
+                      })),
+                  ]}
+                />
               </div>
 
               {/* Thresholds and Modes Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                <div>
-                  <label className="font-semibold text-slate-700 block mb-1">
-                    Combined Pass Mark:
-                  </label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    value={combinedPassMark}
-                    onChange={(e) => setCombinedPassMark(e.target.value)}
-                    placeholder="e.g. 66"
-                    className="w-full p-2 border border-slate-200 rounded-lg font-mono font-bold text-slate-900 bg-white focus:ring-2 focus:ring-emerald-500"
-                  />
-                  <span className="text-[10px] text-slate-500">Min sum of 1st+2nd paper to pass</span>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                <AppTextField
+                  label="Combined Pass Mark"
+                  type="number"
+                  value={combinedPassMark}
+                  onChange={(e) => setCombinedPassMark(e.target.value)}
+                  placeholder="e.g. 66"
+                  helperText="Min sum of 1st+2nd paper to pass"
+                  slotProps={{ htmlInput: { step: 0.5 } }}
+                />
 
-                <div>
-                  <label className="font-semibold text-slate-700 block mb-1">
-                    Combined Full Marks:
-                  </label>
-                  <input
-                    type="number"
-                    value={combinedFullMarks}
-                    onChange={(e) => setCombinedFullMarks(e.target.value)}
-                    placeholder="e.g. 200"
-                    className="w-full p-2 border border-slate-200 rounded-lg font-mono font-bold text-slate-900 bg-white focus:ring-2 focus:ring-emerald-500"
-                  />
-                  <span className="text-[10px] text-slate-500">e.g. 100 + 100 = 200</span>
-                </div>
+                <AppTextField
+                  label="Combined Full Marks"
+                  type="number"
+                  value={combinedFullMarks}
+                  onChange={(e) => setCombinedFullMarks(e.target.value)}
+                  placeholder="e.g. 200"
+                  helperText="e.g. 100 + 100 = 200"
+                />
 
-                <div>
-                  <label className="font-semibold text-slate-700 block mb-1">
-                    Pass Evaluation Mode:
-                  </label>
-                  <select
-                    value={combinedPassMode}
-                    onChange={(e) => setCombinedPassMode(e.target.value as any)}
-                    className="w-full p-2 border border-slate-200 rounded-lg bg-white font-medium text-slate-800"
-                  >
-                    <option value="AGGREGATE_ONLY">Combined Aggregate (Board Standard)</option>
-                    <option value="BOTH">Aggregate + Individual Papers Pass</option>
-                  </select>
-                  <span className="text-[10px] text-slate-500">Paper 1 + Paper 2 ≥ Pass Mark</span>
-                </div>
+                <AppSelect
+                  label="Pass Evaluation Mode"
+                  value={combinedPassMode}
+                  onChange={(val) => setCombinedPassMode(val as "AGGREGATE_ONLY" | "BOTH")}
+                  options={[
+                    { value: "AGGREGATE_ONLY", label: "Combined Aggregate (Board Standard)" },
+                    { value: "BOTH", label: "Aggregate + Individual Papers Pass" },
+                  ]}
+                />
 
-                <div>
-                  <label className="font-semibold text-slate-700 block mb-1">
-                    Grade Distribution:
-                  </label>
-                  <select
-                    value={combinedGradeMode}
-                    onChange={(e) => setCombinedGradeMode(e.target.value as any)}
-                    className="w-full p-2 border border-slate-200 rounded-lg bg-white font-medium text-slate-800"
-                  >
-                    <option value="AVERAGE">Combined Average Grade (NCTB Standard)</option>
-                    <option value="INDIVIDUAL">Keep Individual Subject Grades</option>
-                  </select>
-                  <span className="text-[10px] text-slate-500">Scale total marks to 100 for GP</span>
-                </div>
+                <AppSelect
+                  label="Grade Distribution"
+                  value={combinedGradeMode}
+                  onChange={(val) => setCombinedGradeMode(val as "AVERAGE" | "INDIVIDUAL")}
+                  options={[
+                    { value: "AVERAGE", label: "Combined Average Grade (NCTB Standard)" },
+                    { value: "INDIVIDUAL", label: "Keep Individual Subject Grades" },
+                  ]}
+                />
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
                 <div className="w-full sm:w-auto flex-1">
-                  <input
-                    type="text"
-                    placeholder="Rule Name (e.g. Bangla 1st & 2nd Combined)"
+                  <AppTextField
+                    label="Rule Name"
+                    placeholder="e.g. Bangla 1st & 2nd Combined"
                     value={combinedRuleName}
                     onChange={(e) => setCombinedRuleName(e.target.value)}
-                    className="w-full p-2 border border-slate-200 rounded-lg text-xs bg-white"
                   />
                 </div>
 
@@ -777,12 +700,7 @@ export default function DynamicRulesPage() {
               </div>
 
               {combinedRules.length === 0 ? (
-                <div className="border border-dashed border-slate-300 rounded-xl p-6 text-center text-xs text-slate-500 space-y-1 bg-slate-50/50">
-                  <p className="font-semibold text-slate-600">No combined subject rules configured yet for this exam.</p>
-                  <p className="text-[11px] text-slate-400">
-                    Select 1st Paper and 2nd Paper above and click &quot;Save Combined Rule&quot;, or click &quot;Auto-Detect 1st &amp; 2nd Papers&quot; to auto-pair.
-                  </p>
-                </div>
+                <NoDataFound />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {combinedRules.map((rule) => (
@@ -860,40 +778,31 @@ export default function DynamicRulesPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Max GPA Cap:</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={maxGpa}
-                  onChange={(e) => setMaxGpa(e.target.value)}
-                  className="w-full p-2.5 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 bg-white focus:ring-2 focus:ring-emerald-500"
-                />
-                <span className="text-[10px] text-slate-400 mt-1 block">Usually 5.00 for NCTB standard</span>
-              </div>
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">4th Sub Threshold:</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={fourthThreshold}
-                  onChange={(e) => setFourthThreshold(e.target.value)}
-                  className="w-full p-2.5 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 bg-white focus:ring-2 focus:ring-emerald-500"
-                />
-                <span className="text-[10px] text-slate-400 mt-1 block">GP above this value is added to total GPA</span>
-              </div>
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Min Pass GPA:</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={passGpa}
-                  onChange={(e) => setPassGpa(e.target.value)}
-                  className="w-full p-2.5 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 bg-white focus:ring-2 focus:ring-emerald-500"
-                />
-                <span className="text-[10px] text-slate-400 mt-1 block">Usually 1.00 minimum pass threshold</span>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <AppTextField
+                label="Max GPA Cap"
+                type="number"
+                value={maxGpa}
+                onChange={(e) => setMaxGpa(e.target.value)}
+                helperText="Usually 5.00 for NCTB standard"
+                slotProps={{ htmlInput: { step: 0.01 } }}
+              />
+              <AppTextField
+                label="4th Sub Threshold"
+                type="number"
+                value={fourthThreshold}
+                onChange={(e) => setFourthThreshold(e.target.value)}
+                helperText="GP above this value is added to total GPA"
+                slotProps={{ htmlInput: { step: 0.01 } }}
+              />
+              <AppTextField
+                label="Min Pass GPA"
+                type="number"
+                value={passGpa}
+                onChange={(e) => setPassGpa(e.target.value)}
+                helperText="Usually 1.00 minimum pass threshold"
+                slotProps={{ htmlInput: { step: 0.01 } }}
+              />
             </div>
 
             {/* Slabs Table */}

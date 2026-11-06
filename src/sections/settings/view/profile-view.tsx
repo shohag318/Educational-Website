@@ -34,6 +34,7 @@ import {
 } from "@/lib/settingsStore";
 import { SettingNavHeader } from "@/sections/settings/component/setting-nav-header";
 import { AppButton } from "@/components/button/app-button";
+import { AppTabs } from "@/components/ui/tabs-component";
 
 export default function SettingModulePage() {
   const [formData, setFormData] = useState<SchoolBasicInfo>(DEFAULT_SCHOOL_INFO);
@@ -152,63 +153,19 @@ export default function SettingModulePage() {
       </div>
 
 
-      {/* Navigation Tabs */}
-      <div className="border-b border-slate-200 flex flex-wrap gap-2 text-xs font-semibold">
-        <AppButton
-          type="button"
-          size="small"
-          variant="soft"
-          color={activeTab === "basic" ? "primary" : "inherit"}
-          startIcon={<Building2 className="w-4 h-4" />}
-          onClick={() => setActiveTab("basic")}
-        >
-          General Info
-        </AppButton>
-
-        <AppButton
-          type="button"
-          size="small"
-          variant="soft"
-          color={activeTab === "session" ? "primary" : "inherit"}
-          startIcon={<Calendar className="w-4 h-4" />}
-          onClick={() => setActiveTab("session")}
-        >
-          Session & Defaults
-        </AppButton>
-
-        <AppButton
-          type="button"
-          size="small"
-          variant="soft"
-          color={activeTab === "contact" ? "primary" : "inherit"}
-          startIcon={<MapPin className="w-4 h-4" />}
-          onClick={() => setActiveTab("contact")}
-        >
-          Contact Details
-        </AppButton>
-
-        <AppButton
-          type="button"
-          size="small"
-          variant="soft"
-          color={activeTab === "leadership" ? "primary" : "inherit"}
-          startIcon={<UserCheck className="w-4 h-4" />}
-          onClick={() => setActiveTab("leadership")}
-        >
-          Signatures
-        </AppButton>
-
-        <AppButton
-          type="button"
-          size="small"
-          variant="soft"
-          color={activeTab === "preview" ? "primary" : "inherit"}
-          startIcon={<Eye className="w-4 h-4" />}
-          onClick={() => setActiveTab("preview")}
-        >
-          Preview
-        </AppButton>
-      </div>
+      <AppTabs
+        value={activeTab}
+        onValueChange={(value) =>
+          setActiveTab(value as "basic" | "session" | "contact" | "leadership" | "preview")
+        }
+        items={[
+          { value: "basic", label: "General Info" },
+          { value: "session", label: "Session & Defaults" },
+          { value: "contact", label: "Contact Details" },
+          { value: "leadership", label: "Signatures" },
+          { value: "preview", label: "Preview" },
+        ]}
+      />
 
       {/* Main Form Body */}
       <form onSubmit={handleSave} className="space-y-6">

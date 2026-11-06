@@ -3,7 +3,6 @@
 import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState } from "react";
 import {
-  CheckCircle,
   Play,
   AlertTriangle,
   Users,
@@ -21,6 +20,7 @@ import {
 } from "@/components/iconify/lucide";
 import Link from "next/link";
 import { AppButton } from "@/components/button/app-button";
+import { AppSelect } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import {
   ResultsPageShell,
@@ -361,10 +361,8 @@ export default function ResultReviewPage() {
   return (
     <ResultsPageShell>
       <ResultsPageHeader
-        stepHint="Results workflow • Process"
-        icon={<CheckCircle />}
-        title="Process & Review Results"
-        subtitle="Calculate GPA, apply pass/fail rules, and review drafts before publishing."
+        heading="Process & Review Results"
+        current="Process & Review"
         action={
           <AppButton
             variant="contained"
@@ -384,112 +382,90 @@ export default function ResultReviewPage() {
         title="Choose class & exam to process"
         active={hasActiveFilters}
         onReset={handleResetFilters}
-        columns={6}
+        columns={4}
       >
-          {/* Session Filter */}
-          <div>
-            <SessionSelect
-              value={selectedSession}
-              onChange={(val) => setSelectedSession(val)}
-              label="Session"
-              labelClassName="font-semibold text-slate-600 block mb-1"
-              selectClassName="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            />
-          </div>
+        {/* Session Filter */}
+        <SessionSelect
+          value={selectedSession}
+          onChange={(val) => setSelectedSession(val)}
+          label="Session"
+          fullWidth
+        />
 
-          {/* Class Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Class:</label>
-            <select
-              value={selectedClassId}
-              onChange={(e) => handleClassChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Classes</option>
-              {classes.map((cls) => (
-                <option key={cls.id} value={cls.id}>
-                  {cls.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Class Filter */}
+        <AppSelect
+          label="Class"
+          value={selectedClassId}
+          onChange={handleClassChange}
+          options={[
+            { value: "", label: "All Classes" },
+            ...classes.map((cls) => ({ value: cls.id, label: cls.name })),
+          ]}
+        />
 
-          {/* Exam Name Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Exam Name:</label>
-            <select
-              value={selectedExamId}
-              onChange={(e) => handleExamChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              {filteredExams.map((ex) => (
-                <option key={ex.id} value={ex.id}>
-                  {ex.name} {ex.class?.name ? `(${ex.class.name})` : ""} [{ex.status}]
-                </option>
-              ))}
-              {filteredExams.length === 0 && (
-                <option value="" disabled>
-                  No exams for selected class
-                </option>
-              )}
-            </select>
-          </div>
+        {/* Exam Name Filter */}
+        <AppSelect
+          label="Exam Name"
+          value={selectedExamId}
+          onChange={handleExamChange}
+          options={
+            filteredExams.length === 0
+              ? [{ value: "", label: "No exams for selected class" }]
+              : filteredExams.map((ex) => ({
+                  value: ex.id,
+                  label: `${ex.name} ${ex.class?.name ? `(${ex.class.name})` : ""} [${ex.status}]`,
+                }))
+          }
+        />
 
-          {/* Shift Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Shift:</label>
-            <select
-              value={selectedShift}
-              onChange={(e) => handleShiftChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Shifts</option>
-              <option value="MORNING">Morning</option>
-              <option value="DAY">Day</option>
-              {availableShifts.map((sh: any) => (
-                <option key={sh} value={sh}>
-                  {sh.charAt(0) + sh.slice(1).toLowerCase()}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Shift Filter */}
+        <AppSelect
+          label="Shift"
+          value={selectedShift}
+          onChange={handleShiftChange}
+          options={[
+            { value: "", label: "All Shifts" },
+            { value: "MORNING", label: "Morning" },
+            { value: "DAY", label: "Day" },
+            ...availableShifts
+              .filter((sh: any) => sh !== "MORNING" && sh !== "DAY")
+              .map((sh: any) => ({
+                value: sh,
+                label: sh.charAt(0) + sh.slice(1).toLowerCase(),
+              })),
+          ]}
+        />
 
-          {/* Group Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Group:</label>
-            <select
-              value={isClass11Or12 && selectedGroup === "GENERAL" ? "ALL" : selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="ALL">All Groups</option>
-              {!isClass11Or12 && <option value="GENERAL">General</option>}
-              <option value="SCIENCE">Science</option>
-              <option value="HUMANITIES">Humanities</option>
-              <option value="BUSINESS_STUDIES">Business Studies</option>
-            </select>
-          </div>
+        {/* Group Filter */}
+        <AppSelect
+          label="Group"
+          value={isClass11Or12 && selectedGroup === "GENERAL" ? "ALL" : selectedGroup}
+          onChange={setSelectedGroup}
+          options={[
+            { value: "ALL", label: "All Groups" },
+            ...(!isClass11Or12 ? [{ value: "GENERAL", label: "General" }] : []),
+            { value: "SCIENCE", label: "Science" },
+            { value: "HUMANITIES", label: "Humanities" },
+            { value: "BUSINESS_STUDIES", label: "Business Studies" },
+          ]}
+        />
 
-          {/* Section Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Section:</label>
-            <select
-              value={selectedSectionId}
-              onChange={(e) => setSelectedSectionId(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Sections</option>
-              {availableSections.map((sec: any) => {
-                const shiftLabel = sec.shift === "MORNING" ? "Morning" : sec.shift === "DAY" ? "Day" : sec.shift;
-                return (
-                  <option key={sec.id} value={sec.id}>
-                    {sec.name} {sec.groupType ? `(${sec.groupType})` : ""}{(!selectedShift && shiftLabel) ? ` • ${shiftLabel}` : ""}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-      </ResultsFilterCard>
+        {/* Section Filter */}
+        <AppSelect
+          label="Section"
+          value={selectedSectionId}
+          onChange={setSelectedSectionId}
+          options={[
+            { value: "", label: "All Sections" },
+            ...availableSections.map((sec: any) => {
+              const shiftLabel = sec.shift === "MORNING" ? "Morning" : sec.shift === "DAY" ? "Day" : sec.shift;
+              return {
+                value: sec.id,
+                label: `${sec.name} ${sec.groupType ? `(${sec.groupType})` : ""}${!selectedShift && shiftLabel ? ` • ${shiftLabel}` : ""}`.trim(),
+              };
+            }),
+          ]}
+        />      </ResultsFilterCard>
 
       {/* Class Test (CT) Marks Auto-Sync & Term Weighting Panel */}
       <ResultsPanel
@@ -561,19 +537,19 @@ export default function ResultReviewPage() {
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 <div className="w-64 sm:w-72">
-                  <select
+                  <AppSelect
+                    label="CT Exam"
                     value={selectedCtExamId}
-                    onChange={(e) => setSelectedCtExamId(e.target.value)}
+                    onChange={setSelectedCtExamId}
                     disabled={ctExamLoading}
-                    className="w-full text-xs p-2 bg-white border border-purple-300 rounded-lg font-medium text-slate-800 focus:ring-2 focus:ring-purple-500 shadow-2xs"
-                  >
-                    <option value="">-- Select CT Exam to Auto-Sync --</option>
-                    {availableCtExams.map((ex: any) => (
-                      <option key={ex.id} value={ex.id}>
-                        {ex.name} ({ex.termCode || ex.status})
-                      </option>
-                    ))}
-                  </select>
+                    options={[
+                      { value: "", label: "-- Select CT Exam to Auto-Sync --" },
+                      ...availableCtExams.map((ex: any) => ({
+                        value: ex.id,
+                        label: `${ex.name} (${ex.termCode || ex.status})`,
+                      })),
+                    ]}
+                  />
                 </div>
 
                 {selectedCtExamId && (

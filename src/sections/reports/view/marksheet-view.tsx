@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Award, Printer, ChevronLeft, ChevronRight, User, Layers } from "@/components/iconify/lucide";
+import { Printer, ChevronLeft, ChevronRight, User, Layers } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
+import { AppSelect, AppTextField } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import {
   ResultsPageShell,
@@ -575,123 +576,96 @@ export default function MarksheetPage() {
         }
       `}</style>
 
-      <ResultsPageHeader
-        stepHint="Reports"
-        icon={<Award />}
-        title="Student Report Cards"
-        subtitle="Print individual or batch academic transcripts and report cards."
-      />
+      <ResultsPageHeader heading="Student Report Cards" current="Report Cards" />
 
       <ResultsFilterCard
         title="Choose students to print"
         active={hasActiveFilters}
         onReset={handleResetFilters}
-        columns={6}
+        columns={4}
       >
-          {/* Session Filter */}
-          <div>
-            <SessionSelect
-              value={selectedSession}
-              onChange={(val) => setSelectedSession(val)}
-              label="Session:"
-              labelClassName="font-semibold text-slate-600 block mb-1"
-              selectClassName="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            />
-          </div>
+        {/* Session Filter */}
+        <SessionSelect
+          value={selectedSession}
+          onChange={(val) => setSelectedSession(val)}
+          label="Session"
+          fullWidth
+        />
 
-          {/* Class Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Class:</label>
-            <select
-              value={selectedClassId}
-              onChange={(e) => handleClassChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Classes</option>
-              {classes.map((cls) => (
-                <option key={cls.id} value={cls.id}>
-                  {cls.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Class Filter */}
+        <AppSelect
+          label="Class"
+          value={selectedClassId}
+          onChange={handleClassChange}
+          options={[
+            { value: "", label: "All Classes" },
+            ...classes.map((cls) => ({ value: cls.id, label: cls.name })),
+          ]}
+        />
 
-          {/* Exam Name Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Exam Name:</label>
-            <select
-              value={selectedExamId}
-              onChange={(e) => handleExamChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              {filteredExams.map((ex) => (
-                <option key={ex.id} value={ex.id}>
-                  {ex.name} {ex.class?.name ? `(${ex.class.name})` : ""} [{ex.status}]
-                </option>
-              ))}
-              {filteredExams.length === 0 && (
-                <option value="" disabled>
-                  No exams for selected class
-                </option>
-              )}
-            </select>
-          </div>
+        {/* Exam Name Filter */}
+        <AppSelect
+          label="Exam Name"
+          value={selectedExamId}
+          onChange={handleExamChange}
+          options={
+            filteredExams.length === 0
+              ? [{ value: "", label: "No exams for selected class" }]
+              : filteredExams.map((ex) => ({
+                  value: ex.id,
+                  label: `${ex.name} ${ex.class?.name ? `(${ex.class.name})` : ""} [${ex.status}]`,
+                }))
+          }
+        />
 
-          {/* Shift Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Shift:</label>
-            <select
-              value={selectedShift}
-              onChange={(e) => handleShiftChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Shifts</option>
-              <option value="MORNING">Morning</option>
-              <option value="DAY">Day</option>
-              {availableShifts.map((sh: any) => (
-                <option key={sh} value={sh}>
-                  {sh.charAt(0) + sh.slice(1).toLowerCase()}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Shift Filter */}
+        <AppSelect
+          label="Shift"
+          value={selectedShift}
+          onChange={handleShiftChange}
+          options={[
+            { value: "", label: "All Shifts" },
+            { value: "MORNING", label: "Morning" },
+            { value: "DAY", label: "Day" },
+            ...availableShifts
+              .filter((sh: any) => sh !== "MORNING" && sh !== "DAY")
+              .map((sh: any) => ({
+                value: sh,
+                label: sh.charAt(0) + sh.slice(1).toLowerCase(),
+              })),
+          ]}
+        />
 
-          {/* Group Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Group:</label>
-            <select
-              value={isClass11Or12 && selectedGroup === "GENERAL" ? "ALL" : selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="ALL">All Groups</option>
-              {!isClass11Or12 && <option value="GENERAL">General</option>}
-              <option value="SCIENCE">Science</option>
-              <option value="HUMANITIES">Humanities</option>
-              <option value="BUSINESS_STUDIES">Business Studies</option>
-            </select>
-          </div>
+        {/* Group Filter */}
+        <AppSelect
+          label="Group"
+          value={isClass11Or12 && selectedGroup === "GENERAL" ? "ALL" : selectedGroup}
+          onChange={setSelectedGroup}
+          options={[
+            { value: "ALL", label: "All Groups" },
+            ...(!isClass11Or12 ? [{ value: "GENERAL", label: "General" }] : []),
+            { value: "SCIENCE", label: "Science" },
+            { value: "HUMANITIES", label: "Humanities" },
+            { value: "BUSINESS_STUDIES", label: "Business Studies" },
+          ]}
+        />
 
-          {/* Section Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Section:</label>
-            <select
-              value={selectedSectionId}
-              onChange={(e) => setSelectedSectionId(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Sections</option>
-              {availableSections.map((sec: any) => {
-                const shiftLabel = sec.shift === "MORNING" ? "Morning" : sec.shift === "DAY" ? "Day" : sec.shift;
-                return (
-                  <option key={sec.id} value={sec.id}>
-                    {sec.name} {sec.groupType ? `(${sec.groupType})` : ""}{(!selectedShift && shiftLabel) ? ` • ${shiftLabel}` : ""}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-      </ResultsFilterCard>
+        {/* Section Filter */}
+        <AppSelect
+          label="Section"
+          value={selectedSectionId}
+          onChange={setSelectedSectionId}
+          options={[
+            { value: "", label: "All Sections" },
+            ...availableSections.map((sec: any) => {
+              const shiftLabel = sec.shift === "MORNING" ? "Morning" : sec.shift === "DAY" ? "Day" : sec.shift;
+              return {
+                value: sec.id,
+                label: `${sec.name} ${sec.groupType ? `(${sec.groupType})` : ""}${!selectedShift && shiftLabel ? ` • ${shiftLabel}` : ""}`.trim(),
+              };
+            }),
+          ]}
+        />      </ResultsFilterCard>
 
       {/* Student Selector, Roll Option & Print Controls (No Print) */}
       <ResultsPanel className="no-print text-xs space-y-3">
@@ -751,40 +725,33 @@ export default function MarksheetPage() {
         <div className="flex flex-col sm:flex-row sm:items-end gap-3 pt-2 border-t border-slate-100">
           {/* Quick Roll Input */}
           <div className="w-28 flex-shrink-0">
-            <label className="font-semibold text-slate-700 block mb-1">Roll No:</label>
-            <input
+            <AppTextField
+              label="Roll No"
               type="number"
-              min="1"
               value={rollInput}
               onChange={(e) => handleRollSearch(e.target.value)}
               placeholder="Roll #"
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 font-mono font-bold text-slate-800 text-center bg-white"
+              slotProps={{ htmlInput: { min: 1 } }}
             />
           </div>
 
           {/* Student Dropdown */}
           <div className="flex-1 min-w-[240px]">
-            <label className="font-semibold text-slate-700 block mb-1">
-              Select Student ({students.length} found):
-            </label>
-            <select
+            <AppSelect
+              label={`Select Student (${students.length} found)`}
               value={selectedEnrollmentId}
-              onChange={(e) => setSelectedEnrollmentId(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 font-medium bg-white"
-            >
-              {students.map((st) => (
-                <option key={st.id} value={st.id}>
-                  Roll #{st.classRoll} - {st.student.firstName} {st.student.lastName}
-                  {st.section?.name ? ` [Sec: ${st.section.name}]` : ""}
-                  {st.section?.shift ? ` [${st.section.shift === "MORNING" ? "Morning" : "Day"}]` : ""}
-                </option>
-              ))}
-              {students.length === 0 && (
-                <option value="" disabled>
-                  No students in selected filter
-                </option>
-              )}
-            </select>
+              onChange={setSelectedEnrollmentId}
+              options={
+                students.length === 0
+                  ? [{ value: "", label: "No students in selected filter" }]
+                  : students.map((st) => ({
+                      value: st.id,
+                      label: `Roll #${st.classRoll} - ${st.student.firstName} ${st.student.lastName}${
+                        st.section?.name ? ` [Sec: ${st.section.name}]` : ""
+                      }${st.section?.shift ? ` [${st.section.shift === "MORNING" ? "Morning" : "Day"}]` : ""}`,
+                    }))
+              }
+            />
           </div>
 
           {/* Stepper Buttons */}

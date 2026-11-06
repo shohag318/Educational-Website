@@ -9,7 +9,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { ShieldCheck, Lock, Unlock } from "@/components/iconify/lucide";
+import { Lock, Unlock } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import {
   ResultsPageShell,
@@ -71,12 +71,7 @@ export default function PublishPage() {
 
   return (
     <ResultsPageShell>
-      <ResultsPageHeader
-        stepHint="Results workflow • Final step"
-        icon={<ShieldCheck />}
-        title="Publish Results"
-        subtitle="Lock completed exams so report cards and guardian SMS become available."
-      />
+      <ResultsPageHeader heading="Publish Results" />
 
       <Box
         sx={{

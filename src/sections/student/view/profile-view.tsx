@@ -55,7 +55,6 @@ import { AppSelect } from "@/components/select/app-select";
 import { AppTextField } from "@/components/text-field/app-text-field";
 import { EmptyContent } from "@/components/empty-content/empty-content";
 import { Label } from "@/components/label/label";
-import { CustomTabs } from "@/components/custom-tabs/custom-tabs";
 import {
   Avatar,
   Box,
@@ -63,10 +62,10 @@ import {
   Grid,
   IconButton,
   Stack,
-  Tab,
   Typography,
 } from "@mui/material";
-import { SearchIcon, PrintOutlinedIcon, ChevronLeftIcon, ChevronRightIcon, PhotoCameraOutlinedIcon, PersonOutlinedIcon, EmojiEventsOutlinedIcon, ReceiptLongOutlinedIcon, NotificationsNoneOutlinedIcon, MenuBookOutlinedIcon, EditOutlinedIcon } from "@/components/iconify/mui-icons";
+import { SearchIcon, PrintOutlinedIcon, ChevronLeftIcon, ChevronRightIcon, PhotoCameraOutlinedIcon, NotificationsNoneOutlinedIcon, MenuBookOutlinedIcon, EditOutlinedIcon } from "@/components/iconify/mui-icons";
+import { AppTabs } from "@/components/ui/tabs-component";
 const formatGroupName = (g?: string) => {
   if (!g) return "General";
   const upper = g.toUpperCase().replace(/\s+/g, "_");
@@ -1321,52 +1320,20 @@ export default function StudentProfilePage() {
                 ))}
               </Grid>
 
-              <CustomTabs
+              <AppTabs
                 value={activeTab}
-                onChange={(_e, value) => setActiveTab(value)}
+                onValueChange={(value) =>
+                  setActiveTab(value as "PROFILE" | "RESULT" | "FEE_STATUS" | "NOTICE" | "SUBJECT_LIST")
+                }
                 className="no-print"
-                sx={{
-                  borderBottom: 1,
-                  borderColor: "divider",
-                  mx: { xs: -1, sm: 0 },
-                }}
-              >
-                <Tab
-                  value="PROFILE"
-                  icon={<PersonOutlinedIcon sx={{ fontSize: 18 }} />}
-                  iconPosition="start"
-                  label="Profile"
-                  sx={{ minHeight: 44, textTransform: "none", fontWeight: 600 }}
-                />
-                <Tab
-                  value="RESULT"
-                  icon={<EmojiEventsOutlinedIcon sx={{ fontSize: 18 }} />}
-                  iconPosition="start"
-                  label="Results"
-                  sx={{ minHeight: 44, textTransform: "none", fontWeight: 600 }}
-                />
-                <Tab
-                  value="FEE_STATUS"
-                  icon={<ReceiptLongOutlinedIcon sx={{ fontSize: 18 }} />}
-                  iconPosition="start"
-                  label="Fees"
-                  sx={{ minHeight: 44, textTransform: "none", fontWeight: 600 }}
-                />
-                <Tab
-                  value="NOTICE"
-                  icon={<NotificationsNoneOutlinedIcon sx={{ fontSize: 18 }} />}
-                  iconPosition="start"
-                  label={`Notices (${notices.length})`}
-                  sx={{ minHeight: 44, textTransform: "none", fontWeight: 600 }}
-                />
-                <Tab
-                  value="SUBJECT_LIST"
-                  icon={<MenuBookOutlinedIcon sx={{ fontSize: 18 }} />}
-                  iconPosition="start"
-                  label={`Subjects (${studentSubjectList.length})`}
-                  sx={{ minHeight: 44, textTransform: "none", fontWeight: 600 }}
-                />
-              </CustomTabs>
+                items={[
+                  { value: "PROFILE", label: "Profile" },
+                  { value: "RESULT", label: "Results" },
+                  { value: "FEE_STATUS", label: "Fees" },
+                  { value: "NOTICE", label: `Notices (${notices.length})` },
+                  { value: "SUBJECT_LIST", label: `Subjects (${studentSubjectList.length})` },
+                ]}
+              />
             </Stack>
           </AppCard>
 

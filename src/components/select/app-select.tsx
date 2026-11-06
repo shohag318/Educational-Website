@@ -30,10 +30,16 @@ export function AppSelect({
 
   return (
     <FormControl size="small" fullWidth={fullWidth} disabled={disabled} sx={sx}>
-      {label && <InputLabel>{label}</InputLabel>}
-      <Select value={value} label={label} onChange={handleChange}>
+      {label && <InputLabel shrink={value === "" ? true : undefined}>{label}</InputLabel>}
+      <Select
+        value={value}
+        label={label}
+        onChange={handleChange}
+        displayEmpty
+        notched={value === "" ? true : undefined}
+      >
         {options.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
+          <MenuItem key={`${option.value}__${option.label}`} value={option.value}>
             {option.label}
           </MenuItem>
         ))}

@@ -82,6 +82,103 @@ function NavIcon({ icon, size = 18 }: { icon: string; size?: number }) {
   return <Iconify icon={icon} width={size} sx={{ flexShrink: 0, display: "block" }} />;
 }
 
+/** Top-level sidebar groups — only one stays open at a time (accordion). */
+const TOP_LEVEL_GROUPS = [
+  "session-mod",
+  "student-info-mod",
+  "result-mod",
+  "sms-mod",
+  "student-fee-mod",
+  "manual-fee-mod",
+  "accountant-mod",
+  "download-mod",
+  "setting-mod",
+  "assets-mod",
+] as const;
+
+const PHASE_GROUPS = ["phase-1", "phase-2", "phase-3", "phase-4"] as const;
+
+function allGroupsClosed(): Record<string, boolean> {
+  return {
+    "session-mod": true,
+    "student-info-mod": true,
+    "sms-mod": true,
+    "student-fee-mod": true,
+    "manual-fee-mod": true,
+    "accountant-mod": true,
+    "assets-mod": true,
+    "user-role-mod": true,
+    "download-mod": true,
+    "setting-mod": true,
+    "result-mod": true,
+    "phase-1": true,
+    "phase-2": true,
+    "phase-3": true,
+    "phase-4": true,
+  };
+}
+
+function resolveOpenGroups(path: string | null): Record<string, boolean> {
+  const next = allGroupsClosed();
+  if (!path || path === "/") return next;
+
+  const open = (key: string) => {
+    next[key] = false;
+  };
+
+  if (
+    path.startsWith("/setup/classes") ||
+    path.startsWith("/setup/subject-mapping") ||
+    path.startsWith("/session/")
+  ) {
+    open("session-mod");
+  } else if (
+    path.startsWith("/setup/students") ||
+    path.startsWith("/academic/subject-mapping") ||
+    path.startsWith("/student/profile") ||
+    path.startsWith("/student/attendance") ||
+    path.startsWith("/student/status")
+  ) {
+    open("student-info-mod");
+  } else if (
+    path.startsWith("/academic/rules") ||
+    path.startsWith("/setup/exams") ||
+    path.startsWith("/setup/exam-routine") ||
+    path.startsWith("/marks/") ||
+    path.startsWith("/results/") ||
+    path.startsWith("/reports/")
+  ) {
+    open("result-mod");
+    if (path.startsWith("/academic/rules")) open("phase-1");
+    else if (path.startsWith("/setup/exams") || path.startsWith("/setup/exam-routine")) open("phase-2");
+    else if (path.startsWith("/marks/") || path.startsWith("/results/review")) open("phase-3");
+    else open("phase-4");
+  } else if (path.startsWith("/notifications/sms") || path.startsWith("/sms/")) {
+    open("sms-mod");
+  } else if (path === "/fees" || path.startsWith("/fees/waiver")) {
+    open("student-fee-mod");
+  } else if (path.startsWith("/fees/collection") || path.startsWith("/fees/absent-fine")) {
+    open("manual-fee-mod");
+  } else if (path.startsWith("/accountant")) {
+    open("accountant-mod");
+  } else if (
+    path.startsWith("/download/") ||
+    path.startsWith("/setup/student-info") ||
+    path.startsWith("/student/id-cards") ||
+    path.startsWith("/student/transcript") ||
+    path.startsWith("/student/seat-plan")
+  ) {
+    open("download-mod");
+  } else if (path.startsWith("/settings") || path.startsWith("/user-role")) {
+    open("setting-mod");
+    if (path.startsWith("/user-role")) open("user-role-mod");
+  } else if (path.startsWith("/assets")) {
+    open("assets-mod");
+  }
+
+  return next;
+}
+
 export function Sidebar() {
   const pathname = usePathname();
   const [isInstLogin, setIsInstLogin] = useState(false);
@@ -108,27 +205,41 @@ export function Sidebar() {
     return instSession.accessibleModules.includes(moduleKey);
   };
 
-  // Collapsible state for tree groups (default expanded except result-mod which opens on clicking symbol)
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({
-    "session-mod": false,
-    "student-info-mod": false,
-    "sms-mod": false,
-    "student-fee-mod": false,
-    "manual-fee-mod": false,
-    "accountant-mod": false,
-    "assets-mod": false,
-    "user-role-mod": false,
-    "download-mod": false,
-    "setting-mod": false,
-    "result-mod": true,
-    "phase-1": false,
-    "phase-2": false,
-    "phase-3": false,
-    "phase-4": false,
-  });
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(allGroupsClosed);
+
+  // Keep the active route's submenu open; close the rest.
+  useEffect(() => {
+    setCollapsed(resolveOpenGroups(pathname));
+  }, [pathname]);
 
   const toggleGroup = (key: string) => {
-    setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
+    setCollapsed((prev) => {
+      const isCurrentlyClosed = prev[key] !== false;
+      const next = { ...prev };
+
+      if ((TOP_LEVEL_GROUPS as readonly string[]).includes(key)) {
+        if (isCurrentlyClosed) {
+          for (const group of TOP_LEVEL_GROUPS) next[group] = true;
+          next[key] = false;
+        } else {
+          next[key] = true;
+        }
+        return next;
+      }
+
+      if ((PHASE_GROUPS as readonly string[]).includes(key)) {
+        if (isCurrentlyClosed) {
+          for (const group of PHASE_GROUPS) next[group] = true;
+          next[key] = false;
+        } else {
+          next[key] = true;
+        }
+        return next;
+      }
+
+      next[key] = !prev[key];
+      return next;
+    });
   };
 
   const isLinkActive = (href: string) => pathname === href;

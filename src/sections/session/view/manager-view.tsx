@@ -23,8 +23,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  ToggleButton,
-  ToggleButtonGroup,
   Tooltip,
   Typography,
   useMediaQuery,
@@ -45,6 +43,7 @@ import { Label } from "@/components/label/label";
 import { Scrollbar } from "@/components/scrollbar/scrollbar";
 import { academicService } from "@/api/services";
 import { getStoredSchoolInfo, saveStoredSchoolInfo } from "@/utils/settings-store";
+import { AppTabs } from "@/components/ui/tabs-component";
 
 interface AcademicYearItem {
   id: string;
@@ -339,17 +338,6 @@ function SessionControlContent() {
     { label: "Exams", value: String(totalExamsAcrossActive), hint: "Linked to live sessions", icon: <EmojiEventsIcon color="warning" fontSize="small" /> },
   ];
 
-  const toggleGroupSx = {
-    width: { xs: 1, md: "auto" },
-    flexWrap: { xs: "wrap", sm: "nowrap" },
-    "& .MuiToggleButton-root": {
-      flex: { xs: 1, md: "none" },
-      px: { xs: 1, sm: 1.25 },
-      whiteSpace: "nowrap",
-      fontSize: { xs: 12, sm: 13 },
-    },
-  } as const;
-
   const dialogActionSx = {
     px: { xs: 2, sm: 3 },
     py: 2,
@@ -479,18 +467,19 @@ function SessionControlContent() {
                 startIcon={<SearchIcon fontSize="small" />}
               />
             </Box>
-            <ToggleButtonGroup
-              exclusive
-              fullWidth={isMobile}
-              size="small"
+            <AppTabs
               value={statusFilter}
-              onChange={(_, value) => value && setStatusFilter(value)}
-              sx={toggleGroupSx}
-            >
-              <ToggleButton value="ALL">All ({sessions.length})</ToggleButton>
-              <ToggleButton value="ACTIVE">Active ({activeCount})</ToggleButton>
-              <ToggleButton value="ARCHIVED">Archived ({archivedCount})</ToggleButton>
-            </ToggleButtonGroup>
+              onValueChange={(value) =>
+                setStatusFilter(value as "ALL" | "ACTIVE" | "ARCHIVED")
+              }
+              listClassName={isMobile ? "w-full" : undefined}
+              triggerClassName={isMobile ? "flex-1 justify-center" : undefined}
+              items={[
+                { value: "ALL", label: `All (${sessions.length})` },
+                { value: "ACTIVE", label: `Active (${activeCount})` },
+                { value: "ARCHIVED", label: `Archived (${archivedCount})` },
+              ]}
+            />
           </Stack>
 
           <Stack
@@ -510,24 +499,23 @@ function SessionControlContent() {
                 {activeCount} currently live · choose how many years can run together
               </Typography>
             </Box>
-            <ToggleButtonGroup
-              exclusive
-              fullWidth={isMobile}
-              size="small"
+            <AppTabs
               value={policyValue}
-              onChange={(_, value) => {
+              onValueChange={(value) => {
                 if (value === "single") handleUpdatePolicy(false, 1);
                 if (value === "2") handleUpdatePolicy(true, 2);
                 if (value === "3") handleUpdatePolicy(true, 3);
                 if (value === "unlimited") handleUpdatePolicy(true, 0);
               }}
-              sx={toggleGroupSx}
-            >
-              <ToggleButton value="single">Single</ToggleButton>
-              <ToggleButton value="2">2</ToggleButton>
-              <ToggleButton value="3">3</ToggleButton>
-              <ToggleButton value="unlimited">Unlimited</ToggleButton>
-            </ToggleButtonGroup>
+              listClassName={isMobile ? "w-full" : undefined}
+              triggerClassName={isMobile ? "flex-1 justify-center" : undefined}
+              items={[
+                { value: "single", label: "Single" },
+                { value: "2", label: "2" },
+                { value: "3", label: "3" },
+                { value: "unlimited", label: "Unlimited" },
+              ]}
+            />
           </Stack>
 
           {!loading && sessions.length > 0 && (

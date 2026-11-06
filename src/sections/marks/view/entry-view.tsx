@@ -32,6 +32,7 @@ import {
 import * as XLSX from "xlsx";
 import { MarkInputPdfModal } from "@/sections/marks/component/mark-input-pdf-modal";
 import { AppButton } from "@/components/button/app-button";
+import { AppSelect } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 
 export default function MarkEntryPage() {
@@ -895,10 +896,7 @@ export default function MarkEntryPage() {
     <ResultsPageShell>
       <div className="no-print space-y-6">
         <ResultsPageHeader
-          stepHint="Results workflow • Step 3"
-          icon={<TableProperties />}
-          title="Mark Entry"
-          subtitle="Enter or import student marks by exam, class, and subject."
+          heading="Mark Entry"
           action={
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Download Excel Form Button */}
@@ -965,39 +963,34 @@ export default function MarkEntryPage() {
         />
 
       {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3 text-xs shadow-sm">
-        <div>
-          <SessionSelect
-            value={selectedSession}
-            onChange={(val) => {
-              setSelectedSession(val);
-              const matching = exams.filter((ex) => {
-                if (val !== "ALL" && ex.academicYear?.yearName && ex.academicYear.yearName !== val) {
-                  return false;
-                }
-                return isExamMatchingType(ex, selectedExamType);
-              });
-              if (matching.length > 0 && !matching.some((e) => e.id === selectedExamId)) {
-                handleExamChange(matching[0].id);
+      <div className="bg-white p-4 rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3 shadow-sm">
+        <SessionSelect
+          value={selectedSession}
+          onChange={(val) => {
+            setSelectedSession(val);
+            const matching = exams.filter((ex) => {
+              if (val !== "ALL" && ex.academicYear?.yearName && ex.academicYear.yearName !== val) {
+                return false;
               }
-            }}
-            label="Session"
-            labelClassName="font-semibold text-slate-700 block mb-1"
-            selectClassName="w-full p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 font-medium bg-white"
-          />
-        </div>
+              return isExamMatchingType(ex, selectedExamType);
+            });
+            if (matching.length > 0 && !matching.some((e) => e.id === selectedExamId)) {
+              handleExamChange(matching[0].id);
+            }
+          }}
+          label="Session"
+          fullWidth
+        />
 
-        <div>
-          <label className="font-semibold text-slate-700 block mb-1">Exam Type:</label>
-          <select
-            value={selectedExamType}
-            onChange={(e) => handleExamTypeChange(e.target.value)}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 font-medium bg-white"
-          >
-            <option value="ALL">All Exam Types</option>
-            <option value="Class Test">Class Test</option>
-            <option value="Semester">Semester</option>
-            {distinctExamTypes
+        <AppSelect
+          label="Exam Type"
+          value={selectedExamType}
+          onChange={handleExamTypeChange}
+          options={[
+            { value: "ALL", label: "All Exam Types" },
+            { value: "Class Test", label: "Class Test" },
+            { value: "Semester", label: "Semester" },
+            ...distinctExamTypes
               .filter(
                 (t) =>
                   t !== "Class Test" &&
@@ -1005,125 +998,94 @@ export default function MarkEntryPage() {
                   t !== "Semester" &&
                   t !== "ALL"
               )
-              .map((t) => (
-                <option key={t} value={t}>
-                  {t.replace(/_/g, " ").trim()}
-                </option>
-              ))}
-          </select>
-        </div>
+              .map((t) => ({ value: t, label: t.replace(/_/g, " ").trim() })),
+          ]}
+        />
 
-        <div>
-          <label className="font-semibold text-slate-700 block mb-1">Target Exam:</label>
-          <select
-            value={selectedExamId}
-            onChange={(e) => handleExamChange(e.target.value)}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 font-medium"
-          >
-            {filteredExams.length === 0 ? (
-              <option value="">No exams match filter</option>
-            ) : (
-              filteredExams.map((ex) => (
-                <option key={ex.id} value={ex.id}>
-                  {ex.name} ({ex.termCode || ex.status})
-                </option>
-              ))
-            )}
-          </select>
-        </div>
+        <AppSelect
+          label="Target Exam"
+          value={selectedExamId}
+          onChange={handleExamChange}
+          options={
+            filteredExams.length === 0
+              ? [{ value: "", label: "No exams match filter" }]
+              : filteredExams.map((ex) => ({
+                  value: ex.id,
+                  label: `${ex.name} (${ex.termCode || ex.status})`,
+                }))
+          }
+        />
 
-        <div>
-          <label className="font-semibold text-slate-700 block mb-1">Class:</label>
-          <select
-            value={selectedClassId}
-            onChange={(e) => handleClassChange(e.target.value)}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 font-medium"
-          >
-            {classes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <AppSelect
+          label="Class"
+          value={selectedClassId}
+          onChange={handleClassChange}
+          options={classes.map((c) => ({ value: c.id, label: c.name }))}
+        />
 
-        <div>
-          <label className="font-semibold text-slate-700 block mb-1">Shift:</label>
-          <select
-            value={selectedShift}
-            onChange={(e) => handleShiftChange(e.target.value)}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 font-medium"
-          >
-            <option value="">All Shifts</option>
-            <option value="MORNING">Morning</option>
-            <option value="DAY">Day</option>
-            {availableShifts.map((sh: any) => (
-              <option key={sh} value={sh}>
-                {sh.charAt(0) + sh.slice(1).toLowerCase()}
-              </option>
-            ))}
-          </select>
-        </div>
+        <AppSelect
+          label="Shift"
+          value={selectedShift}
+          onChange={handleShiftChange}
+          options={[
+            { value: "", label: "All Shifts" },
+            { value: "MORNING", label: "Morning" },
+            { value: "DAY", label: "Day" },
+            ...availableShifts
+              .filter((sh: any) => sh !== "MORNING" && sh !== "DAY")
+              .map((sh: any) => ({
+                value: sh,
+                label: sh.charAt(0) + sh.slice(1).toLowerCase(),
+              })),
+          ]}
+        />
 
-        <div>
-          <label className="font-semibold text-slate-700 block mb-1">Group:</label>
-          <select
-            value={isClass11Or12 && selectedGroup === "GENERAL" ? "ALL" : selectedGroup}
-            onChange={(e) => handleGroupChange(e.target.value)}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 font-medium"
-          >
-            <option value="ALL">All Groups</option>
-            {!isClass11Or12 && <option value="GENERAL">General</option>}
-            <option value="SCIENCE">Science</option>
-            <option value="HUMANITIES">Humanities</option>
-            <option value="BUSINESS_STUDIES">Business Studies</option>
-          </select>
-        </div>
+        <AppSelect
+          label="Group"
+          value={isClass11Or12 && selectedGroup === "GENERAL" ? "ALL" : selectedGroup}
+          onChange={handleGroupChange}
+          options={[
+            { value: "ALL", label: "All Groups" },
+            ...(!isClass11Or12 ? [{ value: "GENERAL", label: "General" }] : []),
+            { value: "SCIENCE", label: "Science" },
+            { value: "HUMANITIES", label: "Humanities" },
+            { value: "BUSINESS_STUDIES", label: "Business Studies" },
+          ]}
+        />
 
-        <div>
-          <label className="font-semibold text-slate-700 block mb-1">Section:</label>
-          <select
-            value={selectedSectionId}
-            onChange={(e) => setSelectedSectionId(e.target.value)}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 font-medium"
-          >
-            <option value="">All Sections</option>
-            {availableSections.map((s: any) => {
+        <AppSelect
+          label="Section"
+          value={selectedSectionId}
+          onChange={setSelectedSectionId}
+          options={[
+            { value: "", label: "All Sections" },
+            ...availableSections.map((s: any) => {
               const shiftLabel = s.shift === "MORNING" ? "Morning" : s.shift === "DAY" ? "Day" : s.shift;
-              return (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({s.groupType}){(!selectedShift && shiftLabel) ? ` • ${shiftLabel}` : ""}
-                </option>
-              );
-            })}
-          </select>
-        </div>
+              return {
+                value: s.id,
+                label: `${s.name} (${s.groupType})${!selectedShift && shiftLabel ? ` • ${shiftLabel}` : ""}`,
+              };
+            }),
+          ]}
+        />
 
-        <div>
-          <label className="font-semibold text-slate-700 block mb-1">
-            Subject: {subjects.length > 0 && <span className="text-[11px] font-normal text-slate-400">({subjects.length} Assigned)</span>}
-          </label>
-          <select
-            value={selectedSubjectId}
-            onChange={(e) => setSelectedSubjectId(e.target.value)}
-            disabled={subjectsLoading || subjects.length === 0}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 font-medium text-emerald-800 disabled:bg-slate-100 disabled:text-slate-400"
-          >
-            {subjectsLoading ? (
-              <option value="">Loading assigned subjects...</option>
-            ) : subjects.length === 0 ? (
-              <option value="">No subjects assigned to this exam</option>
-            ) : (
-              subjects.map((sub) => (
-                <option key={sub.id} value={sub.id}>
-                  {sub.name} ({sub.subjectCode})
-                </option>
-              ))
-            )}
-          </select>
-        </div>
+        <AppSelect
+          label={subjects.length > 0 ? `Subject (${subjects.length} Assigned)` : "Subject"}
+          value={selectedSubjectId}
+          onChange={setSelectedSubjectId}
+          disabled={subjectsLoading || subjects.length === 0}
+          options={
+            subjectsLoading
+              ? [{ value: "", label: "Loading assigned subjects..." }]
+              : subjects.length === 0
+              ? [{ value: "", label: "No subjects assigned to this exam" }]
+              : subjects.map((sub) => ({
+                  value: sub.id,
+                  label: `${sub.name} (${sub.subjectCode})`,
+                }))
+          }
+        />
       </div>
-
       {/* Below of Filter: OK Button & Selection Summary */}
       <div className="bg-white p-3 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-xs">
         <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">

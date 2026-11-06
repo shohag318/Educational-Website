@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import { AppButton } from "@/components/button/app-button";
-import { FileEdit, History, Save, Check } from "@/components/iconify/lucide";
+import { AppSelect, AppTextField } from "@/components";
+import { History, Save, Check } from "@/components/iconify/lucide";
 import {
   ResultsPageShell,
   ResultsPageHeader,
@@ -114,12 +115,7 @@ export default function MarkAuditPage() {
 
   return (
     <ResultsPageShell>
-      <ResultsPageHeader
-        stepHint="Results workflow • Mark Entry"
-        icon={<FileEdit />}
-        title="Mark Override & Audit"
-        subtitle="Adjust marks in draft mode. Every change is logged with a required reason."
-      />
+      <ResultsPageHeader heading="Mark Override & Audit" current="Mark Audit" />
 
       {successMsg ? (
         <ResultsNotice severity="success">
@@ -142,42 +138,29 @@ export default function MarkAuditPage() {
       ) : null}
 
       <ResultsFilterCard title="Who & which exam" columns={3}>
-        <div>
-          <label>Select Exam *</label>
-          <select value={selectedExamId} onChange={(e) => setSelectedExamId(e.target.value)}>
-            {exams.map((ex) => (
-              <option key={ex.id} value={ex.id}>
-                {ex.name} ({ex.status})
-              </option>
-            ))}
-          </select>
-        </div>
+        <AppSelect
+          label="Exam"
+          value={selectedExamId}
+          onChange={setSelectedExamId}
+          options={exams.map((ex) => ({ value: ex.id, label: `${ex.name} (${ex.status})` }))}
+        />
 
-        <div>
-          <label>Select Student *</label>
-          <select
-            value={selectedEnrollmentId}
-            onChange={(e) => setSelectedEnrollmentId(e.target.value)}
-          >
-            {students.map((st) => (
-              <option key={st.id} value={st.id}>
-                Roll #{st.classRoll} - {st.student.firstName} {st.student.lastName} (
-                {st.student.studentIdNo})
-              </option>
-            ))}
-          </select>
-        </div>
+        <AppSelect
+          label="Student"
+          value={selectedEnrollmentId}
+          onChange={setSelectedEnrollmentId}
+          options={students.map((st) => ({
+            value: st.id,
+            label: `Roll #${st.classRoll} - ${st.student.firstName} ${st.student.lastName} (${st.student.studentIdNo})`,
+          }))}
+        />
 
-        <div>
-          <label>Select Subject *</label>
-          <select value={selectedSubjectId} onChange={(e) => setSelectedSubjectId(e.target.value)}>
-            {subjects.map((sub) => (
-              <option key={sub.id} value={sub.id}>
-                {sub.name} ({sub.subjectCode})
-              </option>
-            ))}
-          </select>
-        </div>
+        <AppSelect
+          label="Subject"
+          value={selectedSubjectId}
+          onChange={setSelectedSubjectId}
+          options={subjects.map((sub) => ({ value: sub.id, label: `${sub.name} (${sub.subjectCode})` }))}
+        />
       </ResultsFilterCard>
 
       <ResultsPanel>
@@ -200,67 +183,38 @@ export default function MarkAuditPage() {
               bgcolor: "grey.50",
               border: 1,
               borderColor: "divider",
-              "& label": { display: "block", mb: 0.75, fontSize: 12, fontWeight: 600, color: "text.secondary" },
-              "& input": {
-                width: "100%",
-                p: 1.25,
-                borderRadius: 1.5,
-                border: 1,
-                borderColor: "divider",
-                fontSize: 13,
-                bgcolor: "background.paper",
-              },
             }}
           >
-            <div>
-              <label>New CQ Mark</label>
-              <input
-                type="number"
-                step="0.5"
-                placeholder="e.g. 55"
-                value={cqMark}
-                onChange={(e) => setCqMark(e.target.value)}
-              />
-            </div>
-            <div>
-              <label>New MCQ Mark</label>
-              <input
-                type="number"
-                step="0.5"
-                placeholder="e.g. 24"
-                value={mcqMark}
-                onChange={(e) => setMcqMark(e.target.value)}
-              />
-            </div>
-            <div>
-              <label>New Practical Mark</label>
-              <input
-                type="number"
-                step="0.5"
-                placeholder="e.g. 22"
-                value={practicalMark}
-                onChange={(e) => setPracticalMark(e.target.value)}
-              />
-            </div>
+            <AppTextField
+              label="New CQ Mark"
+              type="number"
+              placeholder="e.g. 55"
+              value={cqMark}
+              onChange={(e) => setCqMark(e.target.value)}
+              slotProps={{ htmlInput: { step: 0.5 } }}
+            />
+            <AppTextField
+              label="New MCQ Mark"
+              type="number"
+              placeholder="e.g. 24"
+              value={mcqMark}
+              onChange={(e) => setMcqMark(e.target.value)}
+              slotProps={{ htmlInput: { step: 0.5 } }}
+            />
+            <AppTextField
+              label="New Practical Mark"
+              type="number"
+              placeholder="e.g. 22"
+              value={practicalMark}
+              onChange={(e) => setPracticalMark(e.target.value)}
+              slotProps={{ htmlInput: { step: 0.5 } }}
+            />
           </Box>
 
-          <Box
-            sx={{
-              mb: 2,
-              "& label": { display: "block", mb: 0.75, fontSize: 12, fontWeight: 600, color: "text.secondary" },
-              "& textarea": {
-                width: "100%",
-                p: 1.25,
-                borderRadius: 1.5,
-                border: 1,
-                borderColor: "divider",
-                fontSize: 13,
-                bgcolor: "background.paper",
-              },
-            }}
-          >
-            <label>Audit Reason & Justification (Required) *</label>
-            <textarea
+          <Box sx={{ mb: 2 }}>
+            <AppTextField
+              label="Audit Reason & Justification (Required)"
+              multiline
               rows={2}
               placeholder="e.g. Script re-evaluation requested by Head of Department. 5 marks added to CQ."
               value={auditReason}

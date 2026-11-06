@@ -2,8 +2,9 @@
 
 import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState } from "react";
-import { FileSpreadsheet, Printer, Filter, RotateCcw } from "@/components/iconify/lucide";
+import { Printer, Filter, RotateCcw } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
+import { AppSelect } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import {
   ResultsPageShell,
@@ -190,10 +191,7 @@ export default function TabulationPage() {
   return (
     <ResultsPageShell>
       <ResultsPageHeader
-        stepHint="Reports"
-        icon={<FileSpreadsheet />}
-        title="Tabulation Sheet"
-        subtitle="Full broadsheet with subject marks, GPA, and merit positions."
+        heading="Tabulation Sheet"
         action={
           <AppButton
             variant="contained"
@@ -211,112 +209,90 @@ export default function TabulationPage() {
         title="Choose class & exam"
         active={hasActiveFilters}
         onReset={handleResetFilters}
-        columns={6}
+        columns={4}
       >
-          {/* Session Filter */}
-          <div>
-            <SessionSelect
-              value={selectedSession}
-              onChange={(val) => setSelectedSession(val)}
-              label="Session"
-              labelClassName="font-semibold text-slate-600 block mb-1"
-              selectClassName="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            />
-          </div>
+        {/* Session Filter */}
+        <SessionSelect
+          value={selectedSession}
+          onChange={(val) => setSelectedSession(val)}
+          label="Session"
+          fullWidth
+        />
 
-          {/* Class Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Class:</label>
-            <select
-              value={selectedClassId}
-              onChange={(e) => handleClassChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Classes</option>
-              {classes.map((cls) => (
-                <option key={cls.id} value={cls.id}>
-                  {cls.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Class Filter */}
+        <AppSelect
+          label="Class"
+          value={selectedClassId}
+          onChange={handleClassChange}
+          options={[
+            { value: "", label: "All Classes" },
+            ...classes.map((cls) => ({ value: cls.id, label: cls.name })),
+          ]}
+        />
 
-          {/* Exam Name Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Exam Name:</label>
-            <select
-              value={selectedExamId}
-              onChange={(e) => handleExamChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              {filteredExams.map((ex) => (
-                <option key={ex.id} value={ex.id}>
-                  {ex.name} {ex.class?.name ? `(${ex.class.name})` : ""} [{ex.status}]
-                </option>
-              ))}
-              {filteredExams.length === 0 && (
-                <option value="" disabled>
-                  No exams for selected class
-                </option>
-              )}
-            </select>
-          </div>
+        {/* Exam Name Filter */}
+        <AppSelect
+          label="Exam Name"
+          value={selectedExamId}
+          onChange={handleExamChange}
+          options={
+            filteredExams.length === 0
+              ? [{ value: "", label: "No exams for selected class" }]
+              : filteredExams.map((ex) => ({
+                  value: ex.id,
+                  label: `${ex.name} ${ex.class?.name ? `(${ex.class.name})` : ""} [${ex.status}]`,
+                }))
+          }
+        />
 
-          {/* Shift Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Shift:</label>
-            <select
-              value={selectedShift}
-              onChange={(e) => handleShiftChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Shifts</option>
-              <option value="MORNING">Morning</option>
-              <option value="DAY">Day</option>
-              {availableShifts.map((sh: any) => (
-                <option key={sh} value={sh}>
-                  {sh.charAt(0) + sh.slice(1).toLowerCase()}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Shift Filter */}
+        <AppSelect
+          label="Shift"
+          value={selectedShift}
+          onChange={handleShiftChange}
+          options={[
+            { value: "", label: "All Shifts" },
+            { value: "MORNING", label: "Morning" },
+            { value: "DAY", label: "Day" },
+            ...availableShifts
+              .filter((sh: any) => sh !== "MORNING" && sh !== "DAY")
+              .map((sh: any) => ({
+                value: sh,
+                label: sh.charAt(0) + sh.slice(1).toLowerCase(),
+              })),
+          ]}
+        />
 
-          {/* Group Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Group:</label>
-            <select
-              value={isClass11Or12 && selectedGroup === "GENERAL" ? "ALL" : selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="ALL">All Groups</option>
-              {!isClass11Or12 && <option value="GENERAL">General</option>}
-              <option value="SCIENCE">Science</option>
-              <option value="HUMANITIES">Humanities</option>
-              <option value="BUSINESS_STUDIES">Business Studies</option>
-            </select>
-          </div>
+        {/* Group Filter */}
+        <AppSelect
+          label="Group"
+          value={isClass11Or12 && selectedGroup === "GENERAL" ? "ALL" : selectedGroup}
+          onChange={setSelectedGroup}
+          options={[
+            { value: "ALL", label: "All Groups" },
+            ...(!isClass11Or12 ? [{ value: "GENERAL", label: "General" }] : []),
+            { value: "SCIENCE", label: "Science" },
+            { value: "HUMANITIES", label: "Humanities" },
+            { value: "BUSINESS_STUDIES", label: "Business Studies" },
+          ]}
+        />
 
-          {/* Section Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Section:</label>
-            <select
-              value={selectedSectionId}
-              onChange={(e) => setSelectedSectionId(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Sections</option>
-              {availableSections.map((sec: any) => {
-                const shiftLabel = sec.shift === "MORNING" ? "Morning" : sec.shift === "DAY" ? "Day" : sec.shift;
-                return (
-                  <option key={sec.id} value={sec.id}>
-                    {sec.name} {sec.groupType ? `(${sec.groupType})` : ""}{(!selectedShift && shiftLabel) ? ` • ${shiftLabel}` : ""}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-      </ResultsFilterCard>
+        {/* Section Filter */}
+        <AppSelect
+          label="Section"
+          value={selectedSectionId}
+          onChange={setSelectedSectionId}
+          options={[
+            { value: "", label: "All Sections" },
+            ...availableSections.map((sec: any) => {
+              const shiftLabel = sec.shift === "MORNING" ? "Morning" : sec.shift === "DAY" ? "Day" : sec.shift;
+              return {
+                value: sec.id,
+                label: `${sec.name} ${sec.groupType ? `(${sec.groupType})` : ""}${!selectedShift && shiftLabel ? ` • ${shiftLabel}` : ""}`.trim(),
+              };
+            }),
+          ]}
+        />      </ResultsFilterCard>
 
       {/* Tabulation Sheet Document Canvas */}
       <ResultsPanel sx={{ p: { xs: 2, sm: 3 } }}>

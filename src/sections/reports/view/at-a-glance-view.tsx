@@ -3,18 +3,13 @@
 import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState } from "react";
 import {
-  FileBarChart,
   Printer,
   Sparkles,
   Check,
   RefreshCw,
-  Layers,
-  FileSpreadsheet,
-  AlertTriangle,
-  Award,
-  AlertOctagon,
 } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
+import { AppSelect, AppTextField } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import {
   ResultsPageShell,
@@ -22,6 +17,7 @@ import {
   ResultsFilterCard,
   ResultsPanel,
 } from "@/sections/results/component/result-page-ui";
+import { AppTabs } from "@/components/ui/tabs-component";
 
 export default function AtAGlancePage() {
   const [selectedSession, setSelectedSession] = useState("ALL");
@@ -292,10 +288,8 @@ export default function AtAGlancePage() {
   return (
     <ResultsPageShell>
       <ResultsPageHeader
-        stepHint="Reports"
-        icon={<FileBarChart />}
-        title="Result At a Glance"
-        subtitle="Pass rates, grade distribution, and failure analytics in one summary."
+        heading="Result At a Glance"
+        current="At a Glance"
         action={
           <div className="flex flex-wrap items-center gap-2">
             <AppButton
@@ -330,152 +324,118 @@ export default function AtAGlancePage() {
         title="Choose class & exam"
         active={hasActiveFilters}
         onReset={handleResetFilters}
-        columns={6}
+        columns={4}
       >
-          {/* Session Filter */}
-          <div>
-            <SessionSelect
-              value={selectedSession}
-              onChange={(val) => setSelectedSession(val)}
-              label="Session"
-              labelClassName="font-semibold text-slate-600 block mb-1"
-              selectClassName="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            />
-          </div>
+        {/* Session Filter */}
+        <SessionSelect
+          value={selectedSession}
+          onChange={(val) => setSelectedSession(val)}
+          label="Session"
+          fullWidth
+        />
 
-          {/* Class Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Class:</label>
-            <select
-              value={selectedClassId}
-              onChange={(e) => handleClassChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Classes</option>
-              {classes.map((cls) => (
-                <option key={cls.id} value={cls.id}>
-                  {cls.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Class Filter */}
+        <AppSelect
+          label="Class"
+          value={selectedClassId}
+          onChange={handleClassChange}
+          options={[
+            { value: "", label: "All Classes" },
+            ...classes.map((cls) => ({ value: cls.id, label: cls.name })),
+          ]}
+        />
 
-          {/* Exam Name Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Exam Name:</label>
-            <select
-              value={selectedExamId}
-              onChange={(e) => handleExamChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              {filteredExams.map((ex) => (
-                <option key={ex.id} value={ex.id}>
-                  {ex.name} {ex.class?.name ? `(${ex.class.name})` : ex.institution?.name ? `(${ex.institution.name})` : ""}
-                </option>
-              ))}
-              {filteredExams.length === 0 && (
-                <option value="" disabled>
-                  No exams for selected class
-                </option>
-              )}
-            </select>
-          </div>
+        {/* Exam Name Filter */}
+        <AppSelect
+          label="Exam Name"
+          value={selectedExamId}
+          onChange={handleExamChange}
+          options={
+            filteredExams.length === 0
+              ? [{ value: "", label: "No exams for selected class" }]
+              : filteredExams.map((ex) => ({
+                  value: ex.id,
+                  label: `${ex.name} ${ex.class?.name ? `(${ex.class.name})` : ex.institution?.name ? `(${ex.institution.name})` : ""}`,
+                }))
+          }
+        />
 
-          {/* Shift Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Shift:</label>
-            <select
-              value={selectedShift}
-              onChange={(e) => handleShiftChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Shifts</option>
-              <option value="MORNING">Morning</option>
-              <option value="DAY">Day</option>
-              {availableShifts.map((sh: any) => (
-                <option key={sh} value={sh}>
-                  {sh.charAt(0) + sh.slice(1).toLowerCase()}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Shift Filter */}
+        <AppSelect
+          label="Shift"
+          value={selectedShift}
+          onChange={handleShiftChange}
+          options={[
+            { value: "", label: "All Shifts" },
+            { value: "MORNING", label: "Morning" },
+            { value: "DAY", label: "Day" },
+            ...availableShifts
+              .filter((sh: any) => sh !== "MORNING" && sh !== "DAY")
+              .map((sh: any) => ({
+                value: sh,
+                label: sh.charAt(0) + sh.slice(1).toLowerCase(),
+              })),
+          ]}
+        />
 
-          {/* Group Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Group:</label>
-            <select
-              value={isClass11Or12 && selectedGroup === "GENERAL" ? "ALL" : selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="ALL">All Groups</option>
-              {!isClass11Or12 && <option value="GENERAL">General</option>}
-              <option value="SCIENCE">Science</option>
-              <option value="HUMANITIES">Humanities</option>
-              <option value="BUSINESS_STUDIES">Business Studies</option>
-            </select>
-          </div>
+        {/* Group Filter */}
+        <AppSelect
+          label="Group"
+          value={isClass11Or12 && selectedGroup === "GENERAL" ? "ALL" : selectedGroup}
+          onChange={setSelectedGroup}
+          options={[
+            { value: "ALL", label: "All Groups" },
+            ...(!isClass11Or12 ? [{ value: "GENERAL", label: "General" }] : []),
+            { value: "SCIENCE", label: "Science" },
+            { value: "HUMANITIES", label: "Humanities" },
+            { value: "BUSINESS_STUDIES", label: "Business Studies" },
+          ]}
+        />
 
-          {/* Section Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Section:</label>
-            <select
-              value={selectedSectionId}
-              onChange={(e) => setSelectedSectionId(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Sections</option>
-              {availableSections.map((sec: any) => {
-                const shiftLabel = sec.shift === "MORNING" ? "Morning" : sec.shift === "DAY" ? "Day" : sec.shift;
-                return (
-                  <option key={sec.id} value={sec.id}>
-                    {sec.name} {sec.groupType ? `(${sec.groupType})` : ""}{(!selectedShift && shiftLabel) ? ` • ${shiftLabel}` : ""}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-      </ResultsFilterCard>
+        {/* Section Filter */}
+        <AppSelect
+          label="Section"
+          value={selectedSectionId}
+          onChange={setSelectedSectionId}
+          options={[
+            { value: "", label: "All Sections" },
+            ...availableSections.map((sec: any) => {
+              const shiftLabel = sec.shift === "MORNING" ? "Morning" : sec.shift === "DAY" ? "Day" : sec.shift;
+              return {
+                value: sec.id,
+                label: `${sec.name} ${sec.groupType ? `(${sec.groupType})` : ""}${!selectedShift && shiftLabel ? ` • ${shiftLabel}` : ""}`.trim(),
+              };
+            }),
+          ]}
+        />      </ResultsFilterCard>
 
       <ResultsPanel className="no-print">
         <div className="max-w-md mb-3">
-          <label className="font-semibold text-slate-600 block mb-1">Class Teacher (For Print Header)</label>
-          <input
-            type="text"
+          <AppTextField
+            label="Class Teacher"
+            helperText="Shown in the print header"
             value={classTeacher}
             onChange={(e) => setClassTeacher(e.target.value)}
             placeholder="e.g. Md Shohag Mia"
-            className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100">
-          <span className="text-[11px] font-bold text-slate-500 mr-2 uppercase tracking-wide">
-            View / Print Target:
+        <div className="pt-2 border-t border-slate-100 space-y-2">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">
+            View / Print Target
           </span>
-          {[
-            { id: "ALL", label: "Full Report (All 5 Pages)", icon: Layers },
-            { id: "P1", label: "Page 1: Result at a Glance", icon: FileBarChart },
-            { id: "P2", label: "Page 2: Result Sheet", icon: FileSpreadsheet },
-            { id: "P3", label: "Page 3: Grade Statistics By Course", icon: Award },
-            { id: "P4", label: "Page 4: Failed Statistics By Course", icon: AlertTriangle },
-            { id: "P5", label: "Page 5: Failed Statistics By Course without 4th Subject", icon: AlertOctagon },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isSel = activeTab === tab.id;
-            return (
-              <AppButton
-                key={tab.id}
-                size="small"
-                variant="soft"
-                color={isSel ? "primary" : "inherit"}
-                startIcon={<Icon size={14} />}
-                onClick={() => setActiveTab(tab.id as any)}
-              >
-                {tab.label}
-              </AppButton>
-            );
-          })}
+          <AppTabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as "ALL" | "P1" | "P2" | "P3" | "P4" | "P5")}
+            items={[
+              { value: "ALL", label: "Full Report" },
+              { value: "P1", label: "Result at a Glance" },
+              { value: "P2", label: "Result Sheet" },
+              { value: "P3", label: "Grade Statistics By Course" },
+              { value: "P4", label: "Failed Statistics By Course" },
+              { value: "P5", label: "Failed Statistics without 4th Subject" },
+            ]}
+          />
         </div>
       </ResultsPanel>
 
@@ -890,14 +850,8 @@ export default function AtAGlancePage() {
 
       {/* No Data State */}
       {!loading && !reportData && (
-        <ResultsPanel>
-          <div className="py-10 text-center text-slate-500">
-            <FileBarChart className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-800">No Exam Results Available</h3>
-            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-              Please select an exam that has processed results, or click &quot;Load PDF Demo Data&quot; to test with the 26-student Dalta Degree College dataset.
-            </p>
-          </div>
+        <ResultsPanel padded={false}>
+          <NoDataFound />
         </ResultsPanel>
       )}
     </ResultsPageShell>

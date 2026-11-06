@@ -53,9 +53,10 @@ import { AppCard } from "@/components/card/app-card";
 import { AppSelect } from "@/components/select/app-select";
 import { AppTextField } from "@/components/text-field/app-text-field";
 import { StudentPageHeader } from "@/sections/student/component/student-page-header";
-import { Box, Grid, Stack, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Box, Grid, Stack } from "@mui/material";
 import { SearchIcon } from "@/components/iconify/mui-icons";
 import { getScopedStorageKey, getActiveTenantCode, TENANT_SWITCH_EVENT } from "@/lib/clientTenant";
+import { AppTabs } from "@/components/ui/tabs-component";
 
 type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
 type ViewMode = "daily" | "monthly" | "range";
@@ -1283,19 +1284,17 @@ export default function StudentAttendancePage() {
         }
       />
 
-      <AppCard sx={{ mb: 2 }}>
-        <ToggleButtonGroup
-          exclusive
-          size="small"
+      <Box sx={{ mb: 2 }}>
+        <AppTabs
           value={viewMode}
-          onChange={(_, value) => value && setViewMode(value)}
-          sx={{ flexWrap: "wrap" }}
-        >
-          <ToggleButton value="daily">Daily Register</ToggleButton>
-          <ToggleButton value="monthly">Monthly Sheet</ToggleButton>
-          <ToggleButton value="range">Range & Bulk</ToggleButton>
-        </ToggleButtonGroup>
-      </AppCard>
+          onValueChange={(value) => setViewMode(value as ViewMode)}
+          items={[
+            { value: "daily", label: "Daily Register" },
+            { value: "monthly", label: "Monthly Sheet" },
+            { value: "range", label: "Range & Bulk" },
+          ]}
+        />
+      </Box>
 
       <AppCard sx={{ mb: 3 }}>
         <Grid container spacing={1.5}>

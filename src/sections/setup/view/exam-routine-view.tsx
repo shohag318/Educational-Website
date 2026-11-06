@@ -35,9 +35,11 @@ import {
   ResultsPageShell,
   ResultsPageHeader,
 } from "@/sections/results/component/result-page-ui";
+import { AppSelect, AppTextField } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import { DatePicker, TimePicker } from "@/components/date-picker/date-picker";
 import { AppButton } from "@/components/button/app-button";
+import { AppTabs } from "@/components/ui/tabs-component";
 import {
   getStoredSchoolInfo,
   SchoolBasicInfo,
@@ -931,34 +933,17 @@ export default function ExamRoutinePage() {
       )}
 
       <ResultsPageHeader
-        stepHint="Results workflow • Step 2"
-        icon={<CalendarRange />}
-        title="Exam Routine"
-        subtitle="Set examination dates, times, rooms, and print official routines."
+        heading="Exam Routine"
         action={
           <div className="flex items-center gap-2.5 shrink-0">
-            <div className="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200">
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={activeTab === "setup" ? "primary" : "inherit"}
-                onClick={() => setActiveTab("setup")}
-                startIcon={<Sliders className="w-3.5 h-3.5" />}
-              >
-                Routine Setup
-              </AppButton>
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={activeTab === "print" ? "primary" : "inherit"}
-                onClick={() => setActiveTab("print")}
-                startIcon={<Eye className="w-3.5 h-3.5" />}
-              >
-                Print Preview
-              </AppButton>
-            </div>
+            <AppTabs
+              value={activeTab}
+              onValueChange={(value) => setActiveTab(value as "setup" | "print")}
+              items={[
+                { value: "setup", label: "Routine Setup" },
+                { value: "print", label: "Print Preview" },
+              ]}
+            />
 
             <AppButton
               type="button"
@@ -1010,106 +995,90 @@ export default function ExamRoutinePage() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {/* 1. Academic Session Filter */}
-          <div>
-            <SessionSelect
-              value={selectedSession}
-              onChange={(val) => setSelectedSession(val)}
-              label="Session:"
-              labelClassName="font-bold text-slate-700 block mb-1"
-              selectClassName="w-full p-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800 shadow-2xs"
-            />
-          </div>
+          <SessionSelect
+            value={selectedSession}
+            onChange={(val) => setSelectedSession(val)}
+            label="Session"
+            fullWidth
+          />
 
           {/* 2. Class Filter */}
-          <div>
-            <label className="font-bold text-slate-700 block mb-1">Academic Class:</label>
-            <select
-              value={selectedClassId}
-              onChange={(e) => setSelectedClassId(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800 shadow-2xs"
-            >
-              {classes.length === 0 && <option value="">No classes found</option>}
-              {classes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <AppSelect
+            label="Academic Class"
+            value={selectedClassId}
+            onChange={setSelectedClassId}
+            options={
+              classes.length === 0
+                ? [{ value: "", label: "No classes found" }]
+                : classes.map((c) => ({ value: c.id, label: c.name }))
+            }
+          />
 
           {/* 3. Examination Filter */}
-          <div>
-            <label className="font-bold text-slate-700 block mb-1">Examination Term:</label>
-            <select
-              value={selectedExamId}
-              onChange={(e) => setSelectedExamId(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800 shadow-2xs"
-            >
-              {availableExamsForClass.length === 0 ? (
-                <option value="">No exam configured for this class</option>
-              ) : (
-                availableExamsForClass.map((ex) => (
-                  <option key={ex.id} value={ex.id}>
-                    {ex.name} {ex.termCode ? `(${ex.termCode})` : ""}
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
+          <AppSelect
+            label="Examination Term"
+            value={selectedExamId}
+            onChange={setSelectedExamId}
+            options={
+              availableExamsForClass.length === 0
+                ? [{ value: "", label: "No exam configured for this class" }]
+                : availableExamsForClass.map((ex) => ({
+                    value: ex.id,
+                    label: `${ex.name} ${ex.termCode ? `(${ex.termCode})` : ""}`.trim(),
+                  }))
+            }
+          />
 
           {/* 4. Shift Filter */}
-          <div>
-            <label className="font-bold text-slate-700 block mb-1">Shift:</label>
-            <select
-              value={selectedShift}
-              onChange={(e) => setSelectedShift(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800 shadow-2xs"
-            >
-              <option value="ALL">All Shifts (Day / Morning)</option>
-              <option value="DAY">Day Shift</option>
-              <option value="MORNING">Morning Shift</option>
-            </select>
-          </div>
+          <AppSelect
+            label="Shift"
+            value={selectedShift}
+            onChange={setSelectedShift}
+            options={[
+              { value: "ALL", label: "All Shifts (Day / Morning)" },
+              { value: "DAY", label: "Day Shift" },
+              { value: "MORNING", label: "Morning Shift" },
+            ]}
+          />
 
           {/* 5. Group Filter */}
-          <div>
-            <label className="font-bold text-slate-700 block mb-1">Academic Group:</label>
-            <select
-              value={selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800 shadow-2xs"
-            >
-              <option value="ALL">All Groups</option>
-              <option value="GENERAL">General</option>
-              <option value="SCIENCE">Science</option>
-              <option value="HUMANITIES">Humanities</option>
-              <option value="BUSINESS_STUDIES">Business Studies</option>
-            </select>
-          </div>
+          <AppSelect
+            label="Academic Group"
+            value={selectedGroup}
+            onChange={setSelectedGroup}
+            options={[
+              { value: "ALL", label: "All Groups" },
+              { value: "GENERAL", label: "General" },
+              { value: "SCIENCE", label: "Science" },
+              { value: "HUMANITIES", label: "Humanities" },
+              { value: "BUSINESS_STUDIES", label: "Business Studies" },
+            ]}
+          />
         </div>
 
         {/* Live Search and Quick Metric Badges */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
-          <div className="relative w-full sm:w-80 text-xs">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
+          <div className="w-full sm:w-80">
+            <AppTextField
+              label="Search"
               placeholder="Search by subject, code, room or day..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors"
+              startIcon={<Search className="w-3.5 h-3.5 text-slate-400" />}
+              endIcon={
+                searchQuery ? (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                ) : undefined
+              }
             />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
           </div>
 
           {/* Routine Status Summary Pills */}
@@ -1273,28 +1242,7 @@ export default function ExamRoutinePage() {
             </div>
 
             {filteredRoutineItems.length === 0 ? (
-              <div className="p-12 text-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
-                  <CalendarRange className="w-6 h-6" />
-                </div>
-                <h4 className="text-sm font-bold text-slate-800">No Exam Slots Scheduled Yet</h4>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  You can click &quot;Auto-Generate from Subjects&quot; to quickly map all subjects, or click &quot;Add Exam Slot&quot; to build the timetable manually.
-                </p>
-                <div className="flex items-center justify-center gap-2 pt-2">
-                  <AppButton
-                    type="button"
-                    variant="contained"
-                    color="success"
-                    onClick={handleAutoPopulateSubjects}
-                  >
-                    Auto-Generate Now
-                  </AppButton>
-                  <AppButton type="button" variant="outline" onClick={handleOpenAddItem}>
-                    Add Manually
-                  </AppButton>
-                </div>
-              </div>
+              <NoDataFound />
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">

@@ -125,3 +125,5 @@ export const FavoriteBorderIcon = createMuiIcon("lucide:heart", "FavoriteBorderI
 export const DescriptionOutlinedIcon = createMuiIcon("lucide:file-text", "DescriptionOutlinedIcon");
 export const RestartAltIcon = createMuiIcon("lucide:rotate-ccw", "RestartAltIcon");
 export const FileDownloadOutlinedIcon = createMuiIcon("lucide:download", "FileDownloadOutlinedIcon");
+export const PhoneIcon = createMuiIcon("lucide:phone", "PhoneIcon");
+export const PrintIcon = createMuiIcon("lucide:printer", "PrintIcon");

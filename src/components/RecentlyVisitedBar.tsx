@@ -4,7 +4,6 @@ import React, { useEffect, useState, useRef, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { History, X, ChevronLeft, ChevronRight } from "@/components/iconify/lucide";
-import { AppButton } from "@/components/button/app-button";
 
 interface RecentPageItem {
   path: string;
@@ -300,41 +299,17 @@ export function RecentlyVisitedBar() {
         </button>
       </div>
 
-      {/* Clear All Action */}
+      {/* Clear All Action — same chip shape as recent pills, red accent */}
       {recentPages.length > 0 && (
-        <AppButton
+        <button
+          type="button"
           onClick={handleClearAll}
           title="Clear all recently visited pages"
-          variant="outlined"
-          color="error"
-          size="small"
-          startIcon={<X className="w-3 h-3" />}
-          sx={{
-            minWidth: 0,
-            height: 26,
-            px: { xs: 1, lg: 1.25 },
-            py: 0,
-            borderRadius: 999,
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: "0.01em",
-            borderColor: "rgba(244, 63, 94, 0.28)",
-            color: "#e11d48",
-            bgcolor: "rgba(255, 241, 242, 0.7)",
-            boxShadow: "none",
-            "& .MuiButton-startIcon": {
-              mr: 0.5,
-              ml: 0,
-            },
-            "&:hover": {
-              bgcolor: "#fff1f2",
-              borderColor: "#fb7185",
-              boxShadow: "none",
-            },
-          }}
+          className="shrink-0 inline-flex items-center gap-1 pl-2 pr-2.5 py-1 rounded-lg text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 hover:border-rose-300 transition-all duration-150"
         >
-          Clear
-        </AppButton>
+          <X className="w-3 h-3 text-rose-500" />
+          <span className="leading-tight">Clear</span>
+        </button>
       )}
     </div>
   );

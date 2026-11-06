@@ -11,17 +11,14 @@ import {
   Building2,
   Users,
   GraduationCap,
-  School,
   CheckCircle2,
   Award,
   Search,
   Check,
   Globe,
   SlidersHorizontal,
-  Layers,
   ExternalLink,
   Laptop,
-  BookOpen,
   Calendar,
   AlertCircle,
   Database,
@@ -39,6 +36,7 @@ import {
 import { SchoolBasicInfo, getStoredSchoolInfo } from "@/lib/settingsStore";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
+import { AppTabs } from "@/components/ui/tabs-component";
 import {
   DownloadPageShell,
   DownloadHero,
@@ -634,96 +632,34 @@ export default function BanbeisDownloadPage() {
       ============================================================== */}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.04)] overflow-hidden no-print">
         {/* Navigation Tabs Header */}
-        <div className="border-b border-slate-200 bg-amber-50/40 p-2 sm:px-4 flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center space-x-1 overflow-x-auto text-xs font-semibold">
-            <AppButton
-              type="button"
-              size="small"
-              onClick={() => setActiveTab("enrollment")}
-              variant="soft"
-              color={activeTab === "enrollment" ? "primary" : "inherit"}
-              startIcon={<Users className="w-3.5 h-3.5" />}
-            >
-              1. Class Enrollment
-            </AppButton>
-
-            <AppButton
-              type="button"
-              size="small"
-              onClick={() => setActiveTab("demographics")}
-              variant="soft"
-              color={activeTab === "demographics" ? "primary" : "inherit"}
-              startIcon={<BookOpen className="w-3.5 h-3.5" />}
-            >
-              2. Demographics & Stipend
-            </AppButton>
-
-            <AppButton
-              type="button"
-              size="small"
-              onClick={() => setActiveTab("teachers")}
-              variant="soft"
-              color={activeTab === "teachers" ? "primary" : "inherit"}
-              startIcon={<GraduationCap className="w-3.5 h-3.5" />}
-            >
-              3. Teachers & Staff
-            </AppButton>
-
-            <AppButton
-              type="button"
-              size="small"
-              onClick={() => setActiveTab("exams")}
-              variant="soft"
-              color={activeTab === "exams" ? "primary" : "inherit"}
-              startIcon={<Award className="w-3.5 h-3.5" />}
-            >
-              4. Exam Results
-            </AppButton>
-
-            <AppButton
-              type="button"
-              size="small"
-              onClick={() => setActiveTab("infrastructure")}
-              variant="soft"
-              color={activeTab === "infrastructure" ? "primary" : "inherit"}
-              startIcon={<Building2 className="w-3.5 h-3.5" />}
-            >
-              5. Infrastructure & ICT
-            </AppButton>
-
-            <AppButton
-              type="button"
-              size="small"
-              onClick={() => setActiveTab("students")}
-              variant="soft"
-              color={activeTab === "students" ? "primary" : "inherit"}
-              startIcon={<Database className="w-3.5 h-3.5" />}
-            >
-              6. Student Master Roster
-            </AppButton>
-
-            <AppButton
-              type="button"
-              size="small"
-              onClick={() => setActiveTab("institution")}
-              variant="soft"
-              color={activeTab === "institution" ? "primary" : "inherit"}
-              startIcon={<School className="w-3.5 h-3.5" />}
-            >
-              7. Institution Identity
-            </AppButton>
-
-            <AppButton
-              type="button"
-              size="small"
-              onClick={() => setActiveTab("subjectwise")}
-              variant="soft"
-              color={activeTab === "subjectwise" ? "primary" : "inherit"}
-              startIcon={<Layers className="w-3.5 h-3.5" />}
-            >
-              8. Class 9-12 Subjectwise Student
-            </AppButton>
-          </div>
+        <div className="border-b border-slate-200 bg-amber-50/40 p-2 sm:px-4 overflow-x-auto">
+          <AppTabs
+            value={activeTab}
+            onValueChange={(value) =>
+              setActiveTab(
+                value as
+                  | "institution"
+                  | "enrollment"
+                  | "demographics"
+                  | "teachers"
+                  | "exams"
+                  | "infrastructure"
+                  | "students"
+                  | "subjectwise"
+              )
+            }
+            listClassName="bg-amber-100/70"
+            items={[
+              { value: "enrollment", label: "Class Enrollment" },
+              { value: "demographics", label: "Demographics & Stipend" },
+              { value: "teachers", label: "Teachers & Staff" },
+              { value: "exams", label: "Exam Results" },
+              { value: "infrastructure", label: "Infrastructure & ICT" },
+              { value: "students", label: "Student Master Roster" },
+              { value: "institution", label: "Institution Identity" },
+              { value: "subjectwise", label: "Class 9-12 Subjectwise Student" },
+            ]}
+          />
         </div>
 
         {/* ==============================================================

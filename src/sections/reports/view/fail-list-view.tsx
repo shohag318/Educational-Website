@@ -1,16 +1,34 @@
 "use client";
 
-import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState } from "react";
-import { AlertTriangle, Filter, Phone, Printer, RotateCcw } from "@/components/iconify/lucide";
+import { Chip, Stack, Typography } from "@mui/material";
+import { PhoneIcon, PrintIcon } from "@/components/iconify/mui-icons";
 import { AppButton } from "@/components/button/app-button";
+import { AppSelect, AppTable, Label } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import {
   ResultsPageShell,
   ResultsPageHeader,
   ResultsFilterCard,
-  ResultsPanel,
+  ResultsTableCard,
 } from "@/sections/results/component/result-page-ui";
+
+type FailRow = {
+  roll: string | number;
+  studentName: string;
+  className?: string;
+  sectionName?: string;
+  groupType?: string;
+  subjectName?: string;
+  subjectCode?: string;
+  marks?: string | number;
+  failureReason?: string;
+  phone?: string;
+  classId?: string;
+  sectionId?: string;
+  subjectId?: string;
+  sectionShift?: string;
+};
 
 export default function FailListPage() {
   const [selectedSession, setSelectedSession] = useState("ALL");
@@ -23,17 +41,14 @@ export default function FailListPage() {
   const [selectedSectionId, setSelectedSectionId] = useState("");
   const [subjects, setSubjects] = useState<any[]>([]);
   const [selectedSubjectId, setSelectedSubjectId] = useState("");
-  const [failedList, setFailedList] = useState<any[]>([]);
+  const [failedList, setFailedList] = useState<FailRow[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch initial classes, exams, subjects
   useEffect(() => {
     fetch("/api/classes")
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && data.data) {
-          setClasses(data.data);
-        }
+        if (data.success && data.data) setClasses(data.data);
       })
       .catch((err) => console.error("Error fetching classes:", err));
 
@@ -44,9 +59,7 @@ export default function FailListPage() {
           setExams(data.data);
           const first = data.data[0];
           setSelectedExamId(first.id);
-          if (first.classId) {
-            setSelectedClassId(first.classId);
-          }
+          if (first.classId) setSelectedClassId(first.classId);
         }
       })
       .catch((err) => console.error("Error fetching exams:", err));
@@ -59,40 +72,34 @@ export default function FailListPage() {
       .catch((err) => console.error("Error fetching subjects:", err));
   }, []);
 
-  // Determine if the selected class is within Class (1 to 12)
   const selectedClass = classes.find((c) => c.id === selectedClassId);
   const classNum = selectedClass?.numericValue ?? parseInt(selectedClass?.name?.replace(/\D/g, "") || "0", 10);
 
-  // Group only works for Class (1 to 12)
   const isClass1To12 = Boolean(
     selectedClassId &&
-    ((classNum >= 1 && classNum <= 12) ||
-     (selectedClass && /\b([1-9]|1[0-2])\b|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|ssc|hsc/i.test(selectedClass.name)))
+      ((classNum >= 1 && classNum <= 12) ||
+        (selectedClass &&
+          /\b([1-9]|1[0-2])\b|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|ssc|hsc/i.test(
+            selectedClass.name
+          )))
   );
 
   const isClass11Or12 = Boolean(
-    selectedClass && (
-      classNum === 11 ||
-      classNum === 12 ||
-      /\b(11|12|xi|xii|eleven|twelve|hsc)\b/i.test(selectedClass.name || "")
-    )
+    selectedClass &&
+      (classNum === 11 ||
+        classNum === 12 ||
+        /\b(11|12|xi|xii|eleven|twelve|hsc)\b/i.test(selectedClass.name || ""))
   );
 
-  // Filter exams by selected session and class
   const filteredExams = exams.filter((ex) => {
     if (selectedSession !== "ALL" && ex.academicYear?.yearName && ex.academicYear.yearName !== selectedSession) {
       return false;
     }
-    if (selectedClassId && ex.classId !== selectedClassId) {
-      return false;
-    }
+    if (selectedClassId && ex.classId !== selectedClassId) return false;
     return true;
   });
 
-  // Filter sections by selected class, shift, and group (if group active)
-  const rawSections = selectedClass
-    ? selectedClass.sections || []
-    : classes.flatMap((c) => c.sections || []);
+  const rawSections = selectedClass ? selectedClass.sections || [] : classes.flatMap((c) => c.sections || []);
 
   const availableSections = rawSections.filter((s: any) => {
     if (isClass1To12 && selectedGroup !== "ALL" && s.groupType !== selectedGroup) return false;
@@ -114,8 +121,7 @@ export default function FailListPage() {
     setSelectedGroup("ALL");
     const matchingExams = classId ? exams.filter((e) => e.classId === classId) : exams;
     if (matchingExams.length > 0) {
-      const stillValid = matchingExams.some((e) => e.id === selectedExamId);
-      if (!stillValid) {
+      if (!matchingExams.some((e) => e.id === selectedExamId)) {
         setSelectedExamId(matchingExams[0].id);
       }
     } else {
@@ -130,11 +136,8 @@ export default function FailListPage() {
       if (newShift && newShift !== "ALL" && s.shift?.toUpperCase() !== newShift.toUpperCase()) return false;
       return true;
     });
-    if (selectedSectionId) {
-      const stillValid = matching.some((s: any) => s.id === selectedSectionId);
-      if (!stillValid) {
-        setSelectedSectionId(matching.length > 0 ? matching[0].id : "");
-      }
+    if (selectedSectionId && !matching.some((s: any) => s.id === selectedSectionId)) {
+      setSelectedSectionId(matching.length > 0 ? matching[0].id : "");
     }
   };
 
@@ -155,9 +158,7 @@ export default function FailListPage() {
     setSelectedGroup("ALL");
     setSelectedSectionId("");
     setSelectedSubjectId("");
-    if (exams.length > 0) {
-      setSelectedExamId(exams[0].id);
-    }
+    if (exams.length > 0) setSelectedExamId(exams[0].id);
   };
 
   const fetchFailed = async () => {
@@ -176,11 +177,7 @@ export default function FailListPage() {
 
       const res = await fetch(url);
       const data = await res.json();
-      if (data.success) {
-        setFailedList(data.data);
-      } else {
-        setFailedList([]);
-      }
+      setFailedList(data.success ? data.data : []);
     } catch (e) {
       console.error(e);
       setFailedList([]);
@@ -191,50 +188,44 @@ export default function FailListPage() {
 
   useEffect(() => {
     fetchFailed();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedExamId, selectedSubjectId, selectedClassId, selectedSectionId, selectedShift, selectedGroup]);
 
-  // Client-side filtering
   const filteredList = failedList.filter((row) => {
-    if (selectedClassId && row.classId && row.classId !== selectedClassId) {
+    if (selectedClassId && row.classId && row.classId !== selectedClassId) return false;
+    if (
+      selectedShift &&
+      selectedShift !== "ALL" &&
+      row.sectionShift &&
+      row.sectionShift.toUpperCase() !== selectedShift.toUpperCase()
+    ) {
       return false;
     }
-    if (selectedShift && selectedShift !== "ALL" && row.sectionShift && row.sectionShift.toUpperCase() !== selectedShift.toUpperCase()) {
-      return false;
-    }
-    if (isClass1To12 && selectedGroup !== "ALL" && row.groupType && row.groupType !== selectedGroup) {
-      return false;
-    }
-    if (selectedSectionId && row.sectionId && row.sectionId !== selectedSectionId) {
-      return false;
-    }
-    if (selectedSubjectId && row.subjectId && row.subjectId !== selectedSubjectId) {
-      return false;
-    }
+    if (isClass1To12 && selectedGroup !== "ALL" && row.groupType && row.groupType !== selectedGroup) return false;
+    if (selectedSectionId && row.sectionId && row.sectionId !== selectedSectionId) return false;
+    if (selectedSubjectId && row.subjectId && row.subjectId !== selectedSubjectId) return false;
     return true;
   });
 
   const hasActiveFilters = Boolean(
     (selectedSession && selectedSession !== "ALL") ||
-    selectedClassId ||
-    selectedShift ||
-    (isClass1To12 && selectedGroup !== "ALL") ||
-    selectedSectionId ||
-    selectedSubjectId
+      selectedClassId ||
+      selectedShift ||
+      (isClass1To12 && selectedGroup !== "ALL") ||
+      selectedSectionId ||
+      selectedSubjectId
   );
 
   return (
     <ResultsPageShell>
       <ResultsPageHeader
-        stepHint="Reports"
-        icon={<AlertTriangle />}
-        title="Failed Students by Subject"
-        subtitle="Find students who failed a subject or component, then print a remedial roster."
+        heading="Failed Students by Subject"
+        current="Failed Students"
         action={
           <AppButton
             variant="contained"
-            color="secondary"
-            size="small"
-            startIcon={<Printer size={16} />}
+            color="error"
+            startIcon={<PrintIcon sx={{ fontSize: 16 }} />}
             onClick={() => window.print()}
           >
             Print Fail List
@@ -243,227 +234,209 @@ export default function FailListPage() {
       />
 
       <ResultsFilterCard
-        title="Choose class, exam & subject"
+        title="Filters"
         active={hasActiveFilters}
         onReset={handleResetFilters}
-        columns={7}
+        columns={4}
       >
-          {/* Session Filter */}
-          <div>
-            <SessionSelect
-              value={selectedSession}
-              onChange={(val) => setSelectedSession(val)}
-              label="Session"
-              labelClassName="font-semibold text-slate-600 block mb-1"
-              selectClassName="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800"
-            />
-          </div>
+        <SessionSelect
+          value={selectedSession}
+          onChange={(val) => setSelectedSession(val)}
+          label="Session"
+          fullWidth
+        />
 
-          {/* Class Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Class:</label>
-            <select
-              value={selectedClassId}
-              onChange={(e) => handleClassChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Classes</option>
-              {classes.map((cls) => (
-                <option key={cls.id} value={cls.id}>
-                  {cls.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        <AppSelect
+          label="Class"
+          value={selectedClassId}
+          onChange={handleClassChange}
+          options={[
+            { value: "", label: "All Classes" },
+            ...classes.map((cls) => ({ value: cls.id, label: cls.name })),
+          ]}
+        />
 
-          {/* Exam Name Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Exam Name:</label>
-            <select
-              value={selectedExamId}
-              onChange={(e) => handleExamChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-500 bg-white font-medium text-slate-800"
-            >
-              {filteredExams.map((ex) => (
-                <option key={ex.id} value={ex.id}>
-                  {ex.name} {ex.class?.name ? `(${ex.class.name})` : ""}
-                </option>
-              ))}
-              {filteredExams.length === 0 && (
-                <option value="" disabled>
-                  No exams found
-                </option>
-              )}
-            </select>
-          </div>
+        <AppSelect
+          label="Exam"
+          value={selectedExamId}
+          onChange={handleExamChange}
+          options={
+            filteredExams.length === 0
+              ? [{ value: "", label: "No exams found" }]
+              : filteredExams.map((ex) => ({
+                  value: ex.id,
+                  label: `${ex.name}${ex.class?.name ? ` (${ex.class.name})` : ""}`,
+                }))
+          }
+        />
 
-          {/* Shift Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Shift:</label>
-            <select
-              value={selectedShift}
-              onChange={(e) => handleShiftChange(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Shifts</option>
-              <option value="MORNING">Morning</option>
-              <option value="DAY">Day</option>
-              {availableShifts.map((sh: any) => (
-                <option key={sh} value={sh}>
-                  {sh.charAt(0) + sh.slice(1).toLowerCase()}
-                </option>
-              ))}
-            </select>
-          </div>
+        <AppSelect
+          label="Shift"
+          value={selectedShift}
+          onChange={handleShiftChange}
+          options={[
+            { value: "", label: "All Shifts" },
+            { value: "MORNING", label: "Morning" },
+            { value: "DAY", label: "Day" },
+            ...availableShifts.map((sh) => ({
+              value: sh,
+              label: sh.charAt(0) + sh.slice(1).toLowerCase(),
+            })),
+          ]}
+        />
 
-          {/* Group Filter (Only works for Class 1 to 12) */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1 flex items-center justify-between">
-              <span>Group:</span>
-              <span className={`text-[10px] font-normal ${isClass1To12 ? "text-emerald-600 font-medium" : "text-slate-400"}`}>
-                {isClass1To12 ? "Class 1-12" : "Only Class 1-12"}
-              </span>
-            </label>
-            <select
-              value={selectedGroup}
-              disabled={!isClass1To12}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-              className={`w-full p-2 border border-slate-200 rounded-lg font-medium ${
-                isClass1To12
-                  ? "bg-white text-slate-800 focus:ring-2 focus:ring-red-500 cursor-pointer"
-                  : "bg-slate-100 text-slate-400 cursor-not-allowed border-dashed"
-              }`}
-            >
-              {isClass1To12 ? (
-                <>
-                  <option value="ALL">All Groups</option>
-                  {!isClass11Or12 && <option value="GENERAL">General</option>}
-                  <option value="SCIENCE">Science</option>
-                  <option value="HUMANITIES">Humanities</option>
-                  <option value="BUSINESS_STUDIES">Business Studies</option>
-                </>
-              ) : (
-                <option value="ALL">Select Class (1-12) first</option>
-              )}
-            </select>
-          </div>
+        <AppSelect
+          label="Group"
+          value={isClass1To12 ? selectedGroup : "ALL"}
+          disabled={!isClass1To12}
+          onChange={setSelectedGroup}
+          options={
+            isClass1To12
+              ? [
+                  { value: "ALL", label: "All Groups" },
+                  ...(!isClass11Or12 ? [{ value: "GENERAL", label: "General" }] : []),
+                  { value: "SCIENCE", label: "Science" },
+                  { value: "HUMANITIES", label: "Humanities" },
+                  { value: "BUSINESS_STUDIES", label: "Business Studies" },
+                ]
+              : [{ value: "ALL", label: "Select Class 1–12 first" }]
+          }
+        />
 
-          {/* Section Filter */}
-          <div>
-            <label className="font-semibold text-slate-600 block mb-1">Section:</label>
-            <select
-              value={selectedSectionId}
-              onChange={(e) => setSelectedSectionId(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Sections</option>
-              {availableSections.map((sec: any) => {
-                const shiftLabel = sec.shift === "MORNING" ? "Morning" : sec.shift === "DAY" ? "Day" : sec.shift;
-                return (
-                  <option key={sec.id} value={sec.id}>
-                    {sec.name} {sec.groupType ? `(${sec.groupType})` : ""}{(!selectedShift && shiftLabel) ? ` • ${shiftLabel}` : ""}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
+        <AppSelect
+          label="Section"
+          value={selectedSectionId}
+          onChange={setSelectedSectionId}
+          options={[
+            { value: "", label: "All Sections" },
+            ...availableSections.map((sec: any) => {
+              const shiftLabel =
+                sec.shift === "MORNING" ? "Morning" : sec.shift === "DAY" ? "Day" : sec.shift;
+              return {
+                value: sec.id,
+                label: `${sec.name}${sec.groupType ? ` (${sec.groupType})` : ""}${
+                  !selectedShift && shiftLabel ? ` · ${shiftLabel}` : ""
+                }`,
+              };
+            }),
+          ]}
+        />
 
-          {/* Subject Filter */}
-          <div>
-            <label className="font-semibold text-slate-700 block mb-1">Subject:</label>
-            <select
-              value={selectedSubjectId}
-              onChange={(e) => setSelectedSubjectId(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-500 bg-white font-medium text-slate-800"
-            >
-              <option value="">All Failed Subjects</option>
-              {subjects.map((sub) => (
-                <option key={sub.id} value={sub.id}>
-                  {sub.name} ({sub.subjectCode})
-                </option>
-              ))}
-            </select>
-          </div>
+        <AppSelect
+          label="Subject"
+          value={selectedSubjectId}
+          onChange={setSelectedSubjectId}
+          options={[
+            { value: "", label: "All Failed Subjects" },
+            ...subjects.map((sub) => ({
+              value: sub.id,
+              label: `${sub.name} (${sub.subjectCode})`,
+            })),
+          ]}
+        />
       </ResultsFilterCard>
 
-      {/* Fail Roster Table */}
-      <ResultsPanel padded={false}>
-        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <h2 className="text-sm font-bold text-slate-800">
-              Failed Subject Records ({filteredList.length})
-            </h2>
-            {hasActiveFilters && (
-              <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">
-                Filtered view
-              </span>
-            )}
-          </div>
-          <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">
-            Requires Remedial Action
-          </span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase text-[10px] tracking-wider">
-              <tr>
-                <th className="p-3 w-16">Roll</th>
-                <th className="p-3">Student Name</th>
-                <th className="p-3">Class & Section</th>
-                <th className="p-3">Group</th>
-                <th className="p-3">Failed Subject</th>
-                <th className="p-3 text-center">Marks Obtained</th>
-                <th className="p-3">Exact Failure Reason</th>
-                <th className="p-3">Guardian Contact</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredList.map((row, idx) => (
-                <tr key={idx} className="hover:bg-red-50/30 transition-colors">
-                  <td className="p-3 font-mono font-bold text-slate-900">#{row.roll}</td>
-                  <td className="p-3 font-medium text-slate-900">{row.studentName}</td>
-                  <td className="p-3 text-slate-600">
-                    {row.className} - {row.sectionName}
-                  </td>
-                  <td className="p-3">
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                      {row.groupType || "GENERAL"}
-                    </span>
-                  </td>
-                  <td className="p-3 font-semibold text-slate-800">
-                    {row.subjectName} ({row.subjectCode})
-                  </td>
-                  <td className="p-3 text-center font-mono font-bold text-red-600">
-                    {row.marks}
-                  </td>
-                  <td className="p-3">
-                    <span className="inline-block bg-red-100 text-red-800 px-2 py-0.5 rounded font-mono text-[11px]">
-                      {row.failureReason}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <span className="font-mono text-slate-600 flex items-center space-x-1">
-                      <Phone className="w-3 h-3 text-slate-400" />
-                      <span>{row.phone || "N/A"}</span>
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {filteredList.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={8}
-                    className={loading ? "p-8 text-center text-slate-400 italic" : "p-0"}
-                  >
-                    {loading ? "Loading..." : <NoDataFound />}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </ResultsPanel>
+      <ResultsTableCard
+        title="Failed subject records"
+        count={loading ? "…" : filteredList.length}
+        badge={
+          <Chip
+            size="small"
+            color="error"
+            variant="outlined"
+            label="Remedial action needed"
+            sx={{ height: 24, fontWeight: 700 }}
+          />
+        }
+      >
+        <AppTable<FailRow>
+          rows={loading ? [] : filteredList}
+          rowKey={(row, index) => `${row.roll}-${row.subjectCode}-${index}`}
+          columns={[
+            {
+              id: "roll",
+              label: "Roll",
+              width: 72,
+              render: (row) => (
+                <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 700 }}>
+                  #{row.roll}
+                </Typography>
+              ),
+            },
+            {
+              id: "studentName",
+              label: "Student",
+              render: (row) => (
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {row.studentName}
+                </Typography>
+              ),
+            },
+            {
+              id: "class",
+              label: "Class & Section",
+              render: (row) => (
+                <Typography variant="body2" color="text.secondary">
+                  {row.className} · {row.sectionName}
+                </Typography>
+              ),
+            },
+            {
+              id: "group",
+              label: "Group",
+              render: (row) => (
+                <Label color="default" variant="soft">
+                  {row.groupType || "GENERAL"}
+                </Label>
+              ),
+            },
+            {
+              id: "subject",
+              label: "Failed Subject",
+              render: (row) => (
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {row.subjectName}{" "}
+                  <Typography component="span" variant="caption" color="text.secondary">
+                    ({row.subjectCode})
+                  </Typography>
+                </Typography>
+              ),
+            },
+            {
+              id: "marks",
+              label: "Marks",
+              align: "center",
+              width: 88,
+              render: (row) => (
+                <Typography variant="body2" color="error.main" sx={{ fontFamily: "monospace", fontWeight: 800 }}>
+                  {row.marks}
+                </Typography>
+              ),
+            },
+            {
+              id: "reason",
+              label: "Failure Reason",
+              render: (row) => (
+                <Label color="error" variant="soft">
+                  {row.failureReason || "—"}
+                </Label>
+              ),
+            },
+            {
+              id: "phone",
+              label: "Guardian",
+              render: (row) => (
+                <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                  <PhoneIcon sx={{ fontSize: 14, color: "text.disabled" }} />
+                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+                    {row.phone || "N/A"}
+                  </Typography>
+                </Stack>
+              ),
+            },
+          ]}
+        />
+      </ResultsTableCard>
     </ResultsPageShell>
   );
 }

@@ -16,7 +16,6 @@ import {
   IconButton,
   Snackbar,
   Stack,
-  Tab,
   Table,
   TableBody,
   TableCell,
@@ -33,7 +32,6 @@ import {
   AppSelect,
   AppTextField,
   ConfirmDialog,
-  CustomTabs,
   EmptyContent,
   Label,
   LoadingScreen,
@@ -41,6 +39,7 @@ import {
 } from "@/components";
 import { setupService } from "@/api/services";
 import { PATHS } from "@/config-global";
+import { AppTabs } from "@/components/ui/tabs-component";
 
 interface Subject {
   id: string;
@@ -753,14 +752,14 @@ export default function ClassSubjectMappingPage() {
             spacing={1.5}
             sx={{ alignItems: { sm: "center" }, justifyContent: "space-between", borderBottom: 1, borderColor: "divider", pb: 0.5 }}
           >
-            <CustomTabs
+            <AppTabs
               value={activeTab}
-              onChange={(_, value) => value && setActiveTab(value as "mapped" | "catalog")}
-              sx={{ minHeight: 40, width: { xs: 1, sm: "auto" } }}
-            >
-              <Tab value="mapped" label={`Mapped (${mappings.length})`} />
-              <Tab value="catalog" label={`Catalog (${unmappedSubjects.length})`} />
-            </CustomTabs>
+              onValueChange={(value) => setActiveTab(value as "mapped" | "catalog")}
+              items={[
+                { value: "mapped", label: `Mapped (${mappings.length})` },
+                { value: "catalog", label: `Catalog (${unmappedSubjects.length})` },
+              ]}
+            />
             <AppTextField
               placeholder="Search subject name or code"
               value={searchQuery}

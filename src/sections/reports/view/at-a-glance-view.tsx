@@ -17,6 +17,7 @@ import {
   ResultsFilterCard,
   ResultsPanel,
 } from "@/sections/results/component/result-page-ui";
+import { examOptionLabel, sectionOptionLabel, shiftLabel } from "@/sections/results/utils/select-options";
 import { AppTabs } from "@/components/ui/tabs-component";
 
 export default function AtAGlancePage() {
@@ -355,7 +356,7 @@ export default function AtAGlancePage() {
               ? [{ value: "", label: "No exams for selected class" }]
               : filteredExams.map((ex) => ({
                   value: ex.id,
-                  label: `${ex.name} ${ex.class?.name ? `(${ex.class.name})` : ex.institution?.name ? `(${ex.institution.name})` : ""}`,
+                  label: examOptionLabel(ex),
                 }))
           }
         />
@@ -373,7 +374,7 @@ export default function AtAGlancePage() {
               .filter((sh: any) => sh !== "MORNING" && sh !== "DAY")
               .map((sh: any) => ({
                 value: sh,
-                label: sh.charAt(0) + sh.slice(1).toLowerCase(),
+                label: shiftLabel(sh),
               })),
           ]}
         />
@@ -399,13 +400,10 @@ export default function AtAGlancePage() {
           onChange={setSelectedSectionId}
           options={[
             { value: "", label: "All Sections" },
-            ...availableSections.map((sec: any) => {
-              const shiftLabel = sec.shift === "MORNING" ? "Morning" : sec.shift === "DAY" ? "Day" : sec.shift;
-              return {
-                value: sec.id,
-                label: `${sec.name} ${sec.groupType ? `(${sec.groupType})` : ""}${!selectedShift && shiftLabel ? ` • ${shiftLabel}` : ""}`.trim(),
-              };
-            }),
+            ...availableSections.map((sec: any) => ({
+              value: sec.id,
+              label: sectionOptionLabel(sec, { includeShiftWhen: !selectedShift }),
+            })),
           ]}
         />      </ResultsFilterCard>
 

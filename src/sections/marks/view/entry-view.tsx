@@ -3,10 +3,17 @@
 import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { Box, Chip, Stack, Typography } from "@mui/material";
 import {
   ResultsPageShell,
   ResultsPageHeader,
+  ResultsNotice,
 } from "@/sections/results/component/result-page-ui";
+import {
+  RulesAtmosphere,
+  RulesFilterGrid,
+  RulesSection,
+} from "@/sections/academic/component/rules-section-ui";
 import {
   TableProperties,
   Save,
@@ -15,13 +22,9 @@ import {
   Lock,
   Download,
   FileSpreadsheet,
-  ArrowRight,
   Sliders,
   Sparkles,
   RefreshCw,
-  Calculator,
-  Percent,
-  Layers,
   CheckCircle2,
   Plus,
   Minus,
@@ -34,6 +37,12 @@ import { MarkInputPdfModal } from "@/sections/marks/component/mark-input-pdf-mod
 import { AppButton } from "@/components/button/app-button";
 import { AppSelect } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
+import {
+  examOptionLabel,
+  sectionOptionLabel,
+  shiftLabel,
+  subjectOptionLabel,
+} from "@/sections/results/utils/select-options";
 
 export default function MarkEntryPage() {
   const [selectedSession, setSelectedSession] = useState("ALL");
@@ -894,621 +903,790 @@ export default function MarkEntryPage() {
 
   return (
     <ResultsPageShell>
-      <div className="no-print space-y-6">
+      <RulesAtmosphere>
         <ResultsPageHeader
           heading="Mark Entry"
+          current="Mark Entry"
           action={
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Download Excel Form Button */}
-          <AppButton
-            variant="outline"
-            size="small"
-            startIcon={<Download size={14} />}
-            disabled={rows.length === 0}
-            onClick={handleDownloadExcelForm}
-            title="Download formatted Excel spreadsheet template with pre-filled student roll and names"
-          >
-            Download Excel Form
-          </AppButton>
-
-          <AppButton
-            variant="outline"
-            size="small"
-            startIcon={<Printer size={14} />}
-            disabled={rows.length === 0}
-            onClick={() => setIsPdfModalOpen(true)}
-            title="Download / Print Mark Input Sheet in PDF format with College Name, Exam, Section, Group, and Software Company info"
-          >
-            Download PDF Form
-          </AppButton>
-
-          {/* Upload Excel Sheet Button */}
-          <label
-            className={`bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold text-xs px-3.5 py-2 rounded-xl transition-all flex items-center space-x-2 shadow-xs cursor-pointer ${
-              isLocked ? "opacity-50 cursor-not-allowed pointer-events-none" : ""
-            }`}
-            title="Upload completed Excel spreadsheet to populate marks into the table"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Upload Excel Sheet</span>
-            <input
-              type="file"
-              accept=".xlsx, .xls, .csv"
-              onChange={handleUploadExcelSheet}
-              disabled={isLocked}
-              className="hidden"
-            />
-          </label>
-
-          {/* Save Marks Button */}
-          <AppButton
-            variant="contained"
-            color={isLocked ? "secondary" : saveSuccess ? "success" : "secondary"}
-            size="small"
-            startIcon={isLocked ? <Lock size={16} /> : saveSuccess ? <Check size={16} /> : <Save size={16} />}
-            loading={saving}
-            disabled={saving || isLocked}
-            onClick={handleSaveMarks}
-          >
-            {isLocked
-              ? "Published (Locked)"
-              : saveSuccess
-              ? "Saved Successfully"
-              : saving
-              ? "Saving..."
-              : "Save Marks (Batch)"}
-          </AppButton>
-        </div>
-          }
-        />
-
-      {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3 shadow-sm">
-        <SessionSelect
-          value={selectedSession}
-          onChange={(val) => {
-            setSelectedSession(val);
-            const matching = exams.filter((ex) => {
-              if (val !== "ALL" && ex.academicYear?.yearName && ex.academicYear.yearName !== val) {
-                return false;
-              }
-              return isExamMatchingType(ex, selectedExamType);
-            });
-            if (matching.length > 0 && !matching.some((e) => e.id === selectedExamId)) {
-              handleExamChange(matching[0].id);
-            }
-          }}
-          label="Session"
-          fullWidth
-        />
-
-        <AppSelect
-          label="Exam Type"
-          value={selectedExamType}
-          onChange={handleExamTypeChange}
-          options={[
-            { value: "ALL", label: "All Exam Types" },
-            { value: "Class Test", label: "Class Test" },
-            { value: "Semester", label: "Semester" },
-            ...distinctExamTypes
-              .filter(
-                (t) =>
-                  t !== "Class Test" &&
-                  t !== "Semister" &&
-                  t !== "Semester" &&
-                  t !== "ALL"
-              )
-              .map((t) => ({ value: t, label: t.replace(/_/g, " ").trim() })),
-          ]}
-        />
-
-        <AppSelect
-          label="Target Exam"
-          value={selectedExamId}
-          onChange={handleExamChange}
-          options={
-            filteredExams.length === 0
-              ? [{ value: "", label: "No exams match filter" }]
-              : filteredExams.map((ex) => ({
-                  value: ex.id,
-                  label: `${ex.name} (${ex.termCode || ex.status})`,
-                }))
-          }
-        />
-
-        <AppSelect
-          label="Class"
-          value={selectedClassId}
-          onChange={handleClassChange}
-          options={classes.map((c) => ({ value: c.id, label: c.name }))}
-        />
-
-        <AppSelect
-          label="Shift"
-          value={selectedShift}
-          onChange={handleShiftChange}
-          options={[
-            { value: "", label: "All Shifts" },
-            { value: "MORNING", label: "Morning" },
-            { value: "DAY", label: "Day" },
-            ...availableShifts
-              .filter((sh: any) => sh !== "MORNING" && sh !== "DAY")
-              .map((sh: any) => ({
-                value: sh,
-                label: sh.charAt(0) + sh.slice(1).toLowerCase(),
-              })),
-          ]}
-        />
-
-        <AppSelect
-          label="Group"
-          value={isClass11Or12 && selectedGroup === "GENERAL" ? "ALL" : selectedGroup}
-          onChange={handleGroupChange}
-          options={[
-            { value: "ALL", label: "All Groups" },
-            ...(!isClass11Or12 ? [{ value: "GENERAL", label: "General" }] : []),
-            { value: "SCIENCE", label: "Science" },
-            { value: "HUMANITIES", label: "Humanities" },
-            { value: "BUSINESS_STUDIES", label: "Business Studies" },
-          ]}
-        />
-
-        <AppSelect
-          label="Section"
-          value={selectedSectionId}
-          onChange={setSelectedSectionId}
-          options={[
-            { value: "", label: "All Sections" },
-            ...availableSections.map((s: any) => {
-              const shiftLabel = s.shift === "MORNING" ? "Morning" : s.shift === "DAY" ? "Day" : s.shift;
-              return {
-                value: s.id,
-                label: `${s.name} (${s.groupType})${!selectedShift && shiftLabel ? ` • ${shiftLabel}` : ""}`,
-              };
-            }),
-          ]}
-        />
-
-        <AppSelect
-          label={subjects.length > 0 ? `Subject (${subjects.length} Assigned)` : "Subject"}
-          value={selectedSubjectId}
-          onChange={setSelectedSubjectId}
-          disabled={subjectsLoading || subjects.length === 0}
-          options={
-            subjectsLoading
-              ? [{ value: "", label: "Loading assigned subjects..." }]
-              : subjects.length === 0
-              ? [{ value: "", label: "No subjects assigned to this exam" }]
-              : subjects.map((sub) => ({
-                  value: sub.id,
-                  label: `${sub.name} (${sub.subjectCode})`,
-                }))
-          }
-        />
-      </div>
-      {/* Below of Filter: OK Button & Selection Summary */}
-      <div className="bg-white p-3 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-xs">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
-          <span className="font-semibold text-slate-800">
-            {activeExam?.name || "Target Exam"}
-          </span>
-          {selectedClass && (
-            <>
-              <span>•</span>
-              <span className="font-medium text-slate-700">{selectedClass.name}</span>
-            </>
-          )}
-          {selectedSectionId && (
-            <>
-              <span>•</span>
-              <span className="text-slate-600">{availableSections.find((s: any) => s.id === selectedSectionId)?.name}</span>
-            </>
-          )}
-          {selectedSubjectId && (
-            <>
-              <span>•</span>
-              <span className="font-bold text-emerald-700">
-                {subjects.find((s: any) => s.id === selectedSubjectId)?.name}
-              </span>
-            </>
-          )}
-        </div>
-
-        <AppButton
-          type="button"
-          variant="contained"
-          color="success"
-          size="small"
-          startIcon={<Check size={16} />}
-          onClick={() => {
-            if (!selectedExamId) {
-              alert("Please select a Target Exam first.");
-              return;
-            }
-            setShowMarkInputModal(true);
-          }}
-          title="Open Mark Input Spreadsheet Window"
-        >
-          Ok
-        </AppButton>
-      </div>
-
-      {/* Notice if no subjects are assigned to this exam */}
-      {subjects.length === 0 && !subjectsLoading && selectedExamId && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900 shadow-xs">
-          <div className="flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-            <span>
-              No subjects are assigned to this exam. Assign subjects under Exam Management to enter marks.
-            </span>
-          </div>
-          <Link
-            href="/setup/exams"
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 rounded-lg transition-colors text-center shrink-0"
-          >
-            Manage Exam Subjects
-          </Link>
-        </div>
-      )}
-
-      {/* Class Test Direct Entry Banner OR CT Marks Auto-Sync & Percentage Terms Panel */}
-      {isClassTest ? (
-        <div className="bg-purple-50/80 border border-purple-200 rounded-xl p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center space-x-3">
-            <span className="p-2 bg-purple-600 text-white rounded-lg shrink-0 shadow-2xs">
-              <Sparkles className="w-4 h-4" />
-            </span>
-            <div>
-              <div className="flex items-center space-x-2">
-                <h3 className="font-bold text-purple-950 text-sm">
-                  Class Test (CT) Direct Mark Entry
-                </h3>
-                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-300">
-                  CLASS TEST MODE
-                </span>
-              </div>
-              <p className="text-[11px] text-purple-700 mt-0.5">
-                Entering marks for Class Test. Component columns (CQ, MCQ, Total) are hidden — enter student CT marks directly below.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <span className="text-[11px] font-bold text-purple-950">Max CT Mark:</span>
-            <div className="flex items-center border border-purple-300 rounded-lg overflow-hidden bg-white shadow-2xs">
-              <button
-                type="button"
-                onClick={() => handleUpdateCtMaxMark(Math.max(1, ctMaxMark - 5))}
-                className="p-1.5 hover:bg-purple-100 text-purple-800 transition cursor-pointer"
-                title="Decrease Max Mark (-5)"
+            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", alignItems: "center", gap: 1 }}>
+              <AppButton
+                variant="outline"
+                size="small"
+                startIcon={<Download size={14} />}
+                disabled={rows.length === 0}
+                onClick={handleDownloadExcelForm}
+                title="Download formatted Excel spreadsheet template with pre-filled student roll and names"
               >
-                <Minus className="w-3.5 h-3.5" />
-              </button>
-              <input
-                type="number"
-                min={1}
-                max={500}
-                value={ctMaxMark}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value);
-                  if (!isNaN(val) && val > 0) {
-                    handleUpdateCtMaxMark(val);
-                  } else if (e.target.value === "") {
-                    setCustomCtMaxMark(0);
+                Download Excel Form
+              </AppButton>
+
+              <AppButton
+                variant="outline"
+                size="small"
+                startIcon={<Printer size={14} />}
+                disabled={rows.length === 0}
+                onClick={() => setIsPdfModalOpen(true)}
+                title="Download / Print Mark Input Sheet in PDF format with College Name, Exam, Section, Group, and Software Company info"
+              >
+                Download PDF Form
+              </AppButton>
+
+              <Box
+                component="label"
+                title="Upload completed Excel spreadsheet to populate marks into the table"
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.75,
+                  px: 1.5,
+                  py: 0.75,
+                  borderRadius: 1.5,
+                  border: 1,
+                  borderColor: "primary.light",
+                  bgcolor: "primary.lighter",
+                  color: "primary.dark",
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  cursor: isLocked ? "not-allowed" : "pointer",
+                  opacity: isLocked ? 0.5 : 1,
+                  pointerEvents: isLocked ? "none" : "auto",
+                  "&:hover": { bgcolor: "primary.light", color: "primary.darker" },
+                }}
+              >
+                <FileSpreadsheet size={14} />
+                Upload Excel Sheet
+                <input
+                  type="file"
+                  accept=".xlsx, .xls, .csv"
+                  onChange={handleUploadExcelSheet}
+                  disabled={isLocked}
+                  className="hidden"
+                />
+              </Box>
+
+              <AppButton
+                variant="contained"
+                color={isLocked ? "secondary" : "primary"}
+                size="small"
+                startIcon={isLocked ? <Lock size={16} /> : saveSuccess ? <Check size={16} /> : <Save size={16} />}
+                loading={saving}
+                disabled={saving || isLocked}
+                onClick={handleSaveMarks}
+              >
+                {isLocked
+                  ? "Published (Locked)"
+                  : saveSuccess
+                  ? "Saved Successfully"
+                  : saving
+                  ? "Saving..."
+                  : "Save Marks (Batch)"}
+              </AppButton>
+            </Stack>
+          }
+        />
+
+        {saveSuccess && (
+          <ResultsNotice severity="success">Marks saved successfully.</ResultsNotice>
+        )}
+
+        {ctSyncSuccess && (
+          <ResultsNotice severity="success">CT marks synced successfully.</ResultsNotice>
+        )}
+
+        <RulesSection
+          title="Entry filters"
+          subtitle="Choose session, exam, class, and subject — then open the mark input window."
+          action={
+            <AppButton
+              type="button"
+              variant="contained"
+              color="primary"
+              size="small"
+              startIcon={<Check size={16} />}
+              onClick={() => {
+                if (!selectedExamId) {
+                  alert("Please select a Target Exam first.");
+                  return;
+                }
+                setShowMarkInputModal(true);
+              }}
+              title="Open Mark Input Spreadsheet Window"
+            >
+              Open mark input
+            </AppButton>
+          }
+          toolbar={
+            <RulesFilterGrid columns={4}>
+              <SessionSelect
+                value={selectedSession}
+                onChange={(val) => {
+                  setSelectedSession(val);
+                  const matching = exams.filter((ex) => {
+                    if (val !== "ALL" && ex.academicYear?.yearName && ex.academicYear.yearName !== val) {
+                      return false;
+                    }
+                    return isExamMatchingType(ex, selectedExamType);
+                  });
+                  if (matching.length > 0 && !matching.some((e) => e.id === selectedExamId)) {
+                    handleExamChange(matching[0].id);
                   }
                 }}
-                className="w-14 text-center text-xs font-bold bg-white p-1 border-x border-purple-200 font-mono text-purple-950 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                label="Session"
+                fullWidth
               />
-              <button
-                type="button"
-                onClick={() => handleUpdateCtMaxMark(ctMaxMark + 5)}
-                className="p-1.5 hover:bg-purple-100 text-purple-800 transition cursor-pointer"
-                title="Increase Max Mark (+5)"
+
+              <AppSelect
+                label="Exam Type"
+                value={selectedExamType}
+                onChange={handleExamTypeChange}
+                options={[
+                  { value: "ALL", label: "All Exam Types" },
+                  { value: "Class Test", label: "Class Test" },
+                  { value: "Semester", label: "Semester" },
+                  ...distinctExamTypes
+                    .filter(
+                      (t) =>
+                        t !== "Class Test" &&
+                        t !== "Semister" &&
+                        t !== "Semester" &&
+                        t !== "ALL"
+                    )
+                    .map((t) => ({ value: t, label: t.replace(/_/g, " ").trim() })),
+                ]}
+              />
+
+              <AppSelect
+                label="Target Exam"
+                value={selectedExamId}
+                onChange={handleExamChange}
+                options={
+                  filteredExams.length === 0
+                    ? [{ value: "", label: "No exams match filter" }]
+                    : filteredExams.map((ex) => ({
+                        value: ex.id,
+                        label: examOptionLabel(ex),
+                      }))
+                }
+              />
+
+              <AppSelect
+                label="Class"
+                value={selectedClassId}
+                onChange={handleClassChange}
+                options={classes.map((c) => ({ value: c.id, label: c.name }))}
+              />
+
+              <AppSelect
+                label="Shift"
+                value={selectedShift}
+                onChange={handleShiftChange}
+                options={[
+                  { value: "", label: "All Shifts" },
+                  { value: "MORNING", label: "Morning" },
+                  { value: "DAY", label: "Day" },
+                  ...availableShifts
+                    .filter((sh: any) => sh !== "MORNING" && sh !== "DAY")
+                    .map((sh: any) => ({
+                      value: sh,
+                      label: shiftLabel(sh),
+                    })),
+                ]}
+              />
+
+              <AppSelect
+                label="Group"
+                value={isClass11Or12 && selectedGroup === "GENERAL" ? "ALL" : selectedGroup}
+                onChange={handleGroupChange}
+                options={[
+                  { value: "ALL", label: "All Groups" },
+                  ...(!isClass11Or12 ? [{ value: "GENERAL", label: "General" }] : []),
+                  { value: "SCIENCE", label: "Science" },
+                  { value: "HUMANITIES", label: "Humanities" },
+                  { value: "BUSINESS_STUDIES", label: "Business Studies" },
+                ]}
+              />
+
+              <AppSelect
+                label="Section"
+                value={selectedSectionId}
+                onChange={setSelectedSectionId}
+                options={[
+                  { value: "", label: "All Sections" },
+                  ...availableSections.map((s: any) => ({
+                    value: s.id,
+                    label: sectionOptionLabel(s, { includeShiftWhen: !selectedShift }),
+                  })),
+                ]}
+              />
+
+              <AppSelect
+                label={subjects.length > 0 ? `Subject (${subjects.length} Assigned)` : "Subject"}
+                value={selectedSubjectId}
+                onChange={setSelectedSubjectId}
+                disabled={subjectsLoading || subjects.length === 0}
+                options={
+                  subjectsLoading
+                    ? [{ value: "", label: "Loading assigned subjects..." }]
+                    : subjects.length === 0
+                    ? [{ value: "", label: "No subjects assigned to this exam" }]
+                    : subjects.map((sub) => ({
+                        value: sub.id,
+                        label: subjectOptionLabel(sub),
+                      }))
+                }
+              />
+            </RulesFilterGrid>
+          }
+        >
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1.5}
+            sx={{ alignItems: { sm: "center" }, justifyContent: "space-between" }}
+          >
+            <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap", alignItems: "center", gap: 0.75 }}>
+              <Chip
+                size="small"
+                label={activeExam?.name || "Target Exam"}
+                sx={{ height: 24, fontWeight: 700, fontSize: "0.75rem" }}
+              />
+              {selectedClass && (
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  label={selectedClass.name}
+                  sx={{ height: 24, fontWeight: 600, fontSize: "0.75rem" }}
+                />
+              )}
+              {selectedSectionId && (
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  label={availableSections.find((s: any) => s.id === selectedSectionId)?.name}
+                  sx={{ height: 24, fontSize: "0.75rem" }}
+                />
+              )}
+              {selectedSubjectId && (
+                <Chip
+                  size="small"
+                  color="primary"
+                  label={subjects.find((s: any) => s.id === selectedSubjectId)?.name}
+                  sx={{ height: 24, fontWeight: 700, fontSize: "0.75rem" }}
+                />
+              )}
+            </Stack>
+          </Stack>
+
+          {subjects.length === 0 && !subjectsLoading && selectedExamId && (
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.5}
+              sx={{
+                mt: 2,
+                alignItems: { sm: "center" },
+                justifyContent: "space-between",
+                px: 1.5,
+                py: 1.25,
+                borderRadius: 2,
+                bgcolor: "warning.lighter",
+                color: "warning.darker",
+              }}
+            >
+              <Stack direction="row" spacing={1} sx={{ alignItems: "flex-start" }}>
+                <AlertCircle size={16} />
+                <Typography variant="body2" sx={{ fontSize: "0.8125rem", fontWeight: 500, lineHeight: 1.45 }}>
+                  No subjects are assigned to this exam. Assign subjects under Exam Management to enter marks.
+                </Typography>
+              </Stack>
+              <Typography
+                component={Link}
+                href="/setup/exams"
+                variant="body2"
+                sx={{
+                  flexShrink: 0,
+                  fontWeight: 700,
+                  fontSize: "0.8125rem",
+                  color: "primary.main",
+                  textDecoration: "none",
+                  "&:hover": { textDecoration: "underline" },
+                }}
               >
-                <Plus className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            {/* Quick Presets */}
-            <div className="flex items-center gap-1">
-              {[10, 15, 20, 25, 50, 100].map((preset) => (
+                Manage exam subjects
+              </Typography>
+            </Stack>
+          )}
+        </RulesSection>
+
+        {isClassTest ? (
+          <RulesSection
+            title="Class Test entry"
+            subtitle="Component columns are hidden — enter CT marks directly. Adjust the max mark if needed."
+            action={
+              <Chip
+                size="small"
+                icon={<Sparkles size={12} />}
+                label="Class Test"
+                sx={{ height: 24, fontWeight: 700, bgcolor: "primary.lighter", color: "primary.dark" }}
+              />
+            }
+          >
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.5}
+              sx={{ alignItems: { sm: "center" }, justifyContent: "space-between" }}
+            >
+              <Typography variant="body2" sx={{ fontSize: "0.8125rem", fontWeight: 600, color: "text.secondary" }}>
+                Max CT mark
+              </Typography>
+              <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", alignItems: "center", gap: 1 }}>
+                <Box
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    border: 1,
+                    borderColor: "divider",
+                    borderRadius: 1.5,
+                    overflow: "hidden",
+                    bgcolor: "background.paper",
+                  }}
+                >
+                  <Box
+                    component="button"
+                    type="button"
+                    onClick={() => handleUpdateCtMaxMark(Math.max(1, ctMaxMark - 5))}
+                    title="Decrease Max Mark (-5)"
+                    sx={{
+                      p: 0.75,
+                      border: 0,
+                      bgcolor: "transparent",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      color: "text.secondary",
+                      "&:hover": { bgcolor: "action.hover" },
+                    }}
+                  >
+                    <Minus size={14} />
+                  </Box>
+                  <Box
+                    component="input"
+                    type="number"
+                    min={1}
+                    max={500}
+                    value={ctMaxMark}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const val = parseFloat(e.target.value);
+                      if (!isNaN(val) && val > 0) {
+                        handleUpdateCtMaxMark(val);
+                      } else if (e.target.value === "") {
+                        setCustomCtMaxMark(0);
+                      }
+                    }}
+                    sx={{
+                      width: 56,
+                      textAlign: "center",
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      fontFamily: "monospace",
+                      border: 0,
+                      borderLeft: 1,
+                      borderRight: 1,
+                      borderColor: "divider",
+                      py: 0.75,
+                      outline: "none",
+                    }}
+                  />
+                  <Box
+                    component="button"
+                    type="button"
+                    onClick={() => handleUpdateCtMaxMark(ctMaxMark + 5)}
+                    title="Increase Max Mark (+5)"
+                    sx={{
+                      p: 0.75,
+                      border: 0,
+                      bgcolor: "transparent",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      color: "text.secondary",
+                      "&:hover": { bgcolor: "action.hover" },
+                    }}
+                  >
+                    <Plus size={14} />
+                  </Box>
+                </Box>
+                {[10, 15, 20, 25, 50, 100].map((preset) => (
+                  <AppButton
+                    key={preset}
+                    type="button"
+                    size="small"
+                    variant="soft"
+                    color={ctMaxMark === preset ? "primary" : "inherit"}
+                    onClick={() => handleUpdateCtMaxMark(preset)}
+                  >
+                    {preset}
+                  </AppButton>
+                ))}
+              </Stack>
+            </Stack>
+          </RulesSection>
+        ) : (
+          <RulesSection
+            title="CT sync & weighting"
+            subtitle={
+              isCtActive
+                ? "Sync Class Test marks and apply institutional percentage weighting."
+                : "CT is inactive — the CT column is hidden and scores stay as raw totals."
+            }
+            action={
+              <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                <Chip
+                  size="small"
+                  label={isCtActive ? "Active" : "Inactive"}
+                  color={isCtActive ? "primary" : "default"}
+                  sx={{ height: 24, fontWeight: 700 }}
+                />
                 <AppButton
-                  key={preset}
                   type="button"
                   size="small"
                   variant="soft"
-                  color={ctMaxMark === preset ? "primary" : "inherit"}
-                  onClick={() => handleUpdateCtMaxMark(preset)}
+                  color={isCtActive ? "primary" : "inherit"}
+                  startIcon={<CheckCircle2 size={14} />}
+                  onClick={() => setIsCtActive(true)}
                 >
-                  {preset}
+                  Active
                 </AppButton>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div
-          className={`border rounded-xl p-4 shadow-xs transition-colors ${
-            isCtActive
-              ? "bg-linear-to-r from-purple-50 via-indigo-50 to-emerald-50 border-purple-200/80"
-              : "bg-slate-50 border-slate-200"
-          }`}
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/70">
-            <div className="flex items-center space-x-2">
-              <span className={`p-1.5 text-white rounded-md ${isCtActive ? "bg-purple-600" : "bg-slate-500"}`}>
-                <Sliders className="w-3.5 h-3.5" />
-              </span>
-              <div>
-                <div className="flex items-center space-x-2">
-                  <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
-                    Class Test (CT) Marks Auto-Sync &amp; Term Weighting
-                  </h3>
-                  <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                      isCtActive
-                        ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                        : "bg-slate-200 text-slate-600 border-slate-300"
-                    }`}
+                <AppButton
+                  type="button"
+                  size="small"
+                  variant="soft"
+                  color={!isCtActive ? "primary" : "inherit"}
+                  startIcon={<XCircle size={14} />}
+                  onClick={() => setIsCtActive(false)}
+                >
+                  Inactive
+                </AppButton>
+              </Stack>
+            }
+          >
+            {!isCtActive ? (
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>
+                Turn CT on to sync Class Test marks and configure weight terms.
+              </Typography>
+            ) : (
+              <Stack spacing={2.5}>
+                <Box>
+                  <Typography
+                    variant="body2"
+                    sx={{ mb: 1.25, fontSize: "0.8125rem", fontWeight: 500, color: "text.secondary" }}
                   >
-                    {isCtActive ? "ACTIVE" : "INACTIVE"}
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  {isCtActive
-                    ? "CT exam marks are active and converted with institutional percentage terms."
-                    : "CT is inactive. CT column is hidden, and marks are recorded directly as raw scores (no percentage scaling)."}
-                </p>
-              </div>
-            </div>
-
-            {/* Active / Inactive Toggle Buttons */}
-            <div className="flex items-center p-1 bg-white rounded-xl space-x-1 border border-slate-300/80 shrink-0 shadow-2xs">
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={isCtActive ? "primary" : "inherit"}
-                startIcon={<CheckCircle2 size={14} />}
-                onClick={() => setIsCtActive(true)}
-              >
-                Active
-              </AppButton>
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={!isCtActive ? "primary" : "inherit"}
-                startIcon={<XCircle size={14} />}
-                onClick={() => setIsCtActive(false)}
-              >
-                Inactive
-              </AppButton>
-            </div>
-          </div>
-
-          {/* When Active: Display full sync controls and weight terms */}
-          {isCtActive && (
-            <div className="pt-3 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              {/* CT Auto-Sync Section */}
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-slate-600 mb-2 font-medium">
-                  Select an existing Class Test exam to auto-populate CT marks, or enter them directly:
-                </p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="w-64 sm:w-72">
-                    <select
-                      value={selectedCtExamId}
-                      onChange={(e) => handleSelectCtExam(e.target.value)}
-                      disabled={ctExamLoading}
-                      className="w-full text-xs p-2 bg-white border border-purple-300 rounded-lg font-medium text-slate-800 focus:ring-2 focus:ring-purple-500 shadow-2xs"
-                    >
-                      <option value="">-- Select CT Exam to Auto-Sync --</option>
-                      {availableCtExams.map((ex: any) => (
-                        <option key={ex.id} value={ex.id}>
-                          {ex.name} ({ex.termCode || ex.status})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {selectedCtExamId && (
-                    <AppButton
-                      type="button"
-                      variant="contained"
-                      color="info"
-                      size="small"
-                      startIcon={<RefreshCw size={14} />}
-                      loading={ctExamLoading}
-                      disabled={ctExamLoading}
-                      onClick={() => syncCtMarks(selectedCtExamId, rows, ctPercentage)}
-                      title="Re-fetch and scale CT marks from the selected exam"
-                    >
-                      {ctExamLoading ? "Syncing..." : "Sync CT Marks"}
-                    </AppButton>
-                  )}
-
-                  {selectedCtExamId && (
-                    <AppButton
-                      type="button"
-                      variant="outline"
-                      size="small"
-                      onClick={() => handleSelectCtExam("")}
-                      title="Disconnect CT exam (preserves current values)"
-                    >
-                      Disconnect CT
-                    </AppButton>
-                  )}
-
-                  {ctSyncSuccess && (
-                    <div className="inline-flex items-center space-x-1 text-emerald-700 bg-emerald-100/90 border border-emerald-300 text-xs font-semibold px-2.5 py-1 rounded-lg">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>CT Marks Synced Successfully!</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Percentage Weighting Stepper & Presets */}
-              <div className="bg-white/90 border border-purple-200 rounded-xl p-3 shadow-2xs flex flex-col gap-2.5">
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
-                    Evaluation Weight Terms:
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-slate-500 font-medium">Presets:</span>
-                    <AppButton
-                      type="button"
-                      size="small"
-                      variant="soft"
-                      color={mainExamPercentage === 80 && ctPercentage === 20 ? "primary" : "inherit"}
-                      onClick={() => handleApplyPreset(80, 20)}
-                    >
-                      80 / 20
-                    </AppButton>
-                    <AppButton
-                      type="button"
-                      size="small"
-                      variant="soft"
-                      color={mainExamPercentage === 70 && ctPercentage === 30 ? "primary" : "inherit"}
-                      onClick={() => handleApplyPreset(70, 30)}
-                    >
-                      70 / 30
-                    </AppButton>
-                    <AppButton
-                      type="button"
-                      size="small"
-                      variant="soft"
-                      color={mainExamPercentage === 85 && ctPercentage === 15 ? "primary" : "inherit"}
-                      onClick={() => handleApplyPreset(85, 15)}
-                    >
-                      85 / 15
-                    </AppButton>
-                    <AppButton
-                      type="button"
-                      size="small"
-                      variant="soft"
-                      color={mainExamPercentage === 100 && ctPercentage === 0 ? "primary" : "inherit"}
-                      onClick={() => handleApplyPreset(100, 0)}
-                    >
-                      100% Only
-                    </AppButton>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  {/* Main Exam % */}
-                  <div className="flex items-center space-x-1.5">
-                    <span className="text-xs font-semibold text-slate-700">Main:</span>
-                    <div className="flex items-center border border-slate-300 rounded-lg overflow-hidden bg-slate-50">
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateMainPercentage(mainExamPercentage - 5)}
-                        className="p-1 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
-                        title="Decrease Main Exam %"
-                      >
-                        <Minus className="w-3 h-3" />
-                      </button>
-                      <input
-                        type="number"
-                        min={0}
-                        max={100}
-                        value={mainExamPercentage}
-                        onChange={(e) => handleUpdateMainPercentage(parseFloat(e.target.value) || 0)}
-                        className="w-12 text-center text-xs font-bold bg-white p-1 border-x border-slate-300 font-mono text-slate-900"
+                    Select a Class Test exam to auto-populate CT marks, or enter them directly.
+                  </Typography>
+                  <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", alignItems: "center", gap: 1 }}>
+                    <Box sx={{ width: { xs: "100%", sm: 280 } }}>
+                      <AppSelect
+                        label="CT exam to sync"
+                        value={selectedCtExamId}
+                        onChange={handleSelectCtExam}
+                        disabled={ctExamLoading}
+                        options={[
+                          { value: "", label: "Select CT exam to sync" },
+                          ...availableCtExams.map((ex: any) => ({
+                            value: ex.id,
+                            label: examOptionLabel(ex),
+                          })),
+                        ]}
                       />
-                      <button
+                    </Box>
+
+                    {selectedCtExamId && (
+                      <AppButton
                         type="button"
-                        onClick={() => handleUpdateMainPercentage(mainExamPercentage + 5)}
-                        className="p-1 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
-                        title="Increase Main Exam %"
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        startIcon={<RefreshCw size={14} />}
+                        loading={ctExamLoading}
+                        disabled={ctExamLoading}
+                        onClick={() => syncCtMarks(selectedCtExamId, rows, ctPercentage)}
+                        title="Re-fetch and scale CT marks from the selected exam"
                       >
-                        <Plus className="w-3 h-3" />
-                      </button>
-                    </div>
-                    <span className="text-xs font-bold text-slate-500">%</span>
-                  </div>
+                        {ctExamLoading ? "Syncing..." : "Sync CT Marks"}
+                      </AppButton>
+                    )}
 
-                  <span className="text-slate-400 font-bold">+</span>
-
-                  {/* CT Exam % */}
-                  <div className="flex items-center space-x-1.5">
-                    <span className="text-xs font-semibold text-purple-900">CT:</span>
-                    <div className="flex items-center border border-purple-300 rounded-lg overflow-hidden bg-purple-50/50">
-                      <button
+                    {selectedCtExamId && (
+                      <AppButton
                         type="button"
-                        onClick={() => handleUpdateCtPercentage(ctPercentage - 5)}
-                        className="p-1 hover:bg-purple-100 text-purple-800 transition cursor-pointer"
-                        title="Decrease CT %"
+                        variant="outline"
+                        size="small"
+                        onClick={() => handleSelectCtExam("")}
+                        title="Disconnect CT exam (preserves current values)"
                       >
-                        <Minus className="w-3 h-3" />
-                      </button>
-                      <input
-                        type="number"
-                        min={0}
-                        max={100}
-                        value={ctPercentage}
-                        onChange={(e) => handleUpdateCtPercentage(parseFloat(e.target.value) || 0)}
-                        className="w-12 text-center text-xs font-bold bg-white p-1 border-x border-purple-300 font-mono text-purple-800"
-                      />
-                      <button
+                        Disconnect CT
+                      </AppButton>
+                    )}
+                  </Stack>
+                </Box>
+
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    border: 1,
+                    borderColor: "divider",
+                    bgcolor: "grey.50",
+                  }}
+                >
+                  <Stack
+                    direction={{ xs: "column", md: "row" }}
+                    spacing={1.5}
+                    sx={{ alignItems: { md: "center" }, justifyContent: "space-between", mb: 1.5 }}
+                  >
+                    <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                      <Sliders size={14} />
+                      <Typography variant="body2" sx={{ fontSize: "0.8125rem", fontWeight: 700 }}>
+                        Evaluation weight terms
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap", alignItems: "center", gap: 0.75 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                        Presets
+                      </Typography>
+                      <AppButton
                         type="button"
-                        onClick={() => handleUpdateCtPercentage(ctPercentage + 5)}
-                        className="p-1 hover:bg-purple-100 text-purple-800 transition cursor-pointer"
-                        title="Increase CT %"
+                        size="small"
+                        variant="soft"
+                        color={mainExamPercentage === 80 && ctPercentage === 20 ? "primary" : "inherit"}
+                        onClick={() => handleApplyPreset(80, 20)}
                       >
-                        <Plus className="w-3 h-3" />
-                      </button>
-                    </div>
-                    <span className="text-xs font-bold text-purple-700">%</span>
-                  </div>
+                        80 / 20
+                      </AppButton>
+                      <AppButton
+                        type="button"
+                        size="small"
+                        variant="soft"
+                        color={mainExamPercentage === 70 && ctPercentage === 30 ? "primary" : "inherit"}
+                        onClick={() => handleApplyPreset(70, 30)}
+                      >
+                        70 / 30
+                      </AppButton>
+                      <AppButton
+                        type="button"
+                        size="small"
+                        variant="soft"
+                        color={mainExamPercentage === 85 && ctPercentage === 15 ? "primary" : "inherit"}
+                        onClick={() => handleApplyPreset(85, 15)}
+                      >
+                        85 / 15
+                      </AppButton>
+                      <AppButton
+                        type="button"
+                        size="small"
+                        variant="soft"
+                        color={mainExamPercentage === 100 && ctPercentage === 0 ? "primary" : "inherit"}
+                        onClick={() => handleApplyPreset(100, 0)}
+                      >
+                        100% Only
+                      </AppButton>
+                    </Stack>
+                  </Stack>
 
-                  <div className="text-[10px] text-slate-500 bg-slate-100 px-2 py-1 rounded font-mono ml-auto">
-                    Total:{" "}
-                    <span
-                      className={
-                        mainExamPercentage + ctPercentage === 100
-                          ? "text-emerald-700 font-bold"
-                          : "text-amber-700 font-bold"
-                      }
-                    >
-                      {mainExamPercentage + ctPercentage}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+                  <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap", alignItems: "center", gap: 1.5 }}>
+                    <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                      <Typography variant="body2" sx={{ fontSize: "0.75rem", fontWeight: 600 }}>
+                        Main
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          border: 1,
+                          borderColor: "divider",
+                          borderRadius: 1.5,
+                          overflow: "hidden",
+                          bgcolor: "background.paper",
+                        }}
+                      >
+                        <Box
+                          component="button"
+                          type="button"
+                          onClick={() => handleUpdateMainPercentage(mainExamPercentage - 5)}
+                          title="Decrease Main Exam %"
+                          sx={{
+                            p: 0.5,
+                            border: 0,
+                            bgcolor: "transparent",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            "&:hover": { bgcolor: "action.hover" },
+                          }}
+                        >
+                          <Minus size={12} />
+                        </Box>
+                        <Box
+                          component="input"
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={mainExamPercentage}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            handleUpdateMainPercentage(parseFloat(e.target.value) || 0)
+                          }
+                          sx={{
+                            width: 48,
+                            textAlign: "center",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            fontFamily: "monospace",
+                            border: 0,
+                            borderLeft: 1,
+                            borderRight: 1,
+                            borderColor: "divider",
+                            py: 0.5,
+                            outline: "none",
+                          }}
+                        />
+                        <Box
+                          component="button"
+                          type="button"
+                          onClick={() => handleUpdateMainPercentage(mainExamPercentage + 5)}
+                          title="Increase Main Exam %"
+                          sx={{
+                            p: 0.5,
+                            border: 0,
+                            bgcolor: "transparent",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            "&:hover": { bgcolor: "action.hover" },
+                          }}
+                        >
+                          <Plus size={12} />
+                        </Box>
+                      </Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                        %
+                      </Typography>
+                    </Stack>
 
-      {/* Spreadsheet Grid */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="font-bold text-sm text-slate-800">
-              Students Roster ({rows.length} Taken this Subject)
-            </span>
-            {selectedShift && (
-              <span
-                className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
-                  selectedShift === "MORNING"
-                    ? "bg-amber-50 text-amber-700 border border-amber-200"
-                    : "bg-blue-50 text-blue-700 border border-blue-200"
-                }`}
-              >
-                {selectedShift === "MORNING" ? "Morning Shift" : "Day Shift"}
-              </span>
+                    <Typography color="text.disabled" sx={{ fontWeight: 700 }}>
+                      +
+                    </Typography>
+
+                    <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                      <Typography variant="body2" sx={{ fontSize: "0.75rem", fontWeight: 600 }}>
+                        CT
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          border: 1,
+                          borderColor: "divider",
+                          borderRadius: 1.5,
+                          overflow: "hidden",
+                          bgcolor: "background.paper",
+                        }}
+                      >
+                        <Box
+                          component="button"
+                          type="button"
+                          onClick={() => handleUpdateCtPercentage(ctPercentage - 5)}
+                          title="Decrease CT %"
+                          sx={{
+                            p: 0.5,
+                            border: 0,
+                            bgcolor: "transparent",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            "&:hover": { bgcolor: "action.hover" },
+                          }}
+                        >
+                          <Minus size={12} />
+                        </Box>
+                        <Box
+                          component="input"
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={ctPercentage}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            handleUpdateCtPercentage(parseFloat(e.target.value) || 0)
+                          }
+                          sx={{
+                            width: 48,
+                            textAlign: "center",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            fontFamily: "monospace",
+                            border: 0,
+                            borderLeft: 1,
+                            borderRight: 1,
+                            borderColor: "divider",
+                            py: 0.5,
+                            outline: "none",
+                          }}
+                        />
+                        <Box
+                          component="button"
+                          type="button"
+                          onClick={() => handleUpdateCtPercentage(ctPercentage + 5)}
+                          title="Increase CT %"
+                          sx={{
+                            p: 0.5,
+                            border: 0,
+                            bgcolor: "transparent",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            "&:hover": { bgcolor: "action.hover" },
+                          }}
+                        >
+                          <Plus size={12} />
+                        </Box>
+                      </Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                        %
+                      </Typography>
+                    </Stack>
+
+                    <Chip
+                      size="small"
+                      label={`Total: ${mainExamPercentage + ctPercentage}%`}
+                      color={mainExamPercentage + ctPercentage === 100 ? "primary" : "warning"}
+                      sx={{ height: 24, fontWeight: 700, fontFamily: "monospace", ml: { md: "auto" } }}
+                    />
+                  </Stack>
+                </Box>
+              </Stack>
             )}
-            {config && (
-              <span className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono">
-                Full Marks: {config.totalFullMarks} | Mode: {config.passMode}
-              </span>
-            )}
-          </div>
-          <div className="text-[11px] text-slate-500">
-            Navigation tip: Press <kbd className="px-1 py-0.5 bg-slate-100 border rounded">Tab</kbd> to jump between cells.
-          </div>
-        </div>
+          </RulesSection>
+        )}
 
+        <RulesSection
+          title={`Students roster (${rows.length})`}
+          subtitle="Enter marks in the grid. Press Tab to move between cells."
+          action={
+            <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap", alignItems: "center", gap: 0.75 }}>
+              {selectedShift && (
+                <Chip
+                  size="small"
+                  label={selectedShift === "MORNING" ? "Morning Shift" : "Day Shift"}
+                  sx={{
+                    height: 24,
+                    fontWeight: 600,
+                    bgcolor: selectedShift === "MORNING" ? "warning.lighter" : "info.lighter",
+                    color: selectedShift === "MORNING" ? "warning.dark" : "info.dark",
+                  }}
+                />
+              )}
+              {config && (
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  label={`Full Marks: ${config.totalFullMarks} · ${config.passMode}`}
+                  sx={{ height: 24, fontWeight: 600, fontFamily: "monospace", fontSize: "0.7rem" }}
+                />
+              )}
+            </Stack>
+          }
+        >
         {(() => {
           const cqDef = config?.components?.find((c: any) =>
             c.componentName?.toUpperCase() === "CQ" ||
@@ -1948,8 +2126,7 @@ export default function MarkEntryPage() {
             </div>
           );
         })()}
-      </div>
-      </div>
+        </RulesSection>
 
       {/* Mark Input Spreadsheet Window Modal (Matching user wireframe in Image) */}
       {showMarkInputModal && (
@@ -2050,10 +2227,10 @@ export default function MarkEntryPage() {
                         onChange={(e) => setSelectedSubjectId(e.target.value)}
                         className="w-full p-2 border-2 border-slate-700 rounded text-xs font-semibold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                       >
-                        <option value="">Dropdown menu</option>
+                        <option value="">Select subject</option>
                         {subjects.map((sub) => (
                           <option key={sub.id} value={sub.id}>
-                            {sub.name} ({sub.subjectCode})
+                            {subjectOptionLabel(sub)}
                           </option>
                         ))}
                       </select>
@@ -2615,6 +2792,7 @@ export default function MarkEntryPage() {
         mainExamPercentage={mainExamPercentage}
         isClassTest={isClassTest}
       />
+      </RulesAtmosphere>
     </ResultsPageShell>
   );
 }

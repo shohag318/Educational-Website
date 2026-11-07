@@ -12,6 +12,12 @@ import {
   ResultsFilterCard,
   ResultsTableCard,
 } from "@/sections/results/component/result-page-ui";
+import {
+  examOptionLabel,
+  sectionOptionLabel,
+  shiftLabel,
+  subjectOptionLabel,
+} from "@/sections/results/utils/select-options";
 
 type FailRow = {
   roll: string | number;
@@ -265,7 +271,7 @@ export default function FailListPage() {
               ? [{ value: "", label: "No exams found" }]
               : filteredExams.map((ex) => ({
                   value: ex.id,
-                  label: `${ex.name}${ex.class?.name ? ` (${ex.class.name})` : ""}`,
+                  label: examOptionLabel(ex),
                 }))
           }
         />
@@ -280,7 +286,7 @@ export default function FailListPage() {
             { value: "DAY", label: "Day" },
             ...availableShifts.map((sh) => ({
               value: sh,
-              label: sh.charAt(0) + sh.slice(1).toLowerCase(),
+              label: shiftLabel(sh),
             })),
           ]}
         />
@@ -299,7 +305,7 @@ export default function FailListPage() {
                   { value: "HUMANITIES", label: "Humanities" },
                   { value: "BUSINESS_STUDIES", label: "Business Studies" },
                 ]
-              : [{ value: "ALL", label: "Select Class 1–12 first" }]
+              : [{ value: "ALL", label: "Select class 1 to 12 first" }]
           }
         />
 
@@ -309,16 +315,10 @@ export default function FailListPage() {
           onChange={setSelectedSectionId}
           options={[
             { value: "", label: "All Sections" },
-            ...availableSections.map((sec: any) => {
-              const shiftLabel =
-                sec.shift === "MORNING" ? "Morning" : sec.shift === "DAY" ? "Day" : sec.shift;
-              return {
-                value: sec.id,
-                label: `${sec.name}${sec.groupType ? ` (${sec.groupType})` : ""}${
-                  !selectedShift && shiftLabel ? ` · ${shiftLabel}` : ""
-                }`,
-              };
-            }),
+            ...availableSections.map((sec: any) => ({
+              value: sec.id,
+              label: sectionOptionLabel(sec, { includeShiftWhen: !selectedShift }),
+            })),
           ]}
         />
 
@@ -330,7 +330,7 @@ export default function FailListPage() {
             { value: "", label: "All Failed Subjects" },
             ...subjects.map((sub) => ({
               value: sub.id,
-              label: `${sub.name} (${sub.subjectCode})`,
+              label: subjectOptionLabel(sub),
             })),
           ]}
         />

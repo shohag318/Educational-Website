@@ -11,14 +11,16 @@ import {
 } from "@mui/material";
 import { Lock, Unlock } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
+import { NoDataFound } from "@/components/table/no-data-found";
 import {
   ResultsPageShell,
   ResultsPageHeader,
-  ResultsPanel,
-  ResultsEmpty,
   ResultsNotice,
-  ResultsStat,
 } from "@/sections/results/component/result-page-ui";
+import {
+  RulesAtmosphere,
+  RulesSection,
+} from "@/sections/academic/component/rules-section-ui";
 
 export default function PublishPage() {
   const [exams, setExams] = useState<any[]>([]);
@@ -71,87 +73,122 @@ export default function PublishPage() {
 
   return (
     <ResultsPageShell>
-      <ResultsPageHeader heading="Publish Results" />
+      <RulesAtmosphere>
+        <ResultsPageHeader heading="Publish Results" />
 
-      <Box
-        sx={{
-          display: "grid",
-          gap: 1.5,
-          gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" },
-        }}
-        className="no-print"
-      >
-        <ResultsStat label="Total Exams" value={exams.length} hint="Configured in this school" />
-        <ResultsStat label="Published" value={publishedCount} hint="Locked for report cards" color="success" />
-        <ResultsStat label="Draft / Preview" value={draftCount} hint="Still editable" color="warning" />
-      </Box>
+        <ResultsNotice severity="info">
+          Publishing locks mark entry. You can unlock later if corrections are needed.
+        </ResultsNotice>
 
-      <ResultsNotice severity="info">
-        Publishing locks mark entry. You can unlock later if corrections are needed.
-      </ResultsNotice>
+        <RulesSection
+          title="Exam publish status"
+          subtitle="Lock exams to release report cards, or unlock drafts when marks still need changes."
+          action={
+            !loading && exams.length > 0 ? (
+              <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+                <Chip
+                  size="small"
+                  label={`${exams.length} total`}
+                  sx={{ height: 22, fontWeight: 700, bgcolor: "primary.lighter", color: "primary.dark" }}
+                />
+                <Chip
+                  size="small"
+                  label={`${publishedCount} published`}
+                  color="success"
+                  variant="outlined"
+                  sx={{ height: 22, fontWeight: 700 }}
+                />
+                <Chip
+                  size="small"
+                  label={`${draftCount} draft`}
+                  color="warning"
+                  variant="outlined"
+                  sx={{ height: 22, fontWeight: 700 }}
+                />
+              </Stack>
+            ) : null
+          }
+        >
+          {loading ? (
+            <Box sx={{ py: 6, display: "grid", placeItems: "center" }}>
+              <CircularProgress size={28} />
+            </Box>
+          ) : exams.length === 0 ? (
+            <NoDataFound />
+          ) : (
+            <Box
+              sx={{
+                border: 1,
+                borderColor: "divider",
+                borderRadius: 2,
+                overflow: "hidden",
+                bgcolor: "background.paper",
+              }}
+            >
+              {exams.map((exam, index) => {
+                const isPublished = exam.status === "PUBLISHED";
+                return (
+                  <Box key={exam.id}>
+                    {index > 0 ? <Divider /> : null}
+                    <Stack
+                      direction={{ xs: "column", md: "row" }}
+                      spacing={2}
+                      sx={{
+                        p: { xs: 2, sm: 2.25 },
+                        alignItems: { md: "center" },
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Box sx={{ minWidth: 0 }}>
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          sx={{ alignItems: "center", flexWrap: "wrap", mb: 0.75 }}
+                        >
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ fontWeight: 700, fontSize: { xs: "1rem", sm: "1.0625rem" } }}
+                          >
+                            {exam.name}
+                          </Typography>
+                          <Chip
+                            size="small"
+                            label={exam.status}
+                            color={isPublished ? "success" : "warning"}
+                            variant="outlined"
+                            sx={{ fontWeight: 700, height: 22 }}
+                          />
+                        </Stack>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ fontSize: "0.8125rem" }}
+                        >
+                          Class <strong>{exam.class?.name || "—"}</strong>
+                          {" · "}
+                          Term <strong>{exam.termCode || "—"}</strong>
+                          {" · "}
+                          Processed <strong>{exam._count?.processedResults || 0}</strong>
+                        </Typography>
+                      </Box>
 
-      <ResultsPanel padded={false}>
-        {loading ? (
-          <Box sx={{ py: 8, display: "grid", placeItems: "center" }}>
-            <CircularProgress size={28} />
-          </Box>
-        ) : exams.length === 0 ? (
-          <ResultsEmpty
-            title="No exams found"
-            description="Create an exam first from Exam Configuration."
-          />
-        ) : (
-          exams.map((exam, index) => {
-            const isPublished = exam.status === "PUBLISHED";
-            return (
-              <Box key={exam.id}>
-                {index > 0 ? <Divider /> : null}
-                <Stack
-                  direction={{ xs: "column", md: "row" }}
-                  spacing={2}
-                  sx={{
-                    p: { xs: 2, sm: 2.5 },
-                    alignItems: { md: "center" },
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Box sx={{ minWidth: 0 }}>
-                    <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", mb: 0.75 }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                        {exam.name}
-                      </Typography>
-                      <Chip
+                      <AppButton
                         size="small"
-                        label={exam.status}
-                        color={isPublished ? "success" : "warning"}
-                        variant="outlined"
-                        sx={{ fontWeight: 700, height: 22 }}
-                      />
+                        variant={isPublished ? "outlined" : "contained"}
+                        color={isPublished ? "warning" : "primary"}
+                        startIcon={isPublished ? <Unlock size={14} /> : <Lock size={14} />}
+                        onClick={() => handleTogglePublish(exam.id, exam.status)}
+                      >
+                        {isPublished ? "Unlock to Draft" : "Lock & Publish"}
+                      </AppButton>
                     </Stack>
-                    <Typography variant="body2" color="text.secondary">
-                      Class <strong>{exam.class?.name || "—"}</strong>
-                      {" · "}
-                      Term <strong>{exam.termCode || "—"}</strong>
-                      {" · "}
-                      Processed <strong>{exam._count?.processedResults || 0}</strong>
-                    </Typography>
                   </Box>
-
-                  <AppButton
-                    size="small"
-                    variant={isPublished ? "outlined" : "contained"}
-                    color={isPublished ? "warning" : "success"}
-                    startIcon={isPublished ? <Unlock size={14} /> : <Lock size={14} />}
-                    onClick={() => handleTogglePublish(exam.id, exam.status)}
-                  >
-                    {isPublished ? "Unlock to Draft" : "Lock & Publish"}
-                  </AppButton>
-                </Stack>
-              </Box>
-            );
-          })
-        )}
-      </ResultsPanel>
+                );
+              })}
+            </Box>
+          )}
+        </RulesSection>
+      </RulesAtmosphere>
     </ResultsPageShell>
   );
 }

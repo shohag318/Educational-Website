@@ -3,8 +3,8 @@
 import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import { Box, Chip, Stack, Typography } from "@mui/material";
 import {
-  Calendar,
   Plus,
   Play,
   CheckCircle2,
@@ -18,21 +18,25 @@ import {
   Sliders,
   Check,
   X,
-  AlertCircle,
   Sparkles,
   Layers,
   Search,
   ArrowRight,
-  ShieldAlert,
 } from "@/components/iconify/lucide";
 import { AppSelect, AppTextField } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
+import { templateOptionLabel } from "@/sections/results/utils/select-options";
 import {
   ResultsPageShell,
   ResultsPageHeader,
-  ResultsPanel,
+  ResultsNotice,
 } from "@/sections/results/component/result-page-ui";
+import {
+  RulesAtmosphere,
+  RulesFilterGrid,
+  RulesSection,
+} from "@/sections/academic/component/rules-section-ui";
 
 interface AssessmentComponent {
   id?: string;
@@ -830,210 +834,268 @@ export default function ExamsPage() {
   };
 
   const getStatusBadge = (status: string) => {
+    const baseSx = { height: 24, fontWeight: 700, fontSize: "0.68rem", letterSpacing: "0.02em" };
     switch (status) {
       case "DRAFT":
-        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">DRAFT</span>;
+        return <Chip size="small" label="Draft" sx={{ ...baseSx, bgcolor: "grey.100", color: "text.secondary" }} />;
       case "MARK_ENTRY":
-        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">MARK ENTRY OPEN</span>;
+        return (
+          <Chip
+            size="small"
+            label="Mark entry open"
+            sx={{ ...baseSx, bgcolor: "info.lighter", color: "info.dark" }}
+          />
+        );
       case "DRAFT_PREVIEW":
-        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">DRAFT PREVIEW</span>;
+        return (
+          <Chip
+            size="small"
+            label="Draft preview"
+            sx={{ ...baseSx, bgcolor: "warning.lighter", color: "warning.dark" }}
+          />
+        );
       case "PUBLISHED":
         return (
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 flex items-center space-x-1">
-            <Lock className="w-3 h-3 inline" /> <span>PUBLISHED</span>
-          </span>
+          <Chip
+            size="small"
+            icon={<Lock size={12} />}
+            label="Published"
+            sx={{ ...baseSx, bgcolor: "primary.lighter", color: "primary.darker", "& .MuiChip-icon": { color: "primary.dark" } }}
+          />
         );
       default:
-        return <span>{status}</span>;
+        return <Chip size="small" label={status} sx={baseSx} />;
     }
   };
 
   return (
     <ResultsPageShell>
-      {/* Toast Notification */}
+      <RulesAtmosphere>
       {notification && (
-        <div
-          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-xs font-semibold flex items-center space-x-2 transition-all ${
-            notification.type === "success"
-              ? "bg-emerald-600 text-white"
-              : "bg-rose-600 text-white"
-          }`}
-        >
-          {notification.type === "success" ? (
-            <CheckCircle2 className="w-4 h-4" />
-          ) : (
-            <AlertCircle className="w-4 h-4" />
-          )}
-          <span>{notification.message}</span>
-        </div>
+        <ResultsNotice severity={notification.type === "success" ? "success" : "error"}>
+          {notification.message}
+        </ResultsNotice>
       )}
 
       <ResultsPageHeader heading="Exam Configuration" current="Exam Configuration" />
 
-      {/* Create Exam Card */}
-      <ResultsPanel className="space-y-4">
-        <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
-          <Plus className="w-4 h-4 text-emerald-600" />
-          <span>Create New Exam Instance</span>
-        </h2>
-        <form onSubmit={handleCreateExam} className="space-y-4 text-xs">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
-            <div className="lg:col-span-2">
-              <SessionSelect
-                label="Session"
-                value={session}
-                onChange={setSession}
-                activeOnly={false}
-                fullWidth
-              />
-            </div>
-            <div className="lg:col-span-2">
-              <AppSelect
-                label="Target Class"
-                value={classId}
-                onChange={(val) => {
-                  setClassId(val);
-                  setSelectedTemplateId("");
-                }}
-                options={[
-                  { value: "", label: "-- Select Class --" },
-                  ...classes.map((c) => ({ value: c.id, label: c.name })),
-                ]}
-              />
-            </div>
-            <div className="lg:col-span-3">
-              <AppTextField
-                label="Exam Title"
-                placeholder="e.g. Annual Examination 2026"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="lg:col-span-2 space-y-2">
-              <AppSelect
-                label="Exam Type"
-                value={termCode}
-                onChange={(val) => {
-                  setTermCode(val);
-                  if (val !== "Other") {
-                    setCustomTermCode("");
-                  }
-                }}
-                options={[
-                  { value: "Semester", label: "Semester" },
-                  { value: "Class Test", label: "Class Test" },
-                  { value: "Other", label: "Other" },
-                ]}
-              />
-              {termCode === "Other" && (
+      <RulesSection
+        title="Create exam"
+        subtitle="Set session, class, and title — optionally apply an assessment template for marks distribution."
+      >
+        <form onSubmit={handleCreateExam}>
+          <Stack spacing={2.25}>
+            <Box
+              sx={{
+                display: "grid",
+                gap: 2,
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, minmax(0, 1fr))",
+                  lg: "repeat(12, minmax(0, 1fr))",
+                },
+                "& > *": { minWidth: 0 },
+              }}
+            >
+              <Box sx={{ gridColumn: { lg: "span 2" } }}>
+                <SessionSelect
+                  label="Session"
+                  value={session}
+                  onChange={setSession}
+                  activeOnly={false}
+                  fullWidth
+                />
+              </Box>
+              <Box sx={{ gridColumn: { lg: "span 2" } }}>
+                <AppSelect
+                  label="Class"
+                  value={classId}
+                  onChange={(val) => {
+                    setClassId(val);
+                    setSelectedTemplateId("");
+                  }}
+                  options={[
+                    { value: "", label: "Select class" },
+                    ...classes.map((c) => ({ value: c.id, label: c.name })),
+                  ]}
+                />
+              </Box>
+              <Box sx={{ gridColumn: { lg: "span 3" } }}>
                 <AppTextField
-                  label="Custom Exam Type"
-                  placeholder="e.g. Model Test, Pre-Test"
-                  value={customTermCode}
-                  onChange={(e) => setCustomTermCode(e.target.value)}
+                  label="Exam title"
+                  placeholder="Annual Examination 2026"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   required
                 />
-              )}
-            </div>
-            <div className="lg:col-span-3">
-              <AppSelect
-                label="Exam Template"
-                value={selectedTemplateId}
-                onChange={setSelectedTemplateId}
-                options={[
-                  {
-                    value: "",
-                    label:
-                      filteredTemplatesForClass.length === 0
-                        ? "-- No Templates for Class --"
-                        : "-- None (Manual / Default) --",
-                  },
-                  ...filteredTemplatesForClass.map((tpl) => ({
-                    value: tpl.id,
-                    label: `${tpl.name} (${tpl.items?.length || 0} subjects)`,
-                  })),
-                ]}
-              />
-              <div className="flex justify-end mt-1">
-                <Link
-                  href="/academic/rules"
-                  className="text-[10px] text-emerald-600 hover:text-emerald-700 hover:underline font-semibold"
-                  target="_blank"
-                >
-                  Manage Templates
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Auto Assign Subjects Checkbox or Active Template Notice */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-100">
-            {selectedTemplateId ? (
-              <div className="flex items-center space-x-2 text-xs text-emerald-800 font-medium bg-emerald-50/80 px-3 py-1.5 rounded-lg border border-emerald-200">
-                <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>
-                  Template Active: Subjects & CQ/MCQ/Practical rules from{" "}
-                  <strong>
-                    {templates.find((t) => t.id === selectedTemplateId)?.name || "selected template"}
-                  </strong>{" "}
-                  will be automatically applied.
-                </span>
-              </div>
-            ) : (
-              <label className="flex items-center space-x-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={autoAssignSubjects}
-                  onChange={(e) => setAutoAssignSubjects(e.target.checked)}
-                  className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300"
+              </Box>
+              <Box sx={{ gridColumn: { lg: "span 2" } }}>
+                <Stack spacing={1.5}>
+                  <AppSelect
+                    label="Exam type"
+                    value={termCode}
+                    onChange={(val) => {
+                      setTermCode(val);
+                      if (val !== "Other") {
+                        setCustomTermCode("");
+                      }
+                    }}
+                    options={[
+                      { value: "Semester", label: "Semester" },
+                      { value: "Class Test", label: "Class Test" },
+                      { value: "Other", label: "Other" },
+                    ]}
+                  />
+                  {termCode === "Other" && (
+                    <AppTextField
+                      label="Custom type"
+                      placeholder="Model Test, Pre-Test"
+                      value={customTermCode}
+                      onChange={(e) => setCustomTermCode(e.target.value)}
+                      required
+                    />
+                  )}
+                </Stack>
+              </Box>
+              <Box sx={{ gridColumn: { lg: "span 3" } }}>
+                <AppSelect
+                  label="Template"
+                  value={selectedTemplateId}
+                  onChange={setSelectedTemplateId}
+                  options={[
+                    {
+                      value: "",
+                      label:
+                        filteredTemplatesForClass.length === 0
+                          ? "No templates for this class"
+                          : "Manual setup",
+                    },
+                    ...filteredTemplatesForClass.map((tpl) => ({
+                      value: tpl.id,
+                      label: templateOptionLabel(tpl),
+                    })),
+                  ]}
                 />
-                <span className="font-medium text-slate-700 flex items-center space-x-1">
-                  <span>Automatically assign mapped subjects from selected Class</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
-                    Recommended
-                  </span>
-                </span>
-              </label>
-            )}
+                <Typography
+                  component={Link}
+                  href="/academic/rules"
+                  target="_blank"
+                  variant="caption"
+                  sx={{
+                    display: "inline-block",
+                    mt: 0.75,
+                    fontWeight: 600,
+                    color: "primary.main",
+                    textDecoration: "none",
+                    "&:hover": { textDecoration: "underline" },
+                  }}
+                >
+                  Manage templates
+                </Typography>
+              </Box>
+            </Box>
 
-            <AppButton
-              type="submit"
-              variant="contained"
-              color="success"
-              loading={createLoading}
-              startIcon={<Plus className="w-3.5 h-3.5" />}
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.5}
+              sx={{
+                alignItems: { sm: "center" },
+                justifyContent: "space-between",
+                pt: 0.5,
+                borderTop: 1,
+                borderColor: "divider",
+              }}
             >
-              Create Exam
-            </AppButton>
-          </div>
+              {selectedTemplateId ? (
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{
+                    alignItems: "flex-start",
+                    px: 1.5,
+                    py: 1.25,
+                    borderRadius: 2,
+                    bgcolor: "primary.lighter",
+                    color: "primary.darker",
+                    flex: 1,
+                  }}
+                >
+                  <Sparkles size={16} />
+                  <Typography variant="body2" sx={{ fontSize: "0.8125rem", fontWeight: 500, lineHeight: 1.45 }}>
+                    Template{" "}
+                    <Box component="strong" sx={{ fontWeight: 700 }}>
+                      {templates.find((t) => t.id === selectedTemplateId)?.name || "selected"}
+                    </Box>{" "}
+                    will apply subjects and CQ / MCQ / Practical marks.
+                  </Typography>
+                </Stack>
+              ) : (
+                <Box
+                  component="label"
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    cursor: "pointer",
+                    userSelect: "none",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={autoAssignSubjects}
+                    onChange={(e) => setAutoAssignSubjects(e.target.checked)}
+                    className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300"
+                  />
+                  <Typography variant="body2" sx={{ fontWeight: 500, fontSize: "0.8125rem", color: "text.primary" }}>
+                    Auto-assign mapped subjects
+                  </Typography>
+                  <Chip
+                    size="small"
+                    label="Recommended"
+                    sx={{ height: 22, fontWeight: 700, fontSize: "0.65rem", bgcolor: "primary.lighter", color: "primary.dark" }}
+                  />
+                </Box>
+              )}
+
+              <AppButton
+                type="submit"
+                variant="contained"
+                color="primary"
+                loading={createLoading}
+                startIcon={<Plus className="w-3.5 h-3.5" />}
+              >
+                Create exam
+              </AppButton>
+            </Stack>
+          </Stack>
         </form>
-      </ResultsPanel>
+      </RulesSection>
 
-      {/* Exam Catalog Header & Cards */}
-      <ResultsPanel padded={false}>
-        <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50/50">
-          <div>
-            <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
-              <Calendar className="w-4 h-4 text-emerald-600" />
-              <span>Exam Catalog ({filteredExams.length}{filteredExams.length !== exams.length ? ` of ${exams.length}` : ""})</span>
-            </h2>
-            <p className="text-[11px] text-slate-500 mt-0.5">
-              Click &quot;Manage Assigned Subjects&quot; on any examination to view, assign, or adjust its subject roster.
-            </p>
-          </div>
-          <Link
+      <RulesSection
+        title="Exam catalog"
+        subtitle="Open an exam to manage subjects, marks structure, and lifecycle status."
+        action={
+          <Typography
+            component={Link}
             href="/setup/subject-mapping"
-            className="text-xs text-emerald-700 hover:text-emerald-800 font-semibold flex items-center space-x-1"
+            variant="body2"
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.5,
+              fontWeight: 600,
+              fontSize: "0.8125rem",
+              color: "primary.main",
+              textDecoration: "none",
+              "&:hover": { textDecoration: "underline" },
+            }}
           >
-            <span>Review Class Subject Mappings</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        {/* Exam Catalog Filter Bar (Session first) */}
-        <div className="p-3 bg-slate-50 border-b border-slate-200">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            Class subject mappings
+            <ArrowRight size={14} />
+          </Typography>
+        }
+        toolbar={
+          <RulesFilterGrid columns={3}>
             <SessionSelect
               label="Session"
               value={filterSession}
@@ -1058,16 +1120,32 @@ export default function ExamsPage() {
               ]}
             />
             <AppTextField
-              label="Search Exam"
-              placeholder="Filter by exam name..."
+              label="Search"
+              placeholder="Exam name or class"
               value={filterSearch}
               onChange={(e) => setFilterSearch(e.target.value)}
               startIcon={<Search className="w-3.5 h-3.5 text-slate-400" />}
             />
-          </div>
-        </div>
+          </RulesFilterGrid>
+        }
+      >
+        <Stack spacing={1.5}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between" }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: "0.875rem" }}>
+              Examinations
+            </Typography>
+            <Chip
+              size="small"
+              label={
+                filteredExams.length !== exams.length
+                  ? `${filteredExams.length} of ${exams.length}`
+                  : filteredExams.length
+              }
+              sx={{ height: 22, fontWeight: 700, bgcolor: "primary.lighter", color: "primary.dark" }}
+            />
+          </Stack>
 
-        <div className="divide-y divide-slate-100">
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
           {filteredExams.map((exam) => {
             const isExpanded = expandedExamId === exam.id;
             const subjectCount = exam.subjectConfigs?.length || 0;
@@ -1086,59 +1164,79 @@ export default function ExamsPage() {
               filteredConfigs.every((cfg) => selectedConfigIds.includes(cfg.id));
 
             return (
-              <div key={exam.id} className="transition-colors hover:bg-slate-50/40">
-                {/* Main Exam Card Row */}
-                <div className="p-4.5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                  <div className="space-y-1.5 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-bold text-slate-900 text-sm">{exam.name}</span>
+              <Box
+                key={exam.id}
+                sx={{
+                  borderRadius: 2.5,
+                  border: 1,
+                  borderColor: "divider",
+                  bgcolor: "background.paper",
+                  overflow: "hidden",
+                  transition: "border-color 160ms ease, box-shadow 160ms ease",
+                  "&:hover": {
+                    borderColor: "primary.light",
+                    boxShadow: "0 4px 14px rgba(15, 23, 42, 0.04)",
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    p: { xs: 2, sm: 2.25 },
+                    display: "flex",
+                    flexDirection: { xs: "column", lg: "row" },
+                    alignItems: { lg: "center" },
+                    justifyContent: "space-between",
+                    gap: 2,
+                  }}
+                >
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", alignItems: "center" }}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ fontWeight: 700, fontSize: "0.95rem", letterSpacing: "-0.01em", color: "text.primary" }}
+                      >
+                        {exam.name}
+                      </Typography>
                       {getStatusBadge(exam.status)}
-
-                      {/* Subject Count Pill */}
-                      <AppButton
+                      <Chip
                         size="small"
-                        variant="soft"
-                        color={subjectCount > 0 ? "success" : "warning"}
+                        icon={<BookOpen size={12} />}
+                        label={
+                          subjectCount > 0
+                            ? `${subjectCount} subject${subjectCount > 1 ? "s" : ""}`
+                            : "No subjects"
+                        }
                         onClick={() => {
                           setExpandedExamId(isExpanded ? null : exam.id);
                           setSelectedConfigIds([]);
                         }}
-                        startIcon={<BookOpen className="w-3 h-3" />}
-                      >
-                        {subjectCount > 0
-                          ? `${subjectCount} Subject${subjectCount > 1 ? "s" : ""} Assigned`
-                          : "No Subjects Assigned"}
-                      </AppButton>
-                    </div>
+                        sx={{
+                          height: 24,
+                          fontWeight: 600,
+                          fontSize: "0.7rem",
+                          cursor: "pointer",
+                          bgcolor: subjectCount > 0 ? "primary.lighter" : "warning.lighter",
+                          color: subjectCount > 0 ? "primary.darker" : "warning.dark",
+                          "& .MuiChip-icon": { color: "inherit" },
+                        }}
+                      />
+                    </Stack>
 
-                    <div className="text-xs text-slate-500 flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <span>
-                        Class: <strong className="text-slate-700">{exam.class?.name || "N/A"}</strong>
-                      </span>
-                      <span>•</span>
-                      <span>
-                        Academic Year:{" "}
-                        <strong className="text-slate-700">{exam.academicYear?.yearName || "N/A"}</strong>
-                      </span>
-                      <span>•</span>
-                      <span>
-                        Grading Scale:{" "}
-                        <strong className="text-slate-700">{exam.gradingSystem?.name || "Standard"}</strong>
-                      </span>
-                      {exam.termCode && (
-                        <>
-                          <span>•</span>
-                          <span className="text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[11px] font-medium">
-                            Exam Type: <strong className="text-slate-800">{exam.termCode}</strong>
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mt: 0.85, fontSize: "0.78rem", lineHeight: 1.5, fontWeight: 500 }}
+                    >
+                      {exam.class?.name || "No class"}
+                      {" · "}
+                      {exam.academicYear?.yearName || "No session"}
+                      {" · "}
+                      {exam.gradingSystem?.name || "Standard grading"}
+                      {exam.termCode ? ` · ${exam.termCode}` : ""}
+                    </Typography>
+                  </Box>
 
-                  {/* Actions & Lifecycle Row */}
-                  <div className="flex flex-wrap items-center gap-2 text-xs">
-                    {/* Expand/Collapse Subjects Toggle Button */}
+                  <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", alignItems: "center" }}>
                     <AppButton
                       size="small"
                       variant="soft"
@@ -1150,10 +1248,9 @@ export default function ExamsPage() {
                       startIcon={<Sliders className="w-3.5 h-3.5" />}
                       endIcon={isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                     >
-                      {isExpanded ? "Hide Subjects" : "Manage Subjects"}
+                      {isExpanded ? "Hide subjects" : "Manage subjects"}
                     </AppButton>
 
-                    {/* Quick Sync Button if zero subjects */}
                     {subjectCount === 0 && (
                       <AppButton
                         size="small"
@@ -1164,11 +1261,10 @@ export default function ExamsPage() {
                         title="Auto-assign subjects mapped to this class"
                         startIcon={<RefreshCw className="w-3.5 h-3.5" />}
                       >
-                        Sync Class Subjects
+                        Sync subjects
                       </AppButton>
                     )}
 
-                    {/* Status Action Buttons */}
                     {exam.status === "DRAFT" && (
                       <AppButton
                         size="small"
@@ -1177,33 +1273,28 @@ export default function ExamsPage() {
                         onClick={() => handleUpdateStatus(exam.id, "MARK_ENTRY")}
                         startIcon={<Play className="w-3 h-3" />}
                       >
-                        Open Mark Entry
+                        Open mark entry
                       </AppButton>
                     )}
                     {exam.status === "MARK_ENTRY" && (
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xs text-blue-700 font-medium bg-blue-50 px-2 py-1 rounded border border-blue-200">
-                          Ready for Marks
-                        </span>
-                        <AppButton
-                          size="small"
-                          variant="contained"
-                          color="warning"
-                          onClick={() => handleUpdateStatus(exam.id, "DRAFT_PREVIEW")}
-                        >
-                          Lock Mark Entry
-                        </AppButton>
-                      </div>
+                      <AppButton
+                        size="small"
+                        variant="contained"
+                        color="warning"
+                        onClick={() => handleUpdateStatus(exam.id, "DRAFT_PREVIEW")}
+                      >
+                        Lock mark entry
+                      </AppButton>
                     )}
                     {exam.status === "DRAFT_PREVIEW" && (
                       <AppButton
                         size="small"
                         variant="contained"
-                        color="success"
+                        color="primary"
                         onClick={() => handleUpdateStatus(exam.id, "PUBLISHED")}
                         startIcon={<CheckCircle2 className="w-3 h-3" />}
                       >
-                        Publish Results
+                        Publish results
                       </AppButton>
                     )}
                     {exam.status === "PUBLISHED" && (
@@ -1213,11 +1304,10 @@ export default function ExamsPage() {
                         color="secondary"
                         onClick={() => handleUpdateStatus(exam.id, "DRAFT_PREVIEW")}
                       >
-                        Unlock to Draft
+                        Unlock to draft
                       </AppButton>
                     )}
 
-                    {/* Edit Exam Button */}
                     <AppButton
                       type="button"
                       size="small"
@@ -1240,27 +1330,40 @@ export default function ExamsPage() {
                     >
                       Delete
                     </AppButton>
-                  </div>
-                </div>
+                  </Stack>
+                </Box>
 
-                {/* Expanded Section: Examination Subject Roster & Controls */}
                 {isExpanded && (
-                  <div className="bg-slate-50 border-t border-b border-slate-200 p-4 sm:p-5 space-y-4">
-                    {/* Toolbar Header for Subjects */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                      <div>
-                        <h3 className="text-xs font-bold text-slate-800 flex items-center space-x-2 uppercase tracking-wider">
-                          <BookOpen className="w-4 h-4 text-emerald-600" />
-                          <span>Assigned Subjects for {exam.name}</span>
-                          <span className="text-slate-400 font-normal">({subjectCount} Total)</span>
-                        </h3>
-                        <p className="text-[11px] text-slate-500 mt-0.5">
-                          Control curriculum subjects, total full marks, and component breakdown (CQ, MCQ, Practical) for this exam.
-                        </p>
-                      </div>
+                  <Box
+                    sx={{
+                      px: { xs: 2, sm: 2.25 },
+                      py: 2.25,
+                      borderTop: 1,
+                      borderColor: "divider",
+                      bgcolor: "grey.50",
+                    }}
+                  >
+                    <Stack
+                      direction={{ xs: "column", md: "row" }}
+                      spacing={1.5}
+                      sx={{ alignItems: { md: "flex-start" }, justifyContent: "space-between", mb: 2 }}
+                    >
+                      <Box>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ fontWeight: 700, fontSize: "0.875rem", letterSpacing: "-0.01em" }}
+                        >
+                          Assigned subjects
+                          <Typography component="span" color="text.secondary" sx={{ fontWeight: 600, ml: 0.75 }}>
+                            ({subjectCount})
+                          </Typography>
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.4 }}>
+                          Full marks and CQ / MCQ / Practical breakdown for this exam.
+                        </Typography>
+                      </Box>
 
-                      {/* Control Buttons */}
-                      <div className="flex flex-wrap items-center gap-2">
+                      <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
                         <AppButton
                           size="small"
                           variant="outline"
@@ -1269,20 +1372,22 @@ export default function ExamsPage() {
                           title="Import missing subjects mapped to this class"
                           startIcon={<RefreshCw className="w-3.5 h-3.5" />}
                         >
-                          Sync from Class ({exam.class?.name})
+                          Sync from {exam.class?.name}
                         </AppButton>
 
                         <AppButton
                           size="small"
                           variant="contained"
-                          color="success"
+                          color="primary"
                           onClick={() => handleOpenAssignModal(exam)}
                           startIcon={<Plus className="w-3.5 h-3.5" />}
                         >
-                          Assign Subjects
+                          Assign subjects
                         </AppButton>
-                      </div>
-                    </div>
+                      </Stack>
+                    </Stack>
+
+                    <Stack spacing={2}>
 
                     {/* Batch Actions & Group Filter Bar */}
                     {subjectCount > 0 && (
@@ -1349,7 +1454,7 @@ export default function ExamsPage() {
                             onChange={setGroupFilter}
                             options={[
                               { value: "ALL", label: "All Groups" },
-                              { value: "GENERAL", label: "General / Common" },
+                              { value: "GENERAL", label: "General" },
                               { value: "SCIENCE", label: "Science" },
                               { value: "HUMANITIES", label: "Humanities" },
                               { value: "BUSINESS_STUDIES", label: "Business Studies" },
@@ -1494,29 +1599,32 @@ export default function ExamsPage() {
                         </table>
                       </div>
                     ) : (
-                      /* Empty State for Exam with 0 subjects */
-                      <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-5 text-center space-y-3">
-                        <div className="w-9 h-9 mx-auto bg-amber-100 text-amber-700 rounded-full flex items-center justify-center">
-                          <BookOpen className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-amber-900">
-                            No Subjects Assigned to this Examination
-                          </h4>
-                          <p className="text-[11px] text-amber-700 mt-1 max-w-lg mx-auto">
-                            To enter marks and process results, subjects must be assigned to this examination. You can sync mapped subjects from Class {exam.class?.name} or assign subjects individually.
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                      <Box
+                        sx={{
+                          p: 3,
+                          borderRadius: 2.5,
+                          border: 1,
+                          borderColor: "warning.light",
+                          bgcolor: "warning.lighter",
+                          textAlign: "center",
+                        }}
+                      >
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "warning.darker", fontSize: "0.875rem" }}>
+                          No subjects assigned
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 0.75, mb: 2, fontSize: "0.78rem", color: "warning.dark", maxWidth: 440, mx: "auto" }}>
+                          Sync mapped subjects from {exam.class?.name || "this class"} or assign them manually before mark entry.
+                        </Typography>
+                        <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", justifyContent: "center" }}>
                           <AppButton
                             size="small"
                             variant="contained"
-                            color="success"
+                            color="primary"
                             onClick={() => handleSyncClassSubjects(exam)}
                             loading={syncLoadingExamId === exam.id}
                             startIcon={<RefreshCw className="w-3.5 h-3.5" />}
                           >
-                            Auto-Assign from Class {exam.class?.name}
+                            Sync from {exam.class?.name}
                           </AppButton>
                           <AppButton
                             size="small"
@@ -1524,27 +1632,32 @@ export default function ExamsPage() {
                             onClick={() => handleOpenAssignModal(exam)}
                             startIcon={<Plus className="w-3.5 h-3.5" />}
                           >
-                            Assign Subjects
+                            Assign subjects
                           </AppButton>
-                        </div>
-                      </div>
+                        </Stack>
+                      </Box>
                     )}
-                  </div>
+                    </Stack>
+                  </Box>
                 )}
-              </div>
+              </Box>
             );
           })}
 
           {exams.length === 0 && !loading && <NoDataFound />}
+          {exams.length > 0 && filteredExams.length === 0 && !loading && <NoDataFound />}
 
           {loading && (
-            <div className="p-8 text-center text-slate-400 text-xs flex items-center justify-center space-x-2">
+            <Stack direction="row" spacing={1} sx={{ py: 5, alignItems: "center", justifyContent: "center", color: "text.disabled" }}>
               <RefreshCw className="w-4 h-4 animate-spin text-emerald-600" />
-              <span>Loading examinations...</span>
-            </div>
+              <Typography variant="body2" sx={{ fontSize: "0.8125rem" }}>
+                Loading examinations…
+              </Typography>
+            </Stack>
           )}
-        </div>
-      </ResultsPanel>
+          </Box>
+        </Stack>
+      </RulesSection>
 
       {/* Redesigned Multi-Subject Assign Modal */}
       {showAssignModal && assignModalExam && (
@@ -1835,7 +1948,7 @@ export default function ExamsPage() {
                     onChange={(e) => setModalGroupType(e.target.value)}
                     className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white"
                   >
-                    <option value="GENERAL">General / Common</option>
+                    <option value="GENERAL">General</option>
                     <option value="SCIENCE">Science</option>
                     <option value="HUMANITIES">Humanities</option>
                     <option value="BUSINESS_STUDIES">Business Studies</option>
@@ -1862,9 +1975,9 @@ export default function ExamsPage() {
                     onChange={(e) => setModalPassMode(e.target.value)}
                     className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white"
                   >
-                    <option value="COMPONENT_WISE">Component-Wise (NCTB CQ & MCQ)</option>
-                    <option value="AGGREGATE_ONLY">Aggregate Only (Sum of Marks)</option>
-                    <option value="BOTH">Both (Components & Aggregate)</option>
+                    <option value="COMPONENT_WISE">Component Wise, NCTB CQ and MCQ</option>
+                    <option value="AGGREGATE_ONLY">Aggregate Only, Sum of Marks</option>
+                    <option value="BOTH">Both, Components and Aggregate</option>
                   </select>
                 </div>
                 <div>
@@ -2068,14 +2181,14 @@ export default function ExamsPage() {
                     className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-900"
                     required
                   >
-                    <option value="">-- Select Session --</option>
+                    <option value="">Select session</option>
                     {academicYears.map((ay) => (
                       <option key={ay.id} value={ay.yearName}>
-                        {ay.yearName}{ay.isCurrent ? " (Current)" : ""}
+                        {ay.yearName}{ay.isCurrent ? ", Current" : ""}
                       </option>
                     ))}
                     {academicYears.length === 0 && (
-                      <option value="2026">2026 (Current)</option>
+                      <option value="2026">2026, Current</option>
                     )}
                   </select>
                 </div>
@@ -2199,6 +2312,7 @@ export default function ExamsPage() {
           </div>
         </div>
       )}
+      </RulesAtmosphere>
     </ResultsPageShell>
   );
 }

@@ -1,32 +1,33 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { Box, Chip, IconButton, Stack, Typography } from "@mui/material";
 import {
   ResultsPageShell,
   ResultsPageHeader,
   ResultsNotice,
 } from "@/sections/results/component/result-page-ui";
 import {
+  RulesAtmosphere,
+  RulesFilterGrid,
+  RulesFormBlock,
+  RulesListItem,
+  RulesSection,
+} from "@/sections/academic/component/rules-section-ui";
+import {
   Save,
-  Check,
   Award,
   Layers,
-  Search,
   Trash2,
   Pencil,
-  RefreshCw,
-  CheckCircle2,
-  X,
-  GitMerge,
   Sparkles,
-  Link2,
-  AlertTriangle,
 } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
 import { AppSelect, AppTextField, NoDataFound } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import { TemplateManagementSection } from "@/sections/academic/component/template-management-section";
 import { AppTabs } from "@/components/ui/tabs-component";
+import { examOptionLabel, subjectOptionLabel } from "@/sections/results/utils/select-options";
 
 export default function DynamicRulesPage() {
   const [gradingSystems, setGradingSystems] = useState<any[]>([]);
@@ -424,450 +425,526 @@ export default function DynamicRulesPage() {
 
   return (
     <ResultsPageShell>
-      <ResultsPageHeader heading="Grading & Assessment Rules" current="Grading Rules" />
+      <RulesAtmosphere>
+        <ResultsPageHeader heading="Grading & Assessment Rules" current="Grading Rules" />
 
-      <AppTabs
-        value={activeStepTab}
-        onValueChange={(value) =>
-          setActiveStepTab(value as "STEP_1_TEMPLATES" | "STEP_3_COMBINED" | "STEP_4_GRADING" | "ALL")
-        }
-        items={[
-          { value: "STEP_1_TEMPLATES", label: `Templates (${dbTemplates.length})` },
-          { value: "STEP_3_COMBINED", label: `Combined Papers (${combinedRules.length})` },
-          { value: "STEP_4_GRADING", label: "Grading Scale" },
-          { value: "ALL", label: "All steps" },
-        ]}
-      />
-
-      {saveSuccess && (
-        <ResultsNotice severity="success">Rules updated successfully.</ResultsNotice>
-      )}
-
-      {/* STEP 1: TEMPLATE MANAGEMENT */}
-      {(activeStepTab === "STEP_1_TEMPLATES" || activeStepTab === "ALL") && (
-        <TemplateManagementSection
-          classes={classes}
-          allSubjects={subjects}
-          exams={exams}
-          onTemplateAppliedToExam={handleTemplateAppliedToExam}
+        <AppTabs
+          value={activeStepTab}
+          onValueChange={(value) =>
+            setActiveStepTab(value as "STEP_1_TEMPLATES" | "STEP_3_COMBINED" | "STEP_4_GRADING" | "ALL")
+          }
+          items={[
+            { value: "STEP_1_TEMPLATES", label: `Templates (${dbTemplates.length})` },
+            { value: "STEP_3_COMBINED", label: `Combined Papers (${combinedRules.length})` },
+            { value: "STEP_4_GRADING", label: "Grading Scale" },
+            { value: "ALL", label: "All steps" },
+          ]}
         />
-      )}
 
-      {/* STEP 2 (previously STEP 3): COMBINED 1ST & 2ND PAPER RULES */}
-      {(activeStepTab === "STEP_3_COMBINED" || activeStepTab === "ALL") && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-0">
-          <div className="p-5 border-b border-slate-200 bg-gradient-to-r from-emerald-50/70 via-slate-50 to-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="p-1.5 bg-emerald-600 text-white rounded-lg shadow-xs">
-                  <GitMerge className="w-4 h-4" />
-                </span>
-                <h2 className="text-sm font-bold text-slate-900">
-                  Combined Subject Pass/Fail Logic (1st & 2nd Paper Pairing Engine)
-                </h2>
-                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  {combinedRules.length} Active {combinedRules.length === 1 ? "Pair" : "Pairs"}
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Dynamically pair two subjects evaluated together (e.g. Bangla 1st & 2nd Paper, English 1st & 2nd Paper).
-                When combined marks meet the threshold (e.g. 66/200), students automatically pass both papers across all tabulation sheets and result stages.
-              </p>
-            </div>
+        {saveSuccess && (
+          <ResultsNotice severity="success">Rules updated successfully.</ResultsNotice>
+        )}
 
-            <div className="flex items-center space-x-2 shrink-0">
+        {statusMessage && (
+          <ResultsNotice severity="success">{statusMessage}</ResultsNotice>
+        )}
+
+        {(activeStepTab === "STEP_1_TEMPLATES" || activeStepTab === "ALL") && (
+          <TemplateManagementSection
+            classes={classes}
+            allSubjects={subjects}
+            exams={exams}
+            onTemplateAppliedToExam={handleTemplateAppliedToExam}
+          />
+        )}
+
+        {(activeStepTab === "STEP_3_COMBINED" || activeStepTab === "ALL") && (
+          <RulesSection
+            title="Combined Papers"
+            subtitle="Pair 1st and 2nd papers so students pass both when combined marks meet the threshold — used across tabulation and result stages."
+            action={
               <AppButton
                 type="button"
                 variant="contained"
-                color="success"
+                color="primary"
                 size="small"
                 startIcon={<Sparkles size={14} />}
                 disabled={combinedLoading || combinedClassSubjects.length === 0}
                 onClick={handleAutoPairPresets}
-                title="Automatically scan and pair 1st and 2nd paper subjects for this class"
               >
-                Auto-Detect 1st & 2nd Papers
+                Auto-detect pairs
               </AppButton>
-            </div>
-          </div>
-
-          {/* Session, Class & Target Exam Filter Toolbar */}
-          <div className="p-4 bg-slate-50/80 border-b border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <SessionSelect
-              value={combinedSessionFilter}
-              onChange={(val) => {
-                setCombinedSessionFilter(val);
-              }}
-              label="Session"
-              includeAll={true}
-              allLabel="All Sessions"
-              activeOnly={false}
-              fullWidth
-            />
-
-            <AppSelect
-              label="Class"
-              value={combinedClassFilter}
-              onChange={setCombinedClassFilter}
-              options={[
-                { value: "ALL", label: "All Classes" },
-                ...classes.map((cls) => ({ value: cls.id, label: cls.name })),
-              ]}
-            />
-
-            <AppSelect
-              label="Target Exam"
-              value={selectedExamId}
-              onChange={handleExamChange}
-              options={[
-                { value: "", label: "-- Select Exam --" },
-                ...filteredCombinedExams.map((ex) => ({
-                  value: ex.id,
-                  label: `${ex.name} ${ex.class?.name ? `(${ex.class.name})` : ""}`.trim(),
-                })),
-              ]}
-            />
-          </div>
-
-          <div className="p-5 space-y-5">
-            {/* Form to create/edit combined rule */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-800 flex items-center space-x-1.5">
-                  <Link2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>
-                    {editingCombinedRuleId
-                      ? "Edit Combined Subject Pairing"
-                      : `Create Combined Subject Pairing for ${selectedClassObj?.name || "Class"}`}
-                  </span>
-                </span>
-                {editingCombinedRuleId && (
-                  <AppButton
-                    type="button"
-                    variant="link"
-                    color="inherit"
-                    size="small"
-                    onClick={handleCancelEditCombinedRule}
-                  >
-                    Cancel Edit
-                  </AppButton>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Primary Subject (1st Paper) - Strictly Class-Wise */}
+            }
+            toolbar={
+              <RulesFilterGrid columns={3}>
+                <SessionSelect
+                  value={combinedSessionFilter}
+                  onChange={setCombinedSessionFilter}
+                  label="Session"
+                  includeAll
+                  allLabel="All Sessions"
+                  activeOnly={false}
+                  fullWidth
+                />
                 <AppSelect
-                  label="1st Paper (Primary Subject)"
-                  value={primarySubjectId}
-                  onChange={(newPrimary) => {
-                    setPrimarySubjectId(newPrimary);
-                    const p = combinedClassSubjects.find((s) => s.id === newPrimary);
-                    const s = combinedClassSubjects.find((s) => s.id === secondarySubjectId);
-                    if (p && s) {
-                      setCombinedRuleName(`${p.name.replace(/1st\s*paper/i, "").trim()} (1st & 2nd Combined)`);
-                    } else if (p) {
-                      setCombinedRuleName(`${p.name} Combined`);
-                    }
-                  }}
+                  label="Class"
+                  value={combinedClassFilter}
+                  onChange={setCombinedClassFilter}
                   options={[
-                    {
-                      value: "",
-                      label: fetchingCombinedSubjects
-                        ? "-- Loading Class Subjects... --"
-                        : combinedClassSubjects.length === 0
-                        ? "-- No subjects mapped to this class --"
-                        : "-- Select 1st Paper --",
-                    },
-                    ...combinedClassSubjects.map((sub) => ({
-                      value: sub.id,
-                      label: `${sub.name} (${sub.subjectCode})`,
+                    { value: "ALL", label: "All Classes" },
+                    ...classes.map((cls) => ({ value: cls.id, label: cls.name })),
+                  ]}
+                />
+                <AppSelect
+                  label="Target Exam"
+                  value={selectedExamId}
+                  onChange={handleExamChange}
+                  options={[
+                    { value: "", label: "Select exam" },
+                    ...filteredCombinedExams.map((ex) => ({
+                      value: ex.id,
+                      label: examOptionLabel(ex),
                     })),
                   ]}
                 />
-
-                {/* Secondary Subject (2nd Paper) - Strictly Class-Wise */}
-                <AppSelect
-                  label="2nd Paper (Secondary Subject)"
-                  value={secondarySubjectId}
-                  onChange={(newSecondary) => {
-                    setSecondarySubjectId(newSecondary);
-                    const p = combinedClassSubjects.find((s) => s.id === primarySubjectId);
-                    const s = combinedClassSubjects.find((s) => s.id === newSecondary);
-                    if (p && s) {
-                      setCombinedRuleName(`${p.name.replace(/1st\s*paper/i, "").trim()} (1st & 2nd Combined)`);
-                    }
-                  }}
-                  options={[
-                    {
-                      value: "",
-                      label: fetchingCombinedSubjects
-                        ? "-- Loading Class Subjects... --"
-                        : combinedClassSubjects.length === 0
-                        ? "-- No subjects mapped to this class --"
-                        : "-- Select 2nd Paper --",
-                    },
-                    ...combinedClassSubjects
-                      .filter((sub) => sub.id !== primarySubjectId)
-                      .map((sub) => ({
-                        value: sub.id,
-                        label: `${sub.name} (${sub.subjectCode})`,
-                      })),
-                  ]}
-                />
-              </div>
-
-              {/* Thresholds and Modes Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                <AppTextField
-                  label="Combined Pass Mark"
-                  type="number"
-                  value={combinedPassMark}
-                  onChange={(e) => setCombinedPassMark(e.target.value)}
-                  placeholder="e.g. 66"
-                  helperText="Min sum of 1st+2nd paper to pass"
-                  slotProps={{ htmlInput: { step: 0.5 } }}
-                />
-
-                <AppTextField
-                  label="Combined Full Marks"
-                  type="number"
-                  value={combinedFullMarks}
-                  onChange={(e) => setCombinedFullMarks(e.target.value)}
-                  placeholder="e.g. 200"
-                  helperText="e.g. 100 + 100 = 200"
-                />
-
-                <AppSelect
-                  label="Pass Evaluation Mode"
-                  value={combinedPassMode}
-                  onChange={(val) => setCombinedPassMode(val as "AGGREGATE_ONLY" | "BOTH")}
-                  options={[
-                    { value: "AGGREGATE_ONLY", label: "Combined Aggregate (Board Standard)" },
-                    { value: "BOTH", label: "Aggregate + Individual Papers Pass" },
-                  ]}
-                />
-
-                <AppSelect
-                  label="Grade Distribution"
-                  value={combinedGradeMode}
-                  onChange={(val) => setCombinedGradeMode(val as "AVERAGE" | "INDIVIDUAL")}
-                  options={[
-                    { value: "AVERAGE", label: "Combined Average Grade (NCTB Standard)" },
-                    { value: "INDIVIDUAL", label: "Keep Individual Subject Grades" },
-                  ]}
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
-                <div className="w-full sm:w-auto flex-1">
-                  <AppTextField
-                    label="Rule Name"
-                    placeholder="e.g. Bangla 1st & 2nd Combined"
-                    value={combinedRuleName}
-                    onChange={(e) => setCombinedRuleName(e.target.value)}
-                  />
-                </div>
-
-                <div className="flex items-center space-x-2 w-full sm:w-auto">
-                  <AppButton
-                    type="button"
-                    variant="contained"
-                    color="secondary"
-                    size="small"
-                    startIcon={<Save size={14} />}
-                    loading={combinedLoading}
-                    disabled={!primarySubjectId || !secondarySubjectId || combinedLoading}
-                    onClick={handleSaveCombinedRule}
-                  >
-                    {editingCombinedRuleId ? "Update Combined Rule" : "Save Combined Rule"}
-                  </AppButton>
-                </div>
-              </div>
-            </div>
-
-            {/* Active Paired Rules List */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-                <span className="flex items-center space-x-1.5">
-                  <Layers className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Configured Combined Rules for Selected Exam ({combinedRules.length}):</span>
-                </span>
-                {combinedRules.length > 0 && (
-                  <span className="text-[11px] text-emerald-700 font-medium">
-                    ✓ Automatically applied during result calculation and to all tabulation sheets
-                  </span>
-                )}
-              </div>
-
-              {combinedRules.length === 0 ? (
-                <NoDataFound />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {combinedRules.map((rule) => (
-                    <div
-                      key={rule.id}
-                      className="border border-slate-200 bg-white hover:border-emerald-300 p-3.5 rounded-xl shadow-2xs transition-all space-y-2.5"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <div className="font-bold text-xs text-slate-900 flex items-center space-x-1.5">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <span>{rule.name || "Combined Rule"}</span>
-                          </div>
-                          <div className="text-[11px] text-slate-600 mt-1 font-medium">
-                            <span className="text-slate-900 font-semibold">{rule.primarySubject?.name}</span> ({rule.primarySubject?.subjectCode})
-                            <span className="mx-1.5 text-slate-400 font-bold">+</span>
-                            <span className="text-slate-900 font-semibold">{rule.secondarySubject?.name}</span> ({rule.secondarySubject?.subjectCode})
-                          </div>
-                        </div>
-
-                        <div className="flex items-center space-x-1 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => handleEditCombinedRule(rule)}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer"
-                            title="Edit this combined rule"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteCombinedRule(rule.id, rule.name || "Rule")}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
-                            title="Delete this combined rule"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
-                        <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold border border-emerald-200">
-                          Pass Mark: ≥ {rule.combinedPassMark} / {rule.combinedFullMarks}
-                        </span>
-                        <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 font-medium border border-blue-200">
-                          {rule.passMode === "BOTH" ? "Aggregate + Indiv Pass" : "Aggregate Only"}
-                        </span>
-                        <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium border border-slate-200">
-                          {rule.gradeMode === "AVERAGE" ? "Combined Avg Grade" : "Individual Grades"}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 3 (previously STEP 4): GRADING SCALE & 4TH-SUBJECT SURPLUS RULES ONLY */}
-      {(activeStepTab === "STEP_4_GRADING" || activeStepTab === "ALL") && (
-        <div className="max-w-4xl mx-auto">
-          {/* Panel: Grading System & 4th-Subject Surplus Rules */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
-            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
-                  <Award className="w-5 h-5 text-emerald-600" />
-                  <span>Grading System & 4th-Subject Surplus Rules</span>
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Set GPA caps, 4th subject threshold, and letter grade conversion slabs.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <AppTextField
-                label="Max GPA Cap"
-                type="number"
-                value={maxGpa}
-                onChange={(e) => setMaxGpa(e.target.value)}
-                helperText="Usually 5.00 for NCTB standard"
-                slotProps={{ htmlInput: { step: 0.01 } }}
-              />
-              <AppTextField
-                label="4th Sub Threshold"
-                type="number"
-                value={fourthThreshold}
-                onChange={(e) => setFourthThreshold(e.target.value)}
-                helperText="GP above this value is added to total GPA"
-                slotProps={{ htmlInput: { step: 0.01 } }}
-              />
-              <AppTextField
-                label="Min Pass GPA"
-                type="number"
-                value={passGpa}
-                onChange={(e) => setPassGpa(e.target.value)}
-                helperText="Usually 1.00 minimum pass threshold"
-                slotProps={{ htmlInput: { step: 0.01 } }}
-              />
-            </div>
-
-            {/* Slabs Table */}
-            <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase text-[10px] tracking-wider">
-                  <tr>
-                    <th className="p-3">Grade</th>
-                    <th className="p-3">GP (Grade Point)</th>
-                    <th className="p-3">Mark Range</th>
-                    <th className="p-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {selectedGrading?.slabs?.map((slab: any) => (
-                    <tr key={slab.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="p-3 font-bold text-slate-900">{slab.letterGrade}</td>
-                      <td className="p-3 font-mono font-bold text-emerald-700">{slab.gradePoint.toFixed(2)}</td>
-                      <td className="p-3 font-mono text-slate-600">
-                        {slab.markMin} - {slab.markMax}
-                      </td>
-                      <td className="p-3">
-                        <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            slab.isFail ? "bg-red-50 text-red-700 border border-red-200" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                          }`}
-                        >
-                          {slab.isFail ? "Fail" : "Pass"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <AppButton
-              variant="contained"
-              color="success"
-              fullWidth
-              startIcon={<Save size={16} />}
-              onClick={handleSaveGrading}
-            >
-              Update Grading & Surplus Rules
-            </AppButton>
-          </div>
-        </div>
-      )}
-
-      {/* Status / Alert Banner */}
-      {statusMessage && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-3.5 rounded-xl text-xs font-semibold flex items-center justify-between shadow-xs">
-          <div className="flex items-center space-x-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{statusMessage}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setStatusMessage(null)}
-            className="text-emerald-700 hover:text-emerald-900 cursor-pointer"
+              </RulesFilterGrid>
+            }
           >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
+            <Stack spacing={2.5}>
+              <RulesFormBlock
+                title={
+                  editingCombinedRuleId
+                    ? "Edit subject pairing"
+                    : `New pairing for ${selectedClassObj?.name || "selected class"}`
+                }
+                action={
+                  editingCombinedRuleId ? (
+                    <AppButton
+                      type="button"
+                      variant="link"
+                      color="inherit"
+                      size="small"
+                      onClick={handleCancelEditCombinedRule}
+                    >
+                      Cancel
+                    </AppButton>
+                  ) : null
+                }
+              >
+                <Stack spacing={2}>
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gap: 2,
+                      gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                    }}
+                  >
+                    <AppSelect
+                      label="1st Paper"
+                      value={primarySubjectId}
+                      onChange={(newPrimary) => {
+                        setPrimarySubjectId(newPrimary);
+                        const p = combinedClassSubjects.find((s) => s.id === newPrimary);
+                        const s = combinedClassSubjects.find((s) => s.id === secondarySubjectId);
+                        if (p && s) {
+                          setCombinedRuleName(
+                            `${p.name.replace(/1st\s*paper/i, "").trim()} (1st & 2nd Combined)`
+                          );
+                        } else if (p) {
+                          setCombinedRuleName(`${p.name} Combined`);
+                        }
+                      }}
+                      options={[
+                        {
+                          value: "",
+                          label: fetchingCombinedSubjects
+                            ? "Loading subjects"
+                            : combinedClassSubjects.length === 0
+                              ? "No subjects for this class"
+                              : "Select 1st paper",
+                        },
+                        ...combinedClassSubjects.map((sub) => ({
+                          value: sub.id,
+                          label: subjectOptionLabel(sub),
+                        })),
+                      ]}
+                    />
+                    <AppSelect
+                      label="2nd Paper"
+                      value={secondarySubjectId}
+                      onChange={(newSecondary) => {
+                        setSecondarySubjectId(newSecondary);
+                        const p = combinedClassSubjects.find((s) => s.id === primarySubjectId);
+                        const s = combinedClassSubjects.find((s) => s.id === newSecondary);
+                        if (p && s) {
+                          setCombinedRuleName(
+                            `${p.name.replace(/1st\s*paper/i, "").trim()} (1st & 2nd Combined)`
+                          );
+                        }
+                      }}
+                      options={[
+                        {
+                          value: "",
+                          label: fetchingCombinedSubjects
+                            ? "Loading subjects"
+                            : combinedClassSubjects.length === 0
+                              ? "No subjects for this class"
+                              : "Select 2nd paper",
+                        },
+                        ...combinedClassSubjects
+                          .filter((sub) => sub.id !== primarySubjectId)
+                          .map((sub) => ({
+                            value: sub.id,
+                            label: subjectOptionLabel(sub),
+                          })),
+                      ]}
+                    />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gap: 2,
+                      gridTemplateColumns: {
+                        xs: "1fr",
+                        sm: "repeat(2, minmax(0, 1fr))",
+                        md: "repeat(4, minmax(0, 1fr))",
+                      },
+                    }}
+                  >
+                    <AppTextField
+                      label="Pass mark"
+                      type="number"
+                      value={combinedPassMark}
+                      onChange={(e) => setCombinedPassMark(e.target.value)}
+                      placeholder="66"
+                      helperText="Minimum sum of both papers"
+                      slotProps={{ htmlInput: { step: 0.5 } }}
+                    />
+                    <AppTextField
+                      label="Full marks"
+                      type="number"
+                      value={combinedFullMarks}
+                      onChange={(e) => setCombinedFullMarks(e.target.value)}
+                      placeholder="200"
+                      helperText="Usually 100 + 100"
+                    />
+                    <AppSelect
+                      label="Pass mode"
+                      value={combinedPassMode}
+                      onChange={(val) => setCombinedPassMode(val as "AGGREGATE_ONLY" | "BOTH")}
+                      options={[
+                        { value: "AGGREGATE_ONLY", label: "Combined aggregate" },
+                        { value: "BOTH", label: "Aggregate and individual" },
+                      ]}
+                    />
+                    <AppSelect
+                      label="Grade mode"
+                      value={combinedGradeMode}
+                      onChange={(val) => setCombinedGradeMode(val as "AVERAGE" | "INDIVIDUAL")}
+                      options={[
+                        { value: "AVERAGE", label: "Combined average" },
+                        { value: "INDIVIDUAL", label: "Individual grades" },
+                      ]}
+                    />
+                  </Box>
+
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={1.5}
+                    sx={{ alignItems: { sm: "flex-end" } }}
+                  >
+                    <Box sx={{ flex: 1, width: "100%" }}>
+                      <AppTextField
+                        label="Rule name"
+                        placeholder="Bangla 1st & 2nd Combined"
+                        value={combinedRuleName}
+                        onChange={(e) => setCombinedRuleName(e.target.value)}
+                      />
+                    </Box>
+                    <AppButton
+                      type="button"
+                      variant="contained"
+                      color="primary"
+                      size="medium"
+                      startIcon={<Save size={15} />}
+                      loading={combinedLoading}
+                      disabled={!primarySubjectId || !secondarySubjectId || combinedLoading}
+                      onClick={handleSaveCombinedRule}
+                    >
+                      {editingCombinedRuleId ? "Update rule" : "Save rule"}
+                    </AppButton>
+                  </Stack>
+                </Stack>
+              </RulesFormBlock>
+
+              <Box>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ alignItems: "center", justifyContent: "space-between", mb: 1.5 }}
+                >
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                    <Layers size={15} color="#059669" />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: "0.875rem" }}>
+                      Active rules
+                    </Typography>
+                    <Chip
+                      size="small"
+                      label={combinedRules.length}
+                      sx={{ height: 22, fontWeight: 700, bgcolor: "primary.lighter", color: "primary.dark" }}
+                    />
+                  </Stack>
+                  {combinedRules.length > 0 ? (
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      Applied during result calculation
+                    </Typography>
+                  ) : null}
+                </Stack>
+
+                {combinedRules.length === 0 ? (
+                  <NoDataFound />
+                ) : (
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gap: 1.5,
+                      gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                    }}
+                  >
+                    {combinedRules.map((rule) => (
+                      <RulesListItem
+                        key={rule.id}
+                        title={rule.name || "Combined Rule"}
+                        meta={
+                          <>
+                            {rule.primarySubject?.name} ({rule.primarySubject?.subjectCode})
+                            {" + "}
+                            {rule.secondarySubject?.name} ({rule.secondarySubject?.subjectCode})
+                          </>
+                        }
+                        badges={
+                          <>
+                            <Chip
+                              size="small"
+                              label={`Pass ≥ ${rule.combinedPassMark} / ${rule.combinedFullMarks}`}
+                              sx={{
+                                height: 24,
+                                fontWeight: 600,
+                                fontSize: "0.7rem",
+                                bgcolor: "primary.lighter",
+                                color: "primary.darker",
+                              }}
+                            />
+                            <Chip
+                              size="small"
+                              variant="outlined"
+                              label={rule.passMode === "BOTH" ? "Aggregate + individual" : "Aggregate only"}
+                              sx={{ height: 24, fontWeight: 500, fontSize: "0.7rem" }}
+                            />
+                            <Chip
+                              size="small"
+                              variant="outlined"
+                              label={rule.gradeMode === "AVERAGE" ? "Average grade" : "Individual grades"}
+                              sx={{ height: 24, fontWeight: 500, fontSize: "0.7rem" }}
+                            />
+                          </>
+                        }
+                        actions={
+                          <>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleEditCombinedRule(rule)}
+                              aria-label="Edit rule"
+                              sx={{ color: "text.secondary", "&:hover": { color: "primary.main", bgcolor: "primary.lighter" } }}
+                            >
+                              <Pencil size={15} />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDeleteCombinedRule(rule.id, rule.name || "Rule")}
+                              aria-label="Delete rule"
+                              sx={{ color: "text.secondary", "&:hover": { color: "error.main", bgcolor: "error.lighter" } }}
+                            >
+                              <Trash2 size={15} />
+                            </IconButton>
+                          </>
+                        }
+                      />
+                    ))}
+                  </Box>
+                )}
+              </Box>
+            </Stack>
+          </RulesSection>
+        )}
+
+        {(activeStepTab === "STEP_4_GRADING" || activeStepTab === "ALL") && (
+          <RulesSection
+            title="Grading scale"
+            subtitle="Set GPA caps, fourth-subject surplus threshold, and letter-grade conversion slabs used across all exams."
+          >
+            <Stack spacing={2.5} sx={{ maxWidth: 880 }}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gap: 2,
+                  gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" },
+                }}
+              >
+                <AppTextField
+                  label="Max GPA"
+                  type="number"
+                  value={maxGpa}
+                  onChange={(e) => setMaxGpa(e.target.value)}
+                  helperText="Usually 5.00"
+                  slotProps={{ htmlInput: { step: 0.01 } }}
+                />
+                <AppTextField
+                  label="4th subject threshold"
+                  type="number"
+                  value={fourthThreshold}
+                  onChange={(e) => setFourthThreshold(e.target.value)}
+                  helperText="GP above this adds to GPA"
+                  slotProps={{ htmlInput: { step: 0.01 } }}
+                />
+                <AppTextField
+                  label="Min pass GPA"
+                  type="number"
+                  value={passGpa}
+                  onChange={(e) => setPassGpa(e.target.value)}
+                  helperText="Usually 1.00"
+                  slotProps={{ htmlInput: { step: 0.01 } }}
+                />
+              </Box>
+
+              <Box
+                sx={{
+                  border: 1,
+                  borderColor: "divider",
+                  borderRadius: 2.5,
+                  overflow: "hidden",
+                }}
+              >
+                <Box
+                  component="table"
+                  sx={{
+                    width: 1,
+                    borderCollapse: "collapse",
+                    "& th": {
+                      px: 2,
+                      py: 1.5,
+                      textAlign: "left",
+                      fontSize: "0.6875rem",
+                      fontWeight: 700,
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                      color: "text.secondary",
+                      bgcolor: "grey.50",
+                      borderBottom: 1,
+                      borderColor: "divider",
+                    },
+                    "& td": {
+                      px: 2,
+                      py: 1.5,
+                      fontSize: "0.875rem",
+                      borderBottom: 1,
+                      borderColor: "divider",
+                    },
+                    "& tbody tr:last-of-type td": { borderBottom: 0 },
+                    "& tbody tr:hover": { bgcolor: "action.hover" },
+                  }}
+                >
+                  <thead>
+                    <tr>
+                      <th>Grade</th>
+                      <th>Grade point</th>
+                      <th>Mark range</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedGrading?.slabs?.map((slab: any) => (
+                      <tr key={slab.id}>
+                        <td>
+                          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                            <Box
+                              sx={{
+                                width: 36,
+                                height: 28,
+                                borderRadius: 1,
+                                display: "grid",
+                                placeItems: "center",
+                                fontWeight: 800,
+                                fontSize: "0.8125rem",
+                                letterSpacing: "-0.02em",
+                                bgcolor: slab.isFail ? "error.lighter" : "primary.lighter",
+                                color: slab.isFail ? "error.dark" : "primary.darker",
+                              }}
+                            >
+                              {slab.letterGrade}
+                            </Box>
+                            <Award size={14} color={slab.isFail ? "#BE123C" : "#047857"} />
+                          </Stack>
+                        </td>
+                        <td>
+                          <Typography
+                            component="span"
+                            sx={{
+                              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                              fontWeight: 700,
+                              color: "primary.dark",
+                              fontSize: "0.875rem",
+                            }}
+                          >
+                            {slab.gradePoint.toFixed(2)}
+                          </Typography>
+                        </td>
+                        <td>
+                          <Typography
+                            component="span"
+                            sx={{
+                              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                              color: "text.secondary",
+                              fontSize: "0.8125rem",
+                              fontWeight: 500,
+                            }}
+                          >
+                            {slab.markMin} – {slab.markMax}
+                          </Typography>
+                        </td>
+                        <td>
+                          <Chip
+                            size="small"
+                            label={slab.isFail ? "Fail" : "Pass"}
+                            sx={{
+                              height: 24,
+                              fontWeight: 700,
+                              fontSize: "0.7rem",
+                              bgcolor: slab.isFail ? "error.lighter" : "primary.lighter",
+                              color: slab.isFail ? "error.dark" : "primary.darker",
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Box>
+              </Box>
+
+              <AppButton
+                variant="contained"
+                color="primary"
+                startIcon={<Save size={16} />}
+                onClick={handleSaveGrading}
+                sx={{ alignSelf: { xs: "stretch", sm: "flex-start" }, px: 3 }}
+              >
+                Save grading rules
+              </AppButton>
+            </Stack>
+          </RulesSection>
+        )}
+      </RulesAtmosphere>
     </ResultsPageShell>
   );
 }

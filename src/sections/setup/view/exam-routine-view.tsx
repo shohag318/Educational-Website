@@ -2,7 +2,7 @@
 
 import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
+import { Box, Chip, Stack, Typography } from "@mui/material";
 import {
   CalendarRange,
   Clock,
@@ -10,10 +10,8 @@ import {
   Plus,
   Trash2,
   Pencil,
-  Filter,
   RotateCcw,
   CheckCircle2,
-  AlertCircle,
   Eye,
   Sliders,
   Sparkles,
@@ -34,11 +32,18 @@ import {
 import {
   ResultsPageShell,
   ResultsPageHeader,
+  ResultsNotice,
 } from "@/sections/results/component/result-page-ui";
+import {
+  RulesAtmosphere,
+  RulesFilterGrid,
+  RulesSection,
+} from "@/sections/academic/component/rules-section-ui";
 import { AppSelect, AppTextField } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import { DatePicker, TimePicker } from "@/components/date-picker/date-picker";
 import { AppButton } from "@/components/button/app-button";
+import { examOptionLabel } from "@/sections/results/utils/select-options";
 import { AppTabs } from "@/components/ui/tabs-component";
 import {
   getStoredSchoolInfo,
@@ -912,30 +917,25 @@ export default function ExamRoutinePage() {
         }
       `}</style>
 
-      {/* Floating Toast Notification */}
+      <RulesAtmosphere>
       {notification && (
-        <div
-          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-xl text-xs font-semibold flex items-center space-x-2 transition-all duration-200 no-print ${
+        <ResultsNotice
+          severity={
             notification.type === "success"
-              ? "bg-emerald-700 text-white"
+              ? "success"
               : notification.type === "error"
-              ? "bg-rose-700 text-white"
-              : "bg-slate-800 text-white"
-          }`}
+              ? "error"
+              : "info"
+          }
         >
-          {notification.type === "success" ? (
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-300" />
-          ) : (
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-300" />
-          )}
-          <span>{notification.message}</span>
-        </div>
+          {notification.message}
+        </ResultsNotice>
       )}
 
       <ResultsPageHeader
         heading="Exam Routine"
         action={
-          <div className="flex items-center gap-2.5 shrink-0">
+          <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", flexShrink: 0 }}>
             <AppTabs
               value={activeTab}
               onValueChange={(value) => setActiveTab(value as "setup" | "print")}
@@ -948,303 +948,316 @@ export default function ExamRoutinePage() {
             <AppButton
               type="button"
               variant="contained"
-              color="success"
+              color="primary"
               onClick={() => window.print()}
               title="Print official routine document"
               startIcon={<Printer className="w-4 h-4" />}
             >
               <span className="hidden sm:inline">Print Routine</span>
             </AppButton>
-          </div>
+          </Stack>
         }
       />
 
-      {/* =========================================================================
-          SECTION 1: FILTER SECTION (Session, Class, Exam, Shift, Group, Search)
-      ========================================================================= */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4 no-print">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div className="flex items-center space-x-2">
-            <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">
-              <Filter className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-xs sm:text-sm font-bold text-slate-800">
-                Choose exam to schedule
-              </h2>
-              <p className="text-[11px] text-slate-500">
-                Filter by session, class, exam, shift and group
-              </p>
-            </div>
-            {hasActiveFilters && (
-              <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-full">
-                Filters Applied
-              </span>
-            )}
-          </div>
-
-          {hasActiveFilters && (
-            <AppButton
-              type="button"
-              variant="link"
-              onClick={handleResetFilters}
-              startIcon={<RotateCcw className="w-3.5 h-3.5" />}
-            >
-              Reset Filters
-            </AppButton>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          {/* 1. Academic Session Filter */}
-          <SessionSelect
-            value={selectedSession}
-            onChange={(val) => setSelectedSession(val)}
-            label="Session"
-            fullWidth
-          />
-
-          {/* 2. Class Filter */}
-          <AppSelect
-            label="Academic Class"
-            value={selectedClassId}
-            onChange={setSelectedClassId}
-            options={
-              classes.length === 0
-                ? [{ value: "", label: "No classes found" }]
-                : classes.map((c) => ({ value: c.id, label: c.name }))
-            }
-          />
-
-          {/* 3. Examination Filter */}
-          <AppSelect
-            label="Examination Term"
-            value={selectedExamId}
-            onChange={setSelectedExamId}
-            options={
-              availableExamsForClass.length === 0
-                ? [{ value: "", label: "No exam configured for this class" }]
-                : availableExamsForClass.map((ex) => ({
-                    value: ex.id,
-                    label: `${ex.name} ${ex.termCode ? `(${ex.termCode})` : ""}`.trim(),
-                  }))
-            }
-          />
-
-          {/* 4. Shift Filter */}
-          <AppSelect
-            label="Shift"
-            value={selectedShift}
-            onChange={setSelectedShift}
-            options={[
-              { value: "ALL", label: "All Shifts (Day / Morning)" },
-              { value: "DAY", label: "Day Shift" },
-              { value: "MORNING", label: "Morning Shift" },
-            ]}
-          />
-
-          {/* 5. Group Filter */}
-          <AppSelect
-            label="Academic Group"
-            value={selectedGroup}
-            onChange={setSelectedGroup}
-            options={[
-              { value: "ALL", label: "All Groups" },
-              { value: "GENERAL", label: "General" },
-              { value: "SCIENCE", label: "Science" },
-              { value: "HUMANITIES", label: "Humanities" },
-              { value: "BUSINESS_STUDIES", label: "Business Studies" },
-            ]}
-          />
-        </div>
-
-        {/* Live Search and Quick Metric Badges */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
-          <div className="w-full sm:w-80">
-            <AppTextField
-              label="Search"
-              placeholder="Search by subject, code, room or day..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              startIcon={<Search className="w-3.5 h-3.5 text-slate-400" />}
-              endIcon={
-                searchQuery ? (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("")}
-                    className="text-slate-400 hover:text-slate-600"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                ) : undefined
-              }
-            />
-          </div>
-
-          {/* Routine Status Summary Pills */}
-          <div className="flex flex-wrap items-center gap-2 text-xs w-full sm:w-auto justify-start sm:justify-end">
-            <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold border border-slate-200/80">
-              Class: <span className="font-bold text-slate-900">{selectedClassObj?.name || "All"}</span>
-            </span>
-            <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200/80">
-              Exam: <span className="font-bold">{selectedExamObj?.name || "Term Final"}</span>
-            </span>
-            <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 font-semibold border border-blue-200/80">
-              Scheduled Papers: <span className="font-bold">{filteredRoutineItems.length}</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          SECTION 2: TAB CONTENT (Setup Mode vs Print Preview Mode)
-      ========================================================================= */}
-
-      {activeTab === "setup" ? (
-        /* ================= SETUP & EDIT VIEW ================= */
-        <div className="space-y-6 no-print">
-          {/* Action Toolbar */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center space-x-2">
-              <AppButton
-                type="button"
-                variant="contained"
-                color="success"
-                onClick={handleOpenAddItem}
-                startIcon={<Plus className="w-4 h-4" />}
-              >
-                Add Exam Slot
-              </AppButton>
-
-              <AppButton
-                type="button"
-                variant="soft"
-                onClick={handleAutoPopulateSubjects}
-                title="Automatically generate timetable slots from configured exam subjects"
-                startIcon={<Sparkles className="w-3.5 h-3.5" />}
-              >
-                Auto-Generate from Subjects
-              </AppButton>
-
-              <AppButton
-                type="button"
-                variant="outline"
-                onClick={handleSortByDate}
-                title="Sort all examination slots chronologically"
-                startIcon={<ArrowUpDown className="w-3.5 h-3.5" />}
-              >
-                Sort by Date
-              </AppButton>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={isEditingInstructions ? "warning" : "inherit"}
-                onClick={() => setIsEditingInstructions(!isEditingInstructions)}
-                startIcon={<FileText className="w-3.5 h-3.5" />}
-              >
-                Examinee Instructions ({customInstructions.length})
-              </AppButton>
-
-              <AppButton
-                type="button"
-                variant="ghost"
-                color="inherit"
-                onClick={handleResetToDefaults}
-                title="Reset to default example schedule"
-                startIcon={<RotateCcw className="w-3 h-3" />}
-              >
-                Reset Presets
-              </AppButton>
-            </div>
-          </div>
-
-          {/* Collapsible Examinee Instructions Editor */}
-          {isEditingInstructions && (
-            <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 sm:p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                  <FileText className="w-4 h-4 text-amber-700" />
-                  Examination Hall Rules & Guidelines for Examinees
-                </h3>
-                <span className="text-[11px] text-amber-700">
-                  These rules will be printed at the bottom of the official routine sheet.
-                </span>
-              </div>
-
-              {/* Add instruction form */}
-              <form onSubmit={handleAddInstruction} className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Type an examination rule or guideline..."
-                  value={newInstructionText}
-                  onChange={(e) => setNewInstructionText(e.target.value)}
-                  className="flex-1 text-xs p-2 border border-amber-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+      <Box className="no-print">
+        <RulesSection
+          title="Choose exam"
+          subtitle="Filter by session, class, exam, shift and group."
+          action={
+            hasActiveFilters ? (
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                <Chip
+                  size="small"
+                  label="Filters applied"
+                  sx={{
+                    height: 22,
+                    fontWeight: 700,
+                    fontSize: "0.65rem",
+                    bgcolor: "primary.lighter",
+                    color: "primary.dark",
+                  }}
                 />
-                <AppButton type="submit" variant="contained" color="warning">
-                  Add Guideline
+                <AppButton
+                  type="button"
+                  variant="link"
+                  onClick={handleResetFilters}
+                  startIcon={<RotateCcw className="w-3.5 h-3.5" />}
+                >
+                  Reset
                 </AppButton>
-              </form>
-
-              {/* Instructions list */}
-              <div className="space-y-1.5 pt-1">
-                {customInstructions.map((rule, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-amber-200 text-xs text-slate-800"
-                  >
-                    <div className="flex items-center space-x-2 min-w-0 pr-2">
-                      <span className="font-bold text-amber-800 shrink-0">{idx + 1}.</span>
-                      <span className="truncate">{rule}</span>
-                    </div>
+              </Stack>
+            ) : undefined
+          }
+          toolbar={
+            <RulesFilterGrid columns={4}>
+              <SessionSelect
+                value={selectedSession}
+                onChange={(val) => setSelectedSession(val)}
+                label="Session"
+                fullWidth
+              />
+              <AppSelect
+                label="Class"
+                value={selectedClassId}
+                onChange={setSelectedClassId}
+                options={
+                  classes.length === 0
+                    ? [{ value: "", label: "No classes found" }]
+                    : classes.map((c) => ({ value: c.id, label: c.name }))
+                }
+              />
+              <AppSelect
+                label="Examination"
+                value={selectedExamId}
+                onChange={setSelectedExamId}
+                options={
+                  availableExamsForClass.length === 0
+                    ? [{ value: "", label: "No exam configured for this class" }]
+                    : availableExamsForClass.map((ex) => ({
+                        value: ex.id,
+                        label: examOptionLabel(ex),
+                      }))
+                }
+              />
+              <AppSelect
+                label="Shift"
+                value={selectedShift}
+                onChange={setSelectedShift}
+                options={[
+                  { value: "ALL", label: "All Shifts" },
+                  { value: "DAY", label: "Day Shift" },
+                  { value: "MORNING", label: "Morning Shift" },
+                ]}
+              />
+              <AppSelect
+                label="Group"
+                value={selectedGroup}
+                onChange={setSelectedGroup}
+                options={[
+                  { value: "ALL", label: "All Groups" },
+                  { value: "GENERAL", label: "General" },
+                  { value: "SCIENCE", label: "Science" },
+                  { value: "HUMANITIES", label: "Humanities" },
+                  { value: "BUSINESS_STUDIES", label: "Business Studies" },
+                ]}
+              />
+              <AppTextField
+                label="Search"
+                placeholder="Subject, code, room or day"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                startIcon={<Search className="w-3.5 h-3.5 text-slate-400" />}
+                endIcon={
+                  searchQuery ? (
                     <button
                       type="button"
-                      onClick={() => handleRemoveInstruction(idx)}
-                      className="text-rose-500 hover:text-rose-700 shrink-0 p-1"
-                      title="Remove this rule"
+                      onClick={() => setSearchQuery("")}
+                      className="text-slate-400 hover:text-slate-600"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <X className="w-3.5 h-3.5" />
                     </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+                  ) : undefined
+                }
+              />
+            </RulesFilterGrid>
+          }
+        >
+          <Stack
+            direction="row"
+            spacing={0.75}
+            useFlexGap
+            sx={{ flexWrap: "wrap", alignItems: "center" }}
+          >
+            <Chip
+              size="small"
+              label={`Class: ${selectedClassObj?.name || "All"}`}
+              sx={{ height: 24, fontWeight: 600, fontSize: "0.75rem" }}
+            />
+            <Chip
+              size="small"
+              color="primary"
+              variant="outlined"
+              label={`Exam: ${selectedExamObj?.name || "Term Final"}`}
+              sx={{ height: 24, fontWeight: 600, fontSize: "0.75rem" }}
+            />
+            <Chip
+              size="small"
+              label={`Scheduled papers: ${filteredRoutineItems.length}`}
+              sx={{
+                height: 24,
+                fontWeight: 600,
+                fontSize: "0.75rem",
+                bgcolor: "info.lighter",
+                color: "info.dark",
+              }}
+            />
+          </Stack>
+        </RulesSection>
+      </Box>
 
-          {/* Routine Timetable Grid */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-            <div className="p-4 sm:px-6 border-b border-slate-100 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-emerald-600" />
-                  Scheduled Papers & Time Slots
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Total {filteredRoutineItems.length} papers configured for {selectedClassObj?.name || "Class"} • {selectedExamObj?.name || "Exam"}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
+      {activeTab === "setup" ? (
+        <Box className="no-print" sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+          <RulesSection
+            title="Routine setup"
+            subtitle="Add slots, auto-generate from subjects, or edit examinee instructions."
+            action={
+              <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+                <AppButton
+                  type="button"
+                  variant="contained"
+                  color="primary"
+                  onClick={handleOpenAddItem}
+                  startIcon={<Plus className="w-4 h-4" />}
+                >
+                  Add Exam Slot
+                </AppButton>
+                <AppButton
+                  type="button"
+                  variant="soft"
+                  onClick={handleAutoPopulateSubjects}
+                  title="Automatically generate timetable slots from configured exam subjects"
+                  startIcon={<Sparkles className="w-3.5 h-3.5" />}
+                >
+                  Auto-Generate
+                </AppButton>
+                <AppButton
+                  type="button"
+                  variant="outline"
+                  onClick={handleSortByDate}
+                  title="Sort all examination slots chronologically"
+                  startIcon={<ArrowUpDown className="w-3.5 h-3.5" />}
+                >
+                  Sort by Date
+                </AppButton>
                 <AppButton
                   type="button"
                   size="small"
                   variant="soft"
-                  color="success"
-                  onClick={() => setActiveTab("print")}
-                  startIcon={<Eye className="w-3.5 h-3.5" />}
+                  color={isEditingInstructions ? "warning" : "inherit"}
+                  onClick={() => setIsEditingInstructions(!isEditingInstructions)}
+                  startIcon={<FileText className="w-3.5 h-3.5" />}
                 >
-                  Preview Print Sheet
+                  Instructions ({customInstructions.length})
                 </AppButton>
-              </div>
-            </div>
+                <AppButton
+                  type="button"
+                  variant="ghost"
+                  color="inherit"
+                  onClick={handleResetToDefaults}
+                  title="Reset to default example schedule"
+                  startIcon={<RotateCcw className="w-3 h-3" />}
+                >
+                  Reset Presets
+                </AppButton>
+              </Stack>
+            }
+          >
+            {isEditingInstructions && (
+              <Box
+                sx={{
+                  p: { xs: 2, sm: 2.25 },
+                  borderRadius: 2.5,
+                  border: 1,
+                  borderColor: "warning.light",
+                  bgcolor: "warning.lighter",
+                }}
+              >
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={1}
+                  sx={{ alignItems: { sm: "center" }, justifyContent: "space-between", mb: 2 }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ fontWeight: 700, fontSize: "0.875rem", display: "flex", alignItems: "center", gap: 0.75 }}
+                  >
+                    <FileText className="w-4 h-4" />
+                    Examinee guidelines
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.75rem" }}>
+                    Printed at the bottom of the official routine sheet.
+                  </Typography>
+                </Stack>
 
+                <form onSubmit={handleAddInstruction}>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                    <Box sx={{ flex: 1 }}>
+                      <AppTextField
+                        label="Guideline"
+                        placeholder="Type an examination rule or guideline..."
+                        value={newInstructionText}
+                        onChange={(e) => setNewInstructionText(e.target.value)}
+                      />
+                    </Box>
+                    <AppButton type="submit" variant="contained" color="warning">
+                      Add Guideline
+                    </AppButton>
+                  </Stack>
+                </form>
+
+                <Stack spacing={1} sx={{ mt: 1.5 }}>
+                  {customInstructions.map((rule, idx) => (
+                    <Stack
+                      key={idx}
+                      direction="row"
+                      spacing={1}
+                      sx={{
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        px: 1.5,
+                        py: 1,
+                        borderRadius: 2,
+                        border: 1,
+                        borderColor: "divider",
+                        bgcolor: "background.paper",
+                      }}
+                    >
+                      <Typography variant="body2" sx={{ fontSize: "0.8125rem", minWidth: 0 }} noWrap>
+                        <Box component="span" sx={{ fontWeight: 700, mr: 0.75 }}>
+                          {idx + 1}.
+                        </Box>
+                        {rule}
+                      </Typography>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveInstruction(idx)}
+                        className="text-rose-500 hover:text-rose-700 shrink-0 p-1"
+                        title="Remove this rule"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </Stack>
+                  ))}
+                </Stack>
+              </Box>
+            )}
+            {!isEditingInstructions && (
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>
+                Use the actions above to build the timetable, then preview or print from the Print Preview tab.
+              </Typography>
+            )}
+          </RulesSection>
+
+          <RulesSection
+            title="Scheduled papers"
+            subtitle={`Total ${filteredRoutineItems.length} papers configured for ${selectedClassObj?.name || "Class"} · ${selectedExamObj?.name || "Exam"}`}
+            action={
+              <AppButton
+                type="button"
+                size="small"
+                variant="soft"
+                color="primary"
+                onClick={() => setActiveTab("print")}
+                startIcon={<Eye className="w-3.5 h-3.5" />}
+              >
+                Preview Print Sheet
+              </AppButton>
+            }
+          >
             {filteredRoutineItems.length === 0 ? (
               <NoDataFound />
             ) : (
-              <div className="overflow-x-auto">
+              <Box sx={{ overflowX: "auto", mx: { xs: -2.25, sm: -2.75 }, mb: { xs: -2.25, sm: -2.75 } }}>
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
@@ -1377,50 +1390,61 @@ export default function ExamRoutinePage() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </Box>
             )}
-          </div>
-        </div>
+          </RulesSection>
+        </Box>
       ) : (
-        /* ================= OFFICIAL PRINT VIEW ================= */
-        <div className="space-y-4">
-          {/* Print Toolbar (Controls on screen only) */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex flex-wrap items-center justify-between gap-3 no-print">
-            <div className="flex items-center space-x-3 text-xs">
-              <span className="font-bold text-slate-700">Print Options:</span>
-              <label className="flex items-center space-x-1.5 cursor-pointer text-slate-700">
+        <Stack spacing={2.5}>
+          <Box className="no-print">
+            <RulesSection
+              title="Print preview"
+              subtitle="Adjust print options, then print the official routine sheet."
+              action={
+                <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+                  <AppButton
+                    type="button"
+                    variant="soft"
+                    color="inherit"
+                    onClick={() => setActiveTab("setup")}
+                    startIcon={<Sliders className="w-3.5 h-3.5" />}
+                  >
+                    Return to Setup
+                  </AppButton>
+                  <AppButton
+                    type="button"
+                    variant="contained"
+                    color="primary"
+                    onClick={() => window.print()}
+                    startIcon={<Printer className="w-4 h-4" />}
+                  >
+                    Print Document
+                  </AppButton>
+                </Stack>
+              }
+            >
+              <Box
+                component="label"
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 1,
+                  cursor: "pointer",
+                  userSelect: "none",
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={showRoomInPrint}
                   onChange={(e) => setShowRoomInPrint(e.target.checked)}
                   className="rounded text-emerald-600 focus:ring-emerald-500"
                 />
-                <span>Include Room & Hall Column</span>
-              </label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <AppButton
-                type="button"
-                variant="soft"
-                color="inherit"
-                onClick={() => setActiveTab("setup")}
-                startIcon={<Sliders className="w-3.5 h-3.5" />}
-              >
-                Return to Setup
-              </AppButton>
-
-              <AppButton
-                type="button"
-                variant="contained"
-                color="success"
-                onClick={() => window.print()}
-                startIcon={<Printer className="w-4 h-4" />}
-              >
-                Print Document
-              </AppButton>
-            </div>
-          </div>
+                <Typography variant="body2" sx={{ fontWeight: 500, fontSize: "0.8125rem" }}>
+                  Include Room & Hall column
+                </Typography>
+              </Box>
+            </RulesSection>
+          </Box>
 
           {/* ================= OFFICIAL INSTITUTIONAL PRINT SHEET ================= */}
           <div className="print-sheet-container bg-white p-8 sm:p-12 rounded-2xl border-2 border-slate-300 shadow-sm print:border-none print:shadow-none print:p-0 space-y-6 text-slate-900">
@@ -1584,7 +1608,7 @@ export default function ExamRoutinePage() {
               <span>Published on: {formatDateBnEn(new Date().toISOString().split("T")[0])}</span>
             </div>
           </div>
-        </div>
+        </Stack>
       )}
 
       {/* =========================================================================
@@ -2134,7 +2158,7 @@ export default function ExamRoutinePage() {
                 >
                   Cancel
                 </AppButton>
-                <AppButton type="submit" variant="contained" color="success">
+                <AppButton type="submit" variant="contained" color="primary">
                   {editingItemId ? "Save Changes" : "Add to Routine"}
                 </AppButton>
               </div>
@@ -2142,6 +2166,7 @@ export default function ExamRoutinePage() {
           </div>
         </div>
       )}
+      </RulesAtmosphere>
     </ResultsPageShell>
   );
 }

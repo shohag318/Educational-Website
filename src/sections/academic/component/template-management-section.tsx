@@ -1,8 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { Box, Chip, IconButton, Stack, Typography } from "@mui/material";
 import { AppButton } from "@/components/button/app-button";
+import { AppSelect, AppTextField, NoDataFound } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
+import { ResultsNotice } from "@/sections/results/component/result-page-ui";
+import {
+  RulesFilterGrid,
+  RulesSection,
+} from "@/sections/academic/component/rules-section-ui";
+import { examOptionLabel, joinOptionParts } from "@/sections/results/utils/select-options";
 import {
   Layers,
   Plus,
@@ -15,15 +23,7 @@ import {
   Pencil,
   Trash2,
   Copy,
-  ArrowRight,
-  Sparkles,
-  Sliders,
-  BookOpen,
-  Calendar,
   Send,
-  HelpCircle,
-  AlertCircle,
-  FileSpreadsheet,
   ExternalLink,
 } from "@/components/iconify/lucide";
 
@@ -618,299 +618,292 @@ export function TemplateManagementSection({
   const selectedClassObj = classes.find((c) => c.id === selectedClassId);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-0">
-      {/* Step 1 Header Banner */}
-      <div className="p-5 border-b border-slate-200 bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="p-1.5 bg-emerald-600 text-white rounded-lg shadow-xs">
-              <Bookmark className="w-5 h-5" />
-            </span>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-700 text-white tracking-wide uppercase">
-                  Step 1
-                </span>
-                <h2 className="text-base font-bold text-slate-900">
-                  Template Management &amp; Design Engine
-                </h2>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Select class and subjects to configure marks distribution (Total, Pass, CQ, MCQ, Practical) and save reusable assessment templates.
-              </p>
-            </div>
-          </div>
-        </div>
+    <>
+      {statusMsg ? (
+        <Box sx={{ mb: 2 }}>
+          <ResultsNotice severity={statusMsg.type === "success" ? "success" : "error"}>
+            {statusMsg.text}
+          </ResultsNotice>
+        </Box>
+      ) : null}
 
-        {/* Action Button: 1. Add New Template */}
-        <div className="flex items-center space-x-2.5 shrink-0">
+      <RulesSection
+        title="Assessment templates"
+        subtitle="Configure marks distribution for a class once, then reuse the template across exams."
+        action={
           <AppButton
             type="button"
             variant="contained"
-            color="success"
+            color="primary"
             size="small"
             startIcon={<Plus size={16} />}
             onClick={handleOpenCreateModal}
           >
-            Create Template
+            Create template
           </AppButton>
-        </div>
-      </div>
-
-      {/* Status Alert Banner */}
-      {statusMsg && (
-        <div
-          className={`p-3.5 border-b flex items-center justify-between text-xs font-semibold ${
-            statusMsg.type === "success"
-              ? "bg-emerald-50 text-emerald-900 border-emerald-200"
-              : "bg-red-50 text-red-900 border-red-200"
-          }`}
-        >
-          <div className="flex items-center space-x-2">
-            {statusMsg.type === "success" ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            ) : (
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
-            )}
-            <span>{statusMsg.text}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setStatusMsg(null)}
-            className="text-slate-500 hover:text-slate-800"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {/* Template Filter & Search Toolbar */}
-      <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex flex-wrap items-center gap-2.5 flex-1 max-w-2xl">
-          {/* Session Filter */}
-          <div className="flex items-center space-x-1.5">
-            <span className="font-semibold text-slate-600">Session:</span>
+        }
+        toolbar={
+          <RulesFilterGrid columns={3}>
             <SessionSelect
               value={sessionFilter}
               onChange={setSessionFilter}
-              label=""
-              includeAll={true}
+              label="Session"
+              includeAll
               allLabel="All Sessions"
               activeOnly={false}
-              selectClassName="p-1.5 border border-slate-200 rounded-lg bg-white font-medium text-slate-800 text-xs focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+              fullWidth
             />
-          </div>
-
-          {/* Class Filter */}
-          <div className="flex items-center space-x-1.5">
-            <span className="font-semibold text-slate-600">Class:</span>
-            <select
+            <AppSelect
+              label="Class"
               value={classFilter}
-              onChange={(e) => setClassFilter(e.target.value)}
-              className="p-1.5 border border-slate-200 rounded-lg bg-white font-medium text-slate-800 text-xs focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-            >
-              <option value="ALL">All Classes ({templates.length})</option>
-              {classes.map((cls) => {
-                const count = templates.filter((t) => t.classId === cls.id).length;
-                return (
-                  <option key={cls.id} value={cls.id}>
-                    {cls.name} ({count})
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-
-          {/* Search Input */}
-          <div className="relative flex-1 min-w-[200px]">
-            <input
-              type="text"
+              onChange={setClassFilter}
+              options={[
+                { value: "ALL", label: "All Classes" },
+                ...classes.map((cls) => {
+                  const count = templates.filter((t) => t.classId === cls.id).length;
+                  return {
+                    value: cls.id,
+                    label: joinOptionParts(
+                      cls.name,
+                      `${count} ${count === 1 ? "template" : "templates"}`
+                    ),
+                  };
+                }),
+              ]}
+            />
+            <AppTextField
+              label="Search"
               value={templateSearch}
               onChange={(e) => setTemplateSearch(e.target.value)}
-              placeholder="Search templates by name, class, or subject..."
-              className="w-full p-1.5 pl-7 pr-6 border border-slate-200 rounded-lg bg-white text-xs focus:ring-2 focus:ring-emerald-500 font-medium"
+              placeholder="Name, class, or subject"
+              startIcon={<Search size={15} />}
             />
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2 pointer-events-none" />
-            {templateSearch && (
-              <button
-                type="button"
-                onClick={() => setTemplateSearch("")}
-                className="absolute right-2 top-2 text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="text-[11px] text-slate-500 flex items-center space-x-2">
-          <span className="font-semibold text-slate-700 bg-white px-2.5 py-1 rounded-md border border-slate-200">
-            {filteredTemplates.length} Saved Template{filteredTemplates.length === 1 ? "" : "s"} in DB
-          </span>
-        </div>
-      </div>
-
-      {/* Saved Database Templates Grid */}
-      <div className="p-5">
-        {loading ? (
-          <div className="py-12 text-center text-slate-400 italic text-xs">
-            Loading database assessment templates...
-          </div>
-        ) : filteredTemplates.length === 0 ? (
-          <div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center space-y-3 bg-slate-50/50">
-            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
-              <Bookmark className="w-6 h-6" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="font-bold text-slate-800 text-sm">No Assessment Templates Saved in Database</h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                Click <strong>&quot;Create Template&quot;</strong> above to select a class, pick subjects, and configure CQ, MCQ, and Practical marks distribution.
-              </p>
-            </div>
-            <AppButton
-              type="button"
-              variant="contained"
-              color="success"
+          </RulesFilterGrid>
+        }
+      >
+        <Stack spacing={2}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between" }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: "0.875rem" }}>
+              Saved templates
+            </Typography>
+            <Chip
               size="small"
-              startIcon={<Plus size={16} />}
-              onClick={handleOpenCreateModal}
+              label={filteredTemplates.length}
+              sx={{ height: 22, fontWeight: 700, bgcolor: "primary.lighter", color: "primary.dark" }}
+            />
+          </Stack>
+
+          {loading ? (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ py: 6, textAlign: "center", fontStyle: "italic" }}
             >
-              Create Your First Template
-            </AppButton>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTemplates.map((tpl) => (
-              <div
-                key={tpl.id}
-                className="border border-slate-200 hover:border-emerald-300 bg-white rounded-xl shadow-2xs hover:shadow-sm transition-all p-4 flex flex-col justify-between space-y-3"
+              Loading templates…
+            </Typography>
+          ) : filteredTemplates.length === 0 ? (
+            <Stack spacing={2} sx={{ alignItems: "center", py: 2 }}>
+              <NoDataFound />
+              <AppButton
+                type="button"
+                variant="contained"
+                color="primary"
+                size="small"
+                startIcon={<Plus size={16} />}
+                onClick={handleOpenCreateModal}
               >
-                {/* Template Title & Class Header */}
-                <div className="space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4 className="font-bold text-slate-900 text-sm flex items-center space-x-1.5">
-                        <Bookmark className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span className="line-clamp-1">{tpl.name}</span>
-                      </h4>
-                      <div className="flex items-center space-x-1.5 mt-1">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                          {tpl.class?.name || "All Classes"}
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-mono">
-                          {tpl.items.length} Subject{tpl.items.length === 1 ? "" : "s"}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEditModal(tpl)}
-                        className="p-1.5 text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                        title="Edit Template"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDuplicateTemplate(tpl)}
-                        className="p-1.5 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                        title="Duplicate Template"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteTemplate(tpl)}
-                        className="p-1.5 text-slate-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                        title="Delete Template"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {tpl.description && (
-                    <p className="text-[11px] text-slate-500 line-clamp-1 italic">
-                      {tpl.description}
-                    </p>
-                  )}
-
-                  {/* Subject Breakdown Preview Chips */}
-                  <div className="pt-2 border-t border-slate-100 space-y-1.5">
-                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-                      Subjects &amp; Marks Distribution:
-                    </span>
-                    <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto pr-1">
-                      {tpl.items.slice(0, 6).map((item) => (
-                        <div
-                          key={item.id}
-                          className="px-2 py-1 rounded bg-slate-50 border border-slate-200 text-[10px] font-medium text-slate-700 flex items-center space-x-1"
+                Create your first template
+              </AppButton>
+            </Stack>
+          ) : (
+            <Box
+              sx={{
+                display: "grid",
+                gap: 1.75,
+                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr", lg: "repeat(3, minmax(0, 1fr))" },
+              }}
+            >
+              {filteredTemplates.map((tpl) => (
+                <Box
+                  key={tpl.id}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    p: 2.25,
+                    borderRadius: 2.5,
+                    border: 1,
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
+                    transition: "border-color 160ms ease, box-shadow 160ms ease",
+                    "&:hover": {
+                      borderColor: "primary.light",
+                      boxShadow: "0 6px 18px rgba(15, 23, 42, 0.05)",
+                    },
+                  }}
+                >
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "flex-start", justifyContent: "space-between" }}>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                        <Bookmark size={15} color="#059669" />
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: "0.9rem",
+                            letterSpacing: "-0.01em",
+                            lineHeight: 1.35,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
                         >
-                          <span className="font-semibold">{item.subject.name}:</span>
-                          <span className="font-mono text-slate-900 font-bold">{item.totalMarks}M</span>
-                          <span className="text-slate-400 text-[9px]">
-                            ({item.cqMarks} CQ + {item.mcqMarks} MCQ{item.practicalMarks > 0 ? ` + ${item.practicalMarks} Prac` : ""})
-                          </span>
-                        </div>
+                          {tpl.name}
+                        </Typography>
+                      </Stack>
+                      <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", mt: 1 }}>
+                        <Chip
+                          size="small"
+                          label={tpl.class?.name || "All Classes"}
+                          sx={{ height: 22, fontWeight: 600, fontSize: "0.7rem" }}
+                        />
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, alignSelf: "center" }}>
+                          {tpl.items.length} subject{tpl.items.length === 1 ? "" : "s"}
+                        </Typography>
+                      </Stack>
+                    </Box>
+                    <Stack direction="row" spacing={0.15} sx={{ flexShrink: 0 }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleOpenEditModal(tpl)}
+                        aria-label="Edit template"
+                        sx={{ color: "text.secondary", "&:hover": { color: "primary.main", bgcolor: "primary.lighter" } }}
+                      >
+                        <Pencil size={14} />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDuplicateTemplate(tpl)}
+                        aria-label="Duplicate template"
+                        sx={{ color: "text.secondary", "&:hover": { color: "info.main", bgcolor: "info.lighter" } }}
+                      >
+                        <Copy size={14} />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteTemplate(tpl)}
+                        aria-label="Delete template"
+                        sx={{ color: "text.secondary", "&:hover": { color: "error.main", bgcolor: "error.lighter" } }}
+                      >
+                        <Trash2 size={14} />
+                      </IconButton>
+                    </Stack>
+                  </Stack>
+
+                  {tpl.description ? (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        mt: 1.25,
+                        fontSize: "0.78rem",
+                        lineHeight: 1.45,
+                        overflow: "hidden",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                      }}
+                    >
+                      {tpl.description}
+                    </Typography>
+                  ) : null}
+
+                  <Box sx={{ mt: 1.75, pt: 1.5, borderTop: 1, borderColor: "divider", flex: 1 }}>
+                    <Typography
+                      variant="overline"
+                      sx={{ display: "block", mb: 1, color: "text.disabled", letterSpacing: "0.08em" }}
+                    >
+                      Marks preview
+                    </Typography>
+                    <Stack spacing={0.75}>
+                      {tpl.items.slice(0, 4).map((item) => (
+                        <Stack
+                          key={item.id}
+                          direction="row"
+                          spacing={1}
+                          sx={{ alignItems: "baseline", justifyContent: "space-between" }}
+                        >
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontSize: "0.78rem",
+                              fontWeight: 600,
+                              color: "text.primary",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              minWidth: 0,
+                            }}
+                          >
+                            {item.subject.name}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              flexShrink: 0,
+                              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                              fontWeight: 600,
+                              color: "text.secondary",
+                            }}
+                          >
+                            {item.totalMarks} · {item.cqMarks}/{item.mcqMarks}
+                            {item.practicalMarks > 0 ? `/${item.practicalMarks}` : ""}
+                          </Typography>
+                        </Stack>
                       ))}
-                      {tpl.items.length > 6 && (
-                        <span className="text-[10px] text-slate-400 font-medium py-1 px-1">
-                          +{tpl.items.length - 6} more subjects
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                      {tpl.items.length > 4 ? (
+                        <Typography variant="caption" color="text.disabled" sx={{ fontWeight: 500 }}>
+                          +{tpl.items.length - 4} more
+                        </Typography>
+                      ) : null}
+                    </Stack>
+                  </Box>
 
-                {/* Apply Button */}
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-                  <span className="text-[10px] text-slate-400">
-                    Saved in DB
-                  </span>
-                  <AppButton
-                    type="button"
-                    variant="soft"
-                    color="success"
-                    size="small"
-                    startIcon={<Send size={12} />}
-                    onClick={() => handleOpenApplyModal(tpl)}
-                  >
-                    Apply to Exam
-                  </AppButton>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+                  <Box sx={{ mt: 2, pt: 1.5, borderTop: 1, borderColor: "divider" }}>
+                    <AppButton
+                      type="button"
+                      variant="soft"
+                      color="primary"
+                      size="small"
+                      fullWidth
+                      startIcon={<Send size={13} />}
+                      onClick={() => handleOpenApplyModal(tpl)}
+                    >
+                      Apply to exam
+                    </AppButton>
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          )}
+        </Stack>
+      </RulesSection>
 
-      {/* ========================================================================= */}
-      {/* MODAL: CREATE / EDIT ASSESSMENT TEMPLATE WIZARD */}
-      {/* ========================================================================= */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            {/* Modal Header */}
-            <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white flex items-center justify-between shrink-0">
-              <div className="flex items-center space-x-2.5">
-                <span className="p-1.5 bg-white/20 rounded-lg">
-                  <Bookmark className="w-5 h-5 text-white" />
-                </span>
-                <div>
-                  <h3 className="font-bold text-base sm:text-lg">
-                    {editingTemplateId ? "Edit Assessment Template" : "Create Assessment Template"}
-                  </h3>
-                  <p className="text-xs text-emerald-100">
-                    Step 1: Set Template Name &amp; Class &rarr; Select Subjects &rarr; Distribute CQ + MCQ + Practical &rarr; Save to Database.
-                  </p>
-                </div>
+        <div className="fixed inset-0 z-50 bg-slate-900/55 backdrop-blur-[2px] flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="font-bold text-[1.05rem] tracking-tight text-slate-900">
+                  {editingTemplateId ? "Edit assessment template" : "Create assessment template"}
+                </h3>
+                <p className="text-[0.8rem] text-slate-500 mt-0.5 font-normal">
+                  Name and class → subjects → CQ / MCQ / Practical → save
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-white/80 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -967,10 +960,10 @@ export function TemplateManagementSection({
                       }}
                       className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-bold text-slate-900 bg-white text-xs cursor-pointer"
                     >
-                      <option value="">-- Select Class from Dropdown --</option>
+                      <option value="">Select class</option>
                       {classes.map((cls) => (
                         <option key={cls.id} value={cls.id}>
-                          {cls.name} (Class {cls.numericValue || cls.name})
+                          {cls.name}
                         </option>
                       ))}
                     </select>
@@ -1389,17 +1382,17 @@ export function TemplateManagementSection({
                   <AppButton
                     type="submit"
                     variant="contained"
-                    color="success"
+                    color="primary"
                     size="small"
                     startIcon={<CheckCircle2 size={16} />}
                     loading={savingTemplate}
                     disabled={savingTemplate || selectedSubjectIds.length === 0 || !allRowsBalanced}
                   >
                     {savingTemplate
-                      ? "Saving to Database..."
+                      ? "Saving…"
                       : editingTemplateId
-                      ? "Update Template in Database"
-                      : "Save Template to Database"}
+                      ? "Update template"
+                      : "Save template"}
                   </AppButton>
                 </div>
               </div>
@@ -1412,60 +1405,52 @@ export function TemplateManagementSection({
       {/* MODAL: APPLY TEMPLATE TO AN EXAM */}
       {/* ========================================================================= */}
       {applyModalTemplate && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-4 bg-emerald-600 text-white flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Send className="w-5 h-5 text-white" />
-                <h3 className="font-bold text-sm">Apply Template to Exam</h3>
+        <div className="fixed inset-0 z-50 bg-slate-900/55 backdrop-blur-[2px] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-[1rem] tracking-tight text-slate-900">Apply template to exam</h3>
+                <p className="text-[0.78rem] text-slate-500 mt-0.5">Push CQ, MCQ, and Practical marks into the exam.</p>
               </div>
               <button
                 type="button"
                 onClick={() => setApplyModalTemplate(null)}
-                className="text-white/80 hover:text-white p-1 rounded-lg"
+                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-5 space-y-4 text-xs">
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
-                <span className="text-[10px] text-slate-400 font-semibold uppercase">Selected Template:</span>
-                <p className="font-bold text-slate-900 text-sm">{applyModalTemplate.name}</p>
-                <p className="text-[11px] text-slate-500">
-                  Class: <strong>{applyModalTemplate.class?.name}</strong> &bull; {applyModalTemplate.items.length} Subjects included
+            <div className="p-5 space-y-4">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-1">
+                <span className="text-[0.68rem] text-slate-400 font-semibold uppercase tracking-wider">Template</span>
+                <p className="font-bold text-slate-900 text-[0.95rem] tracking-tight">{applyModalTemplate.name}</p>
+                <p className="text-[0.78rem] text-slate-500">
+                  {applyModalTemplate.class?.name} · {applyModalTemplate.items.length} subjects
                 </p>
               </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Target Exam:
-                </label>
-                <select
-                  value={targetExamId}
-                  onChange={(e) => setTargetExamId(e.target.value)}
-                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-900 bg-white"
-                >
-                  <option value="">-- Select Exam --</option>
-                  {exams
+              <AppSelect
+                label="Target exam"
+                value={targetExamId}
+                onChange={setTargetExamId}
+                options={[
+                  { value: "", label: "Select exam" },
+                  ...exams
                     .filter(
                       (ex) =>
                         sessionFilter === "ALL" ||
                         !ex.academicYear?.yearName ||
                         ex.academicYear?.yearName === sessionFilter
                     )
-                    .map((ex) => (
-                      <option key={ex.id} value={ex.id}>
-                        {ex.name} {ex.class?.name ? `(${ex.class.name})` : ""}
-                      </option>
-                    ))}
-                </select>
-                <span className="text-[10px] text-slate-400 mt-1 block">
-                  This will configure CQ, MCQ, and Practical marks directly into the selected exam's subject logic in the database.
-                </span>
-              </div>
+                    .map((ex) => ({
+                      value: ex.id,
+                      label: examOptionLabel(ex),
+                    })),
+                ]}
+              />
 
-              <div className="flex items-center justify-end space-x-2 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-1">
                 <AppButton
                   type="button"
                   variant="outline"
@@ -1477,20 +1462,20 @@ export function TemplateManagementSection({
                 <AppButton
                   type="button"
                   variant="contained"
-                  color="success"
+                  color="primary"
                   size="small"
                   startIcon={<Check size={14} />}
                   loading={applyingTemplate}
                   disabled={applyingTemplate || !targetExamId}
                   onClick={handleExecuteApplyToExam}
                 >
-                  {applyingTemplate ? "Applying..." : "Confirm & Apply to Exam"}
+                  {applyingTemplate ? "Applying…" : "Apply to exam"}
                 </AppButton>
               </div>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

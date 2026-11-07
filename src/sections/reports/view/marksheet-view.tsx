@@ -11,6 +11,13 @@ import {
   ResultsFilterCard,
   ResultsPanel,
 } from "@/sections/results/component/result-page-ui";
+import {
+  examOptionLabel,
+  joinOptionParts,
+  sectionOptionLabel,
+  shiftLabel,
+  studentOptionLabel,
+} from "@/sections/results/utils/select-options";
 
 // Reusable official NCTB Report Card Sheet Component
 function ReportCardSheet({ reportData }: { reportData: any }) {
@@ -613,7 +620,7 @@ export default function MarksheetPage() {
               ? [{ value: "", label: "No exams for selected class" }]
               : filteredExams.map((ex) => ({
                   value: ex.id,
-                  label: `${ex.name} ${ex.class?.name ? `(${ex.class.name})` : ""} [${ex.status}]`,
+                  label: examOptionLabel(ex),
                 }))
           }
         />
@@ -631,7 +638,7 @@ export default function MarksheetPage() {
               .filter((sh: any) => sh !== "MORNING" && sh !== "DAY")
               .map((sh: any) => ({
                 value: sh,
-                label: sh.charAt(0) + sh.slice(1).toLowerCase(),
+                label: shiftLabel(sh),
               })),
           ]}
         />
@@ -657,13 +664,10 @@ export default function MarksheetPage() {
           onChange={setSelectedSectionId}
           options={[
             { value: "", label: "All Sections" },
-            ...availableSections.map((sec: any) => {
-              const shiftLabel = sec.shift === "MORNING" ? "Morning" : sec.shift === "DAY" ? "Day" : sec.shift;
-              return {
-                value: sec.id,
-                label: `${sec.name} ${sec.groupType ? `(${sec.groupType})` : ""}${!selectedShift && shiftLabel ? ` • ${shiftLabel}` : ""}`.trim(),
-              };
-            }),
+            ...availableSections.map((sec: any) => ({
+              value: sec.id,
+              label: sectionOptionLabel(sec, { includeShiftWhen: !selectedShift }),
+            })),
           ]}
         />      </ResultsFilterCard>
 
@@ -746,9 +750,11 @@ export default function MarksheetPage() {
                   ? [{ value: "", label: "No students in selected filter" }]
                   : students.map((st) => ({
                       value: st.id,
-                      label: `Roll #${st.classRoll} - ${st.student.firstName} ${st.student.lastName}${
-                        st.section?.name ? ` [Sec: ${st.section.name}]` : ""
-                      }${st.section?.shift ? ` [${st.section.shift === "MORNING" ? "Morning" : "Day"}]` : ""}`,
+                      label: joinOptionParts(
+                        studentOptionLabel(st),
+                        st.section?.name ? `Section ${st.section.name}` : undefined,
+                        shiftLabel(st.section?.shift)
+                      ),
                     }))
               }
             />

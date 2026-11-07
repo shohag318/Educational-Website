@@ -12,6 +12,11 @@ import {
   ResultsFilterCard,
   ResultsNotice,
 } from "@/sections/results/component/result-page-ui";
+import {
+  examOptionLabel,
+  studentOptionLabel,
+  subjectOptionLabel,
+} from "@/sections/results/utils/select-options";
 
 export default function MarkAuditPage() {
   const [exams, setExams] = useState<any[]>([]);
@@ -142,7 +147,7 @@ export default function MarkAuditPage() {
           label="Exam"
           value={selectedExamId}
           onChange={setSelectedExamId}
-          options={exams.map((ex) => ({ value: ex.id, label: `${ex.name} (${ex.status})` }))}
+          options={exams.map((ex) => ({ value: ex.id, label: examOptionLabel(ex) }))}
         />
 
         <AppSelect
@@ -151,7 +156,7 @@ export default function MarkAuditPage() {
           onChange={setSelectedEnrollmentId}
           options={students.map((st) => ({
             value: st.id,
-            label: `Roll #${st.classRoll} - ${st.student.firstName} ${st.student.lastName} (${st.student.studentIdNo})`,
+            label: studentOptionLabel(st),
           }))}
         />
 
@@ -159,7 +164,7 @@ export default function MarkAuditPage() {
           label="Subject"
           value={selectedSubjectId}
           onChange={setSelectedSubjectId}
-          options={subjects.map((sub) => ({ value: sub.id, label: `${sub.name} (${sub.subjectCode})` }))}
+          options={subjects.map((sub) => ({ value: sub.id, label: subjectOptionLabel(sub) }))}
         />
       </ResultsFilterCard>
 

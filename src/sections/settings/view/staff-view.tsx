@@ -2,13 +2,24 @@
 
 import { NoDataFound } from "@/components/table/no-data-found";
 import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
+import {
+  Box,
+  Checkbox,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
 import {
   Users,
   UserCheck,
   UserPlus,
   Search,
-  Filter,
   Download,
   Printer,
   Edit2,
@@ -17,32 +28,28 @@ import {
   Phone,
   Mail,
   GraduationCap,
-  Building2,
   Award,
   BookOpen,
-  Calendar,
   MapPin,
-  ShieldCheck,
-  CheckCircle2,
   X,
   RotateCcw,
-  Plus,
   Briefcase,
-  IdCard,
-  SlidersHorizontal,
-  ChevronRight,
-  School,
-  ExternalLink,
 } from "@/components/iconify/lucide";
-import { SettingNavHeader } from "@/sections/settings/component/setting-nav-header";
 import { SessionSelect } from "@/components/SessionSelect";
 import { DatePicker } from "@/components/date-picker/date-picker";
 import { AppButton } from "@/components/button/app-button";
+import { AppTextField } from "@/components/text-field/app-text-field";
+import { AppSelect } from "@/components/select/app-select";
+import {
+  SettingsPageShell,
+  SettingsPageHeader,
+  SettingsSection,
+  SettingsFilterGrid,
+  SettingsNotice,
+} from "@/sections/settings/component/settings-page-ui";
 import {
   TeacherStaffMember,
   StaffCategory,
-  MpoStatus,
-  StaffStatus,
   getStoredStaffList,
   saveStoredStaffList,
   resetStaffListToDefault,
@@ -382,193 +389,228 @@ export default function TeacherStaffInfoPage() {
     window.print();
   };
 
+  const hasActiveFilters =
+    selectedSession !== "ALL" ||
+    selectedCategory !== "ALL" ||
+    selectedDepartment !== "ALL" ||
+    selectedMpoStatus !== "ALL" ||
+    selectedStatus !== "ALL" ||
+    Boolean(searchQuery);
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-16">
-      {/* Setting Module Segmented Navigation */}
-      <SettingNavHeader />
+    <SettingsPageShell>
+      <SettingsPageHeader
+        heading="Teacher and Staff Information"
+        current="Teacher & Staff"
+        action={
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap className="no-print">
+            <AppButton
+              type="button"
+              onClick={handleResetToDefault}
+              variant="outline"
+              color="secondary"
+              size="small"
+              startIcon={<RotateCcw className="w-3.5 h-3.5" />}
+              title="Reset roster to default Bangladeshi teachers & staff dataset"
+            >
+              Reset
+            </AppButton>
+            <AppButton
+              type="button"
+              onClick={handleExportCsv}
+              variant="outline"
+              color="secondary"
+              size="small"
+              startIcon={<Download className="w-3.5 h-3.5" />}
+              title="Download CSV workbook for BANBEIS or spreadsheet processing"
+            >
+              Export
+            </AppButton>
+            <AppButton
+              type="button"
+              onClick={handlePrint}
+              variant="outline"
+              color="secondary"
+              size="small"
+              startIcon={<Printer className="w-3.5 h-3.5" />}
+              title="Print official master staff roster with institutional signature blocks"
+            >
+              Print
+            </AppButton>
+            <AppButton
+              type="button"
+              onClick={handleOpenAdd}
+              variant="contained"
+              color="primary"
+              size="small"
+              startIcon={<UserPlus className="w-4 h-4" />}
+            >
+              Add
+            </AppButton>
+          </Stack>
+        }
+      />
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-emerald-500/40 flex items-center space-x-3 transition-all animate-bounce no-print">
-          <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-4 h-4" />
-          </div>
-          <span className="text-sm font-medium">{toastMessage}</span>
-        </div>
-      )}
+      {toastMessage && <SettingsNotice severity="success">{toastMessage}</SettingsNotice>}
 
-      {/* Institutional Context & Page Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-950 rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="text-xs uppercase tracking-widest font-semibold text-cyan-400 bg-cyan-950/80 px-2.5 py-1 rounded-md border border-cyan-800 flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5" />
-              EIIN: {schoolInfo.eiin} • {schoolInfo.board} Board
-            </span>
-            <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold px-2 py-0.5 rounded">
-              Academic Session {schoolInfo.academicYear}
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold mt-2.5 flex items-center space-x-2.5">
-            <UserCheck className="w-6 h-6 text-cyan-400" />
-            <span>Teacher and Staff Information</span>
-          </h1>
-          <p className="text-sm text-slate-300 mt-1 max-w-2xl">
-            Official institutional faculty & staff directory • BANBEIS & MPO index registry • Academic subject teaching load, class teachers & contact records.
-          </p>
-        </div>
+      <Stack
+        direction="row"
+        spacing={1}
+        flexWrap="wrap"
+        useFlexGap
+        className="no-print"
+        sx={{ alignItems: "center" }}
+      >
+        <Chip size="small" icon={<Users className="w-3.5 h-3.5" />} label={`${stats.total} Total`} />
+        <Chip
+          size="small"
+          color="success"
+          variant="outlined"
+          icon={<GraduationCap className="w-3.5 h-3.5" />}
+          label={`${stats.teaching} Teaching`}
+        />
+        <Chip
+          size="small"
+          color="info"
+          variant="outlined"
+          icon={<Briefcase className="w-3.5 h-3.5" />}
+          label={`${stats.nonTeaching} Support`}
+        />
+        <Chip
+          size="small"
+          color="warning"
+          variant="outlined"
+          icon={<Award className="w-3.5 h-3.5" />}
+          label={`${stats.mpo} MPO`}
+        />
+        <Chip
+          size="small"
+          variant="outlined"
+          icon={<UserCheck className="w-3.5 h-3.5" />}
+          label={`${stats.male}M · ${stats.female}F`}
+        />
+        <Chip
+          size="small"
+          variant="outlined"
+          label={`EIIN ${schoolInfo.eiin} · ${schoolInfo.board} · ${schoolInfo.academicYear}`}
+        />
+      </Stack>
 
-        {/* Action Buttons */}
-        <div className="flex items-center flex-wrap gap-2.5 self-start md:self-auto shrink-0">
-          <AppButton
-            type="button"
-            onClick={handleResetToDefault}
-            variant="outline"
-            color="secondary"
-            size="small"
-            startIcon={<RotateCcw className="w-3.5 h-3.5" />}
-            title="Reset roster to default Bangladeshi teachers & staff dataset"
-          >
-            <span className="hidden sm:inline">Reset Default</span>
-          </AppButton>
-
-          <AppButton
-            type="button"
-            onClick={handleExportCsv}
-            variant="outline"
-            color="secondary"
-            size="small"
-            startIcon={<Download className="w-3.5 h-3.5" />}
-            title="Download CSV workbook for BANBEIS or spreadsheet processing"
-          >
-            Export CSV
-          </AppButton>
-
-          <AppButton
-            type="button"
-            onClick={handlePrint}
-            variant="outline"
-            color="secondary"
-            size="small"
-            startIcon={<Printer className="w-3.5 h-3.5" />}
-            title="Print official master staff roster with institutional signature blocks"
-          >
-            Print Roster
-          </AppButton>
-
-          <AppButton
-            type="button"
-            onClick={handleOpenAdd}
-            variant="contained"
-            color="info"
-            size="small"
-            startIcon={<UserPlus className="w-4 h-4" />}
-          >
-            + Add New Personnel
-          </AppButton>
-        </div>
-      </div>
-
-      {/* KPI Metric Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 no-print">
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center font-bold shrink-0">
-            <Users className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Total Personnel
-            </div>
-            <div className="text-xl font-extrabold text-slate-900 mt-0.5">
-              {stats.total} <span className="text-xs font-normal text-slate-500">Active</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shrink-0">
-            <GraduationCap className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Teaching Faculty
-            </div>
-            <div className="text-xl font-extrabold text-emerald-700 mt-0.5">
-              {stats.teaching} <span className="text-xs font-normal text-slate-500">Teachers</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold shrink-0">
-            <Briefcase className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Non-Teaching Staff
-            </div>
-            <div className="text-xl font-extrabold text-indigo-700 mt-0.5">
-              {stats.nonTeaching} <span className="text-xs font-normal text-slate-500">Office/MLSS</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold shrink-0">
-            <Award className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              MPO Enlisted
-            </div>
-            <div className="text-xl font-extrabold text-amber-700 mt-0.5">
-              {stats.mpo} <span className="text-xs font-normal text-slate-500">Govt Index</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center space-x-3 col-span-2 sm:col-span-1">
-          <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold shrink-0">
-            <UserCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Gender Distribution
-            </div>
-            <div className="text-sm font-bold text-slate-800 mt-0.5">
-              <span className="text-sky-600">{stats.male} Male</span> •{" "}
-              <span className="text-rose-600">{stats.female} Female</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Search, Filter Toolbar & View Switcher */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3 no-print">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          {/* Search Box */}
-          <div className="relative flex-1 min-w-[260px]">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by teacher name, index no, staff ID, mobile, designation, or subject..."
-              className="w-full pl-9 pr-8 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition"
-            />
-            {searchQuery && (
-              <button
+      <SettingsSection
+        title="Search & filters"
+        subtitle="Filter the institutional faculty and staff directory by category, department, MPO status, and session."
+        action={
+          hasActiveFilters ? (
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+              <Chip
+                size="small"
+                label="Filters applied"
+                sx={{
+                  height: 22,
+                  fontWeight: 700,
+                  fontSize: "0.65rem",
+                  bgcolor: "primary.lighter",
+                  color: "primary.dark",
+                }}
+              />
+              <AppButton
                 type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                variant="link"
+                color="primary"
+                size="small"
+                startIcon={<RotateCcw className="w-3 h-3" />}
+                onClick={() => {
+                  setSelectedSession("ALL");
+                  setSelectedCategory("ALL");
+                  setSelectedDepartment("ALL");
+                  setSelectedMpoStatus("ALL");
+                  setSelectedStatus("ALL");
+                  setSearchQuery("");
+                }}
               >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
+                Reset
+              </AppButton>
+            </Stack>
+          ) : undefined
+        }
+        toolbar={
+          <SettingsFilterGrid columns={4}>
+            <Box sx={{ gridColumn: { xs: "1 / -1", md: "span 2" } }}>
+              <AppTextField
+                label="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by name, index, staff ID, mobile, designation, or subject..."
+                startIcon={<Search className="w-3.5 h-3.5 text-slate-400" />}
+                endIcon={
+                  searchQuery ? (
+                    <IconButton size="small" onClick={() => setSearchQuery("")} edge="end" aria-label="Clear search">
+                      <X className="w-3.5 h-3.5" />
+                    </IconButton>
+                  ) : undefined
+                }
+              />
+            </Box>
 
-          {/* Category Tabs */}
-          <div className="flex items-center space-x-1 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-semibold shrink-0">
+            <SessionSelect
+              value={selectedSession}
+              onChange={(val) => setSelectedSession(val)}
+              label="Session"
+              includeAll
+              allLabel="All Sessions"
+              fullWidth
+            />
+
+            <AppSelect
+              label="Department"
+              value={selectedDepartment}
+              onChange={setSelectedDepartment}
+              options={[
+                { value: "ALL", label: `All Departments (${departments.length})` },
+                ...departments.map((dept) => ({ value: dept, label: dept })),
+              ]}
+            />
+
+            <AppSelect
+              label="MPO Status"
+              value={selectedMpoStatus}
+              onChange={setSelectedMpoStatus}
+              options={[
+                { value: "ALL", label: "All MPO Categories" },
+                { value: "MPO_ENLISTED", label: "MPO Enlisted (Govt Subsidized)" },
+                { value: "NON_MPO", label: "Non-MPO (School Payroll)" },
+                { value: "CONTRACTUAL", label: "Contractual" },
+                { value: "PART_TIME", label: "Part-Time / Guest" },
+              ]}
+            />
+
+            <AppSelect
+              label="Service Status"
+              value={selectedStatus}
+              onChange={setSelectedStatus}
+              options={[
+                { value: "ALL", label: "All Service Status" },
+                { value: "ACTIVE", label: "Active in Service" },
+                { value: "ON_LEAVE", label: "On Leave" },
+                { value: "RETIRED", label: "Retired" },
+              ]}
+            />
+          </SettingsFilterGrid>
+        }
+      >
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={1.5}
+          sx={{
+            px: { xs: 2.25, sm: 2.75 },
+            pb: 2.25,
+            pt: 0.5,
+            alignItems: { md: "center" },
+            justifyContent: "space-between",
+          }}
+          className="no-print"
+        >
+          <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
             <AppButton
               type="button"
               size="small"
@@ -585,7 +627,7 @@ export default function TeacherStaffInfoPage() {
               color={selectedCategory === "TEACHING" ? "primary" : "inherit"}
               onClick={() => setSelectedCategory("TEACHING")}
             >
-              Teaching Staff ({stats.teaching})
+              Teaching ({stats.teaching})
             </AppButton>
             <AppButton
               type="button"
@@ -594,12 +636,11 @@ export default function TeacherStaffInfoPage() {
               color={selectedCategory === "NON_TEACHING" ? "primary" : "inherit"}
               onClick={() => setSelectedCategory("NON_TEACHING")}
             >
-              Support Staff ({stats.nonTeaching})
+              Support ({stats.nonTeaching})
             </AppButton>
-          </div>
+          </Stack>
 
-          {/* View Mode Switcher */}
-          <div className="flex items-center space-x-1 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-semibold shrink-0">
+          <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
             <AppButton
               type="button"
               size="small"
@@ -607,7 +648,7 @@ export default function TeacherStaffInfoPage() {
               color={viewMode === "cards" ? "primary" : "inherit"}
               onClick={() => setViewMode("cards")}
             >
-              Directory Cards
+              Cards
             </AppButton>
             <AppButton
               type="button"
@@ -616,99 +657,15 @@ export default function TeacherStaffInfoPage() {
               color={viewMode === "table" ? "primary" : "inherit"}
               onClick={() => setViewMode("table")}
             >
-              Official Table Roster
+              Table
             </AppButton>
-          </div>
-        </div>
-
-        {/* Secondary Filter Dropdowns */}
-        <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-slate-100 text-xs">
-          <div className="flex items-center space-x-1.5 text-slate-500 font-semibold">
-            <Filter className="w-3.5 h-3.5" />
-            <span>Filters:</span>
-          </div>
-
-          {/* Session Filter */}
-          <div className="flex items-center space-x-1.5">
-            <span className="text-slate-500 font-medium">Session:</span>
-            <SessionSelect
-              value={selectedSession}
-              onChange={(val) => setSelectedSession(val)}
-              selectClassName="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 text-xs font-medium focus:outline-none focus:border-cyan-500 cursor-pointer"
-            />
-          </div>
-
-          {/* Department Filter */}
-          <select
-            value={selectedDepartment}
-            onChange={(e) => setSelectedDepartment(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 text-xs font-medium focus:outline-none focus:border-cyan-500 cursor-pointer"
-          >
-            <option value="ALL">All Departments ({departments.length})</option>
-            {departments.map((dept) => (
-              <option key={dept} value={dept}>
-                {dept}
-              </option>
-            ))}
-          </select>
-
-          {/* MPO Status Filter */}
-          <select
-            value={selectedMpoStatus}
-            onChange={(e) => setSelectedMpoStatus(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 text-xs font-medium focus:outline-none focus:border-cyan-500 cursor-pointer"
-          >
-            <option value="ALL">All MPO Categories</option>
-            <option value="MPO_ENLISTED">MPO Enlisted (Govt Subsidized)</option>
-            <option value="NON_MPO">Non-MPO (School Payroll)</option>
-            <option value="CONTRACTUAL">Contractual</option>
-            <option value="PART_TIME">Part-Time / Guest</option>
-          </select>
-
-          {/* Service Status Filter */}
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 text-xs font-medium focus:outline-none focus:border-cyan-500 cursor-pointer"
-          >
-            <option value="ALL">All Service Status</option>
-            <option value="ACTIVE">Active in Service</option>
-            <option value="ON_LEAVE">On Leave</option>
-            <option value="RETIRED">Retired</option>
-          </select>
-
-          {/* Clear Filters */}
-          {(selectedSession !== "ALL" ||
-            selectedCategory !== "ALL" ||
-            selectedDepartment !== "ALL" ||
-            selectedMpoStatus !== "ALL" ||
-            selectedStatus !== "ALL" ||
-            searchQuery) && (
-            <AppButton
-              type="button"
-              variant="link"
-              color="info"
-              size="small"
-              startIcon={<RotateCcw className="w-3 h-3" />}
-              onClick={() => {
-                setSelectedSession("ALL");
-                setSelectedCategory("ALL");
-                setSelectedDepartment("ALL");
-                setSelectedMpoStatus("ALL");
-                setSelectedStatus("ALL");
-                setSearchQuery("");
-              }}
-            >
-              Reset Filters
-            </AppButton>
-          )}
-
-          <div className="text-slate-500 font-mono text-[11px] ml-auto">
-            Showing <span className="font-bold text-slate-900">{filteredStaff.length}</span> of{" "}
-            {staffList.length} staff records
-          </div>
-        </div>
-      </div>
+            <Typography variant="caption" color="text.secondary" sx={{ ml: 1, fontFamily: "monospace" }}>
+              Showing <Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>{filteredStaff.length}</Box> of{" "}
+              {staffList.length}
+            </Typography>
+          </Stack>
+        </Stack>
+      </SettingsSection>
 
       {/* PRINT-ONLY HEADER */}
       <div className="hidden print:block mb-6 border-b pb-4 text-center">
@@ -724,9 +681,13 @@ export default function TeacherStaffInfoPage() {
         </div>
       </div>
 
+      <SettingsSection
+        title="Staff directory"
+        subtitle="Official institutional faculty & staff roster with BANBEIS and MPO index records."
+      >
       {/* DIRECTORY CARDS VIEW */}
       {viewMode === "cards" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 no-print">
+        <Box className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 no-print" sx={{ p: { xs: 2, sm: 2.5 } }}>
           {filteredStaff.length === 0 ? (
             <div className="col-span-full bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-3">
               <Users className="w-10 h-10 text-slate-300 mx-auto" />
@@ -880,7 +841,7 @@ export default function TeacherStaffInfoPage() {
                     <AppButton
                       type="button"
                       variant="link"
-                      color="info"
+                      color="primary"
                       size="small"
                       startIcon={<Eye className="w-3.5 h-3.5" />}
                       onClick={() => setSelectedDossier(staff)}
@@ -911,12 +872,12 @@ export default function TeacherStaffInfoPage() {
               );
             })
           )}
-        </div>
+        </Box>
       )}
 
       {/* OFFICIAL TABLE ROSTER VIEW (Also rendered in print) */}
       {(viewMode === "table" || typeof window !== "undefined") && (
-        <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden ${viewMode !== "table" ? "hidden print:block" : ""}`}>
+        <Box className={`${viewMode !== "table" ? "hidden print:block" : ""}`} sx={{ overflow: "hidden" }}>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
@@ -1059,472 +1020,381 @@ export default function TeacherStaffInfoPage() {
               <p className="text-[10px] text-slate-500">{schoolInfo.headTitle} & Institutional Seal</p>
             </div>
           </div>
-        </div>
+        </Box>
       )}
+      </SettingsSection>
 
       {/* ========================================================
           MODAL: ADD / EDIT PERSONNEL
          ======================================================== */}
-      {isAddEditModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto no-print">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full my-8 overflow-hidden animate-in fade-in duration-200">
-            {/* Modal Header */}
-            <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
-              <div>
-                <h3 className="font-bold text-base flex items-center space-x-2">
-                  <UserPlus className="w-5 h-5 text-cyan-400" />
-                  <span>{editingStaff ? "Edit Staff Information" : "Register New Teacher / Staff"}</span>
-                </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+      <Dialog
+        open={isAddEditModalOpen}
+        onClose={() => setIsAddEditModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+        className="no-print"
+      >
+        <Box component="form" onSubmit={handleSaveStaff} sx={{ display: "flex", flexDirection: "column", maxHeight: "90vh" }}>
+          <DialogTitle sx={{ pr: 6, position: "relative" }}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+              <UserPlus className="w-5 h-5" />
+              <Box>
+                <Typography variant="h6" component="span">
+                  {editingStaff ? "Edit Staff Information" : "Register New Teacher / Staff"}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" display="block">
                   Institutional Master Faculty & Administrative Roster Registration
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsAddEditModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+                </Typography>
+              </Box>
+            </Stack>
+            <IconButton
+              aria-label="Close"
+              onClick={() => setIsAddEditModalOpen(false)}
+              sx={{ position: "absolute", right: 8, top: 8 }}
+            >
+              <X className="w-5 h-5" />
+            </IconButton>
+          </DialogTitle>
 
-            {/* Modal Tabs */}
-            <div className="flex border-b border-slate-200 bg-slate-50 px-4 text-xs font-semibold">
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={formTab === "identity" ? "primary" : "inherit"}
-                onClick={() => setFormTab("identity")}
-              >
-                1. Identity & Records
-              </AppButton>
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={formTab === "employment" ? "primary" : "inherit"}
-                onClick={() => setFormTab("employment")}
-              >
-                2. Role & Employment
-              </AppButton>
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={formTab === "academics" ? "primary" : "inherit"}
-                onClick={() => setFormTab("academics")}
-              >
-                3. Academics & Allocation
-              </AppButton>
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={formTab === "contact" ? "primary" : "inherit"}
-                onClick={() => setFormTab("contact")}
-              >
-                4. Contact & Address
-              </AppButton>
-            </div>
+          <Stack
+            direction="row"
+            spacing={0.75}
+            flexWrap="wrap"
+            useFlexGap
+            sx={{ px: 3, pb: 1.5, borderBottom: 1, borderColor: "divider" }}
+          >
+            <AppButton
+              type="button"
+              size="small"
+              variant="soft"
+              color={formTab === "identity" ? "primary" : "inherit"}
+              onClick={() => setFormTab("identity")}
+            >
+              1. Identity & Records
+            </AppButton>
+            <AppButton
+              type="button"
+              size="small"
+              variant="soft"
+              color={formTab === "employment" ? "primary" : "inherit"}
+              onClick={() => setFormTab("employment")}
+            >
+              2. Role & Employment
+            </AppButton>
+            <AppButton
+              type="button"
+              size="small"
+              variant="soft"
+              color={formTab === "academics" ? "primary" : "inherit"}
+              onClick={() => setFormTab("academics")}
+            >
+              3. Academics & Allocation
+            </AppButton>
+            <AppButton
+              type="button"
+              size="small"
+              variant="soft"
+              color={formTab === "contact" ? "primary" : "inherit"}
+              onClick={() => setFormTab("contact")}
+            >
+              4. Contact & Address
+            </AppButton>
+          </Stack>
 
-            {/* Modal Body Form */}
-            <form onSubmit={handleSaveStaff} className="p-6 space-y-4 max-h-[65vh] overflow-y-auto">
-              {/* TAB 1: IDENTITY */}
-              {formTab === "identity" && (
-                <div className="space-y-4 text-xs">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">
-                        Staff ID No. *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.staffId}
-                        onChange={(e) => setFormData({ ...formData, staffId: e.target.value })}
-                        placeholder="e.g. TCH-010"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 font-mono"
-                        required
-                      />
-                    </div>
+          <DialogContent dividers sx={{ overflowY: "auto" }}>
+            {formTab === "identity" && (
+              <Stack spacing={2}>
+                <SettingsFilterGrid columns={2}>
+                  <AppTextField
+                    label="Staff ID No. *"
+                    value={formData.staffId}
+                    onChange={(e) => setFormData({ ...formData, staffId: e.target.value })}
+                    placeholder="e.g. TCH-010"
+                    required
+                    slotProps={{ input: { sx: { fontFamily: "monospace" } } }}
+                  />
+                  <AppTextField
+                    label="MPO Index Number"
+                    value={formData.mpoIndex}
+                    onChange={(e) => setFormData({ ...formData, mpoIndex: e.target.value })}
+                    placeholder="e.g. MPO-829104 or Non-MPO"
+                    slotProps={{ input: { sx: { fontFamily: "monospace" } } }}
+                  />
+                  <AppTextField
+                    label="Full Name (English) *"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g. Mohammad Rafiqul Islam"
+                    required
+                  />
+                  <AppTextField
+                    label="Full Name (Bangla)"
+                    value={formData.nameBn}
+                    onChange={(e) => setFormData({ ...formData, nameBn: e.target.value })}
+                    placeholder="e.g. মোহাম্মদ রফিকুল ইসলাম"
+                  />
+                </SettingsFilterGrid>
 
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">
-                        MPO Index Number
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.mpoIndex}
-                        onChange={(e) => setFormData({ ...formData, mpoIndex: e.target.value })}
-                        placeholder="e.g. MPO-829104 or Non-MPO"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 font-mono"
-                      />
-                    </div>
-                  </div>
+                <SettingsFilterGrid columns={3}>
+                  <AppSelect
+                    label="Gender"
+                    value={formData.gender}
+                    onChange={(value) => setFormData({ ...formData, gender: value as TeacherStaffMember["gender"] })}
+                    options={[
+                      { value: "MALE", label: "Male" },
+                      { value: "FEMALE", label: "Female" },
+                      { value: "OTHER", label: "Other" },
+                    ]}
+                  />
+                  <AppSelect
+                    label="Blood Group"
+                    value={formData.bloodGroup}
+                    onChange={(value) => setFormData({ ...formData, bloodGroup: value })}
+                    options={[
+                      { value: "A+", label: "A+" },
+                      { value: "A-", label: "A-" },
+                      { value: "B+", label: "B+" },
+                      { value: "B-", label: "B-" },
+                      { value: "O+", label: "O+" },
+                      { value: "O-", label: "O-" },
+                      { value: "AB+", label: "AB+" },
+                      { value: "AB-", label: "AB-" },
+                    ]}
+                  />
+                  <DatePicker
+                    label="Date of Birth"
+                    value={formData.dateOfBirth}
+                    onChange={(val) => setFormData({ ...formData, dateOfBirth: val })}
+                  />
+                </SettingsFilterGrid>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">
-                        Full Name (English) *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="e.g. Mohammad Rafiqul Islam"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                        required
-                      />
-                    </div>
+                <AppTextField
+                  label="National ID (NID)"
+                  value={formData.nid}
+                  onChange={(e) => setFormData({ ...formData, nid: e.target.value })}
+                  placeholder="10 or 17 digit NID number"
+                  slotProps={{ input: { sx: { fontFamily: "monospace" } } }}
+                />
+              </Stack>
+            )}
 
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">
-                        Full Name (Bangla)
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.nameBn}
-                        onChange={(e) => setFormData({ ...formData, nameBn: e.target.value })}
-                        placeholder="e.g. মোহাম্মদ রফিকুল ইসলাম"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 font-bengali"
-                      />
-                    </div>
-                  </div>
+            {formTab === "employment" && (
+              <Stack spacing={2}>
+                <SettingsFilterGrid columns={2}>
+                  <AppSelect
+                    label="Staff Category *"
+                    value={formData.category}
+                    onChange={(value) =>
+                      setFormData({ ...formData, category: value as TeacherStaffMember["category"] })
+                    }
+                    options={[
+                      { value: "TEACHING", label: "Teaching Faculty (Teacher/Instructor)" },
+                      { value: "NON_TEACHING", label: "Non-Teaching (Office / Support / MLSS)" },
+                    ]}
+                  />
+                  <AppTextField
+                    label="Official Designation *"
+                    value={formData.designation}
+                    onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                    placeholder="e.g. Senior Teacher (Mathematics)"
+                    required
+                  />
+                  <AppTextField
+                    label="Department"
+                    value={formData.department}
+                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                    placeholder="e.g. Mathematics & Science, Languages, Administration"
+                  />
+                  <AppSelect
+                    label="MPO Status"
+                    value={formData.mpoStatus}
+                    onChange={(value) =>
+                      setFormData({ ...formData, mpoStatus: value as TeacherStaffMember["mpoStatus"] })
+                    }
+                    options={[
+                      { value: "MPO_ENLISTED", label: "MPO Enlisted (Govt Subsidized)" },
+                      { value: "NON_MPO", label: "Non-MPO (School Payroll)" },
+                      { value: "CONTRACTUAL", label: "Contractual" },
+                      { value: "PART_TIME", label: "Part-Time / Visiting" },
+                    ]}
+                  />
+                </SettingsFilterGrid>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">Gender</label>
-                      <select
-                        value={formData.gender}
-                        onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                      >
-                        <option value="MALE">Male</option>
-                        <option value="FEMALE">Female</option>
-                        <option value="OTHER">Other</option>
-                      </select>
-                    </div>
+                <SettingsFilterGrid columns={3}>
+                  <AppTextField
+                    label="Salary Grade"
+                    value={formData.salaryGrade}
+                    onChange={(e) => setFormData({ ...formData, salaryGrade: e.target.value })}
+                    placeholder="e.g. Grade 9 (NPS)"
+                  />
+                  <DatePicker
+                    label="Joining Date"
+                    value={formData.joiningDate}
+                    onChange={(val) => setFormData({ ...formData, joiningDate: val })}
+                  />
+                  <AppSelect
+                    label="Service Status"
+                    value={formData.status}
+                    onChange={(value) =>
+                      setFormData({ ...formData, status: value as TeacherStaffMember["status"] })
+                    }
+                    options={[
+                      { value: "ACTIVE", label: "Active in Service" },
+                      { value: "ON_LEAVE", label: "On Leave" },
+                      { value: "RETIRED", label: "Retired" },
+                    ]}
+                  />
+                </SettingsFilterGrid>
+              </Stack>
+            )}
 
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">Blood Group</label>
-                      <select
-                        value={formData.bloodGroup}
-                        onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 font-mono"
-                      >
-                        <option value="A+">A+</option>
-                        <option value="A-">A-</option>
-                        <option value="B+">B+</option>
-                        <option value="B-">B-</option>
-                        <option value="O+">O+</option>
-                        <option value="O-">O-</option>
-                        <option value="AB+">AB+</option>
-                        <option value="AB-">AB-</option>
-                      </select>
-                    </div>
-
-                    <DatePicker
-                      label="Date of Birth"
-                      value={formData.dateOfBirth}
-                      onChange={(val) => setFormData({ ...formData, dateOfBirth: val })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">National ID (NID)</label>
-                    <input
-                      type="text"
-                      value={formData.nid}
-                      onChange={(e) => setFormData({ ...formData, nid: e.target.value })}
-                      placeholder="10 or 17 digit NID number"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 font-mono"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 2: EMPLOYMENT */}
-              {formTab === "employment" && (
-                <div className="space-y-4 text-xs">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">
-                        Staff Category *
-                      </label>
-                      <select
-                        value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                      >
-                        <option value="TEACHING">Teaching Faculty (Teacher/Instructor)</option>
-                        <option value="NON_TEACHING">Non-Teaching (Office / Support / MLSS)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">
-                        Official Designation *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.designation}
-                        onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                        placeholder="e.g. Senior Teacher (Mathematics)"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">Department</label>
-                      <input
-                        type="text"
-                        value={formData.department}
-                        onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                        placeholder="e.g. Mathematics & Science, Languages, Administration"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">MPO Status</label>
-                      <select
-                        value={formData.mpoStatus}
-                        onChange={(e) => setFormData({ ...formData, mpoStatus: e.target.value as any })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                      >
-                        <option value="MPO_ENLISTED">MPO Enlisted (Govt Subsidized)</option>
-                        <option value="NON_MPO">Non-MPO (School Payroll)</option>
-                        <option value="CONTRACTUAL">Contractual</option>
-                        <option value="PART_TIME">Part-Time / Visiting</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">Salary Grade</label>
-                      <input
-                        type="text"
-                        value={formData.salaryGrade}
-                        onChange={(e) => setFormData({ ...formData, salaryGrade: e.target.value })}
-                        placeholder="e.g. Grade 9 (NPS)"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                      />
-                    </div>
-
-                    <DatePicker
-                      label="Joining Date"
-                      value={formData.joiningDate}
-                      onChange={(val) => setFormData({ ...formData, joiningDate: val })}
-                    />
-
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">Service Status</label>
-                      <select
-                        value={formData.status}
-                        onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                      >
-                        <option value="ACTIVE">Active in Service</option>
-                        <option value="ON_LEAVE">On Leave</option>
-                        <option value="RETIRED">Retired</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 3: ACADEMICS & ALLOCATION */}
-              {formTab === "academics" && (
-                <div className="space-y-4 text-xs">
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">
-                      Highest Educational Qualifications
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.education}
-                      onChange={(e) => setFormData({ ...formData, education: e.target.value })}
-                      placeholder="e.g. M.Sc in Mathematics (DU), B.Ed (1st Class)"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">
-                      Assigned Subjects (Separate with commas)
-                    </label>
-                    <input
-                      type="text"
-                      value={subjectInput}
-                      onChange={(e) => setSubjectInput(e.target.value)}
-                      placeholder="e.g. General Mathematics, Higher Mathematics"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                    />
-                    <p className="text-[10px] text-slate-400 mt-0.5">
-                      Enter subjects taught by this teacher for routine and result tabulations.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">
-                      Assigned Classes / Sections (Separate with commas)
-                    </label>
-                    <input
-                      type="text"
-                      value={classInput}
-                      onChange={(e) => setClassInput(e.target.value)}
-                      placeholder="e.g. Class 9 (Science), Class 10 (Day)"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                    />
-                  </div>
-
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 space-y-2">
-                    <label className="flex items-center space-x-2 font-bold text-emerald-950 cursor-pointer">
-                      <input
-                        type="checkbox"
+            {formTab === "academics" && (
+              <Stack spacing={2}>
+                <AppTextField
+                  label="Highest Educational Qualifications"
+                  value={formData.education}
+                  onChange={(e) => setFormData({ ...formData, education: e.target.value })}
+                  placeholder="e.g. M.Sc in Mathematics (DU), B.Ed (1st Class)"
+                />
+                <Box>
+                  <AppTextField
+                    label="Assigned Subjects (Separate with commas)"
+                    value={subjectInput}
+                    onChange={(e) => setSubjectInput(e.target.value)}
+                    placeholder="e.g. General Mathematics, Higher Mathematics"
+                  />
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
+                    Enter subjects taught by this teacher for routine and result tabulations.
+                  </Typography>
+                </Box>
+                <AppTextField
+                  label="Assigned Classes / Sections (Separate with commas)"
+                  value={classInput}
+                  onChange={(e) => setClassInput(e.target.value)}
+                  placeholder="e.g. Class 9 (Science), Class 10 (Day)"
+                />
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: "success.lighter",
+                    border: 1,
+                    borderColor: "success.light",
+                  }}
+                >
+                  <FormControlLabel
+                    control={
+                      <Checkbox
                         checked={formData.isClassTeacher || false}
                         onChange={(e) => setFormData({ ...formData, isClassTeacher: e.target.checked })}
-                        className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer"
+                        color="success"
                       />
-                      <span>Designated as Class Teacher</span>
-                    </label>
-
-                    {formData.isClassTeacher && (
-                      <div className="pt-1">
-                        <label className="block font-semibold text-emerald-900 mb-1 text-[11px]">
-                          Class Teacher Of (Class & Section):
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.classTeacherOf || ""}
-                          onChange={(e) => setFormData({ ...formData, classTeacherOf: e.target.value })}
-                          placeholder="e.g. Class 10 - Padma (Day Shift)"
-                          className="w-full px-3 py-1.5 rounded-lg border border-emerald-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-xs"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 4: CONTACT & ADDRESS */}
-              {formTab === "contact" && (
-                <div className="space-y-4 text-xs">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">
-                        Primary Mobile Phone *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="+880 1712-345678"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 font-mono"
-                        required
+                    }
+                    label="Designated as Class Teacher"
+                  />
+                  {formData.isClassTeacher && (
+                    <Box sx={{ mt: 1 }}>
+                      <AppTextField
+                        label="Class Teacher Of (Class & Section)"
+                        value={formData.classTeacherOf || ""}
+                        onChange={(e) => setFormData({ ...formData, classTeacherOf: e.target.value })}
+                        placeholder="e.g. Class 10 - Padma (Day Shift)"
                       />
-                    </div>
+                    </Box>
+                  )}
+                </Box>
+              </Stack>
+            )}
 
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="teacher@school.edu.bd"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                      />
-                    </div>
-                  </div>
+            {formTab === "contact" && (
+              <Stack spacing={2}>
+                <SettingsFilterGrid columns={2}>
+                  <AppTextField
+                    label="Primary Mobile Phone *"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+880 1712-345678"
+                    required
+                    slotProps={{ input: { sx: { fontFamily: "monospace" } } }}
+                  />
+                  <AppTextField
+                    label="Email Address"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="teacher@school.edu.bd"
+                  />
+                </SettingsFilterGrid>
+                <AppTextField
+                  label="Emergency Contact Phone"
+                  value={formData.emergencyContact || ""}
+                  onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
+                  placeholder="+880 1819-223344"
+                  slotProps={{ input: { sx: { fontFamily: "monospace" } } }}
+                />
+                <AppTextField
+                  label="Permanent / Residential Address"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="Holding, Road, Area, Thana, District"
+                  multiline
+                  minRows={2}
+                />
+              </Stack>
+            )}
+          </DialogContent>
 
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">
-                      Emergency Contact Phone
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.emergencyContact || ""}
-                      onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
-                      placeholder="+880 1819-223344"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 font-mono"
-                    />
-                  </div>
+          <DialogActions sx={{ px: 3, py: 2, justifyContent: "space-between" }}>
+            <AppButton
+              type="button"
+              variant="ghost"
+              color="inherit"
+              size="small"
+              onClick={() => setIsAddEditModalOpen(false)}
+            >
+              Cancel
+            </AppButton>
 
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">
-                      Permanent / Residential Address
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      placeholder="Holding, Road, Area, Thana, District"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Modal Footer Controls */}
-              <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
+            <Stack direction="row" spacing={1}>
+              {formTab !== "identity" && (
                 <AppButton
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   color="inherit"
                   size="small"
-                  onClick={() => setIsAddEditModalOpen(false)}
+                  onClick={() => {
+                    if (formTab === "employment") setFormTab("identity");
+                    if (formTab === "academics") setFormTab("employment");
+                    if (formTab === "contact") setFormTab("academics");
+                  }}
                 >
-                  Cancel
+                  Back
                 </AppButton>
+              )}
 
-                <div className="flex items-center space-x-2">
-                  {formTab !== "identity" && (
-                    <AppButton
-                      type="button"
-                      variant="outline"
-                      color="inherit"
-                      size="small"
-                      onClick={() => {
-                        if (formTab === "employment") setFormTab("identity");
-                        if (formTab === "academics") setFormTab("employment");
-                        if (formTab === "contact") setFormTab("academics");
-                      }}
-                    >
-                      Back
-                    </AppButton>
-                  )}
-
-                  {formTab !== "contact" ? (
-                    <AppButton
-                      type="button"
-                      variant="contained"
-                      color="info"
-                      size="small"
-                      onClick={() => {
-                        if (formTab === "identity") setFormTab("employment");
-                        if (formTab === "employment") setFormTab("academics");
-                        if (formTab === "academics") setFormTab("contact");
-                      }}
-                    >
-                      Next Step
-                    </AppButton>
-                  ) : (
-                    <AppButton type="submit" variant="contained" color="success" size="small">
-                      Save Personnel Record
-                    </AppButton>
-                  )}
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+              {formTab !== "contact" ? (
+                <AppButton
+                  type="button"
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={() => {
+                    if (formTab === "identity") setFormTab("employment");
+                    if (formTab === "employment") setFormTab("academics");
+                    if (formTab === "academics") setFormTab("contact");
+                  }}
+                >
+                  Next Step
+                </AppButton>
+              ) : (
+                <AppButton type="submit" variant="contained" color="primary" size="small">
+                  Save Personnel Record
+                </AppButton>
+              )}
+            </Stack>
+          </DialogActions>
+        </Box>
+      </Dialog>
 
       {/* ========================================================
           MODAL: 360° STAFF PROFILE DOSSIER
@@ -1709,7 +1579,7 @@ export default function TeacherStaffInfoPage() {
                 <AppButton
                   type="button"
                   variant="contained"
-                  color="info"
+                  color="primary"
                   size="small"
                   startIcon={<Edit2 className="w-3.5 h-3.5" />}
                   onClick={() => {
@@ -1725,6 +1595,6 @@ export default function TeacherStaffInfoPage() {
           </div>
         </div>
       )}
-    </div>
+    </SettingsPageShell>
   );
 }

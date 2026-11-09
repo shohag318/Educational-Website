@@ -42,9 +42,8 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   }, []);
 
   const handleLogout = () => {
-    const code = session?.institutionCode || info.eiin;
     clearAuthSession();
-    router.push(`${PATHS.auth.portalLogin}?inst=${encodeURIComponent(code)}`);
+    router.push(PATHS.auth.login);
   };
 
   return (

@@ -3,33 +3,42 @@
 
 import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
 import {
-  ShieldCheck,
-  Users,
+  Box,
+  Checkbox,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  Stack,
+  Typography,
+} from "@mui/material";
+import {
   UserPlus,
-  Search,
-  Shield,
   KeyRound,
   CheckCircle2,
   XCircle,
-  AlertTriangle,
-  Lock,
-  Smartphone,
   Mail,
   Phone,
   Trash2,
   Edit2,
-  RefreshCw,
-  Sparkles,
   Download,
-  Filter,
   Layers,
   ChevronDown,
 } from "@/components/iconify/lucide";
-import { UserRoleNavHeader } from "@/sections/user-role/component/user-role-nav-header";
 import { SessionSelect } from "@/components/SessionSelect";
+import { AppSelect } from "@/components/select/app-select";
+import { AppTextField } from "@/components/text-field/app-text-field";
 import { AppButton } from "@/components/button/app-button";
+import {
+  SettingsPageShell,
+  SettingsPageHeader,
+  SettingsSection,
+  SettingsFilterGrid,
+  SettingsNotice,
+} from "@/sections/settings/component/settings-page-ui";
 import {
   UserAccount,
   Role,
@@ -484,40 +493,12 @@ export default function UserRolePage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed top-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center space-x-2.5 text-xs border border-purple-500/50 animate-bounce">
-          <Sparkles className="w-4 h-4 text-purple-400" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
-
-      {/* Navigation Tabs */}
-      <UserRoleNavHeader />
-
-      {/* Header */}
-      <div>
-        <div className="flex items-center space-x-2 text-xs text-slate-500 mb-1">
-          <Link href="/" className="hover:underline">Home</Link>
-          <span>/</span>
-          <Link href="/settings" className="hover:underline">Settings</Link>
-          <span>/</span>
-          <span className="text-slate-800 font-medium">User Accounts</span>
-        </div>
-
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <ShieldCheck className="w-6 h-6 text-purple-600" />
-              User Accounts & Roles
-            </h1>
-            <p className="text-xs text-slate-500 mt-1">
-              Manage staff user accounts, role permissions, access privileges, and security audit logs.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
+    <SettingsPageShell>
+      <SettingsPageHeader
+        heading="User Accounts"
+        current="User Accounts"
+        action={
+          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
             <AppButton
               onClick={exportCSV}
               variant="outline"
@@ -533,469 +514,400 @@ export default function UserRolePage() {
                 setIsAddModalOpen(true);
               }}
               variant="contained"
+              color="primary"
               size="small"
               startIcon={<UserPlus className="w-4 h-4" />}
             >
               Add New User
             </AppButton>
-          </div>
-        </div>
-      </div>
+          </Stack>
+        }
+      />
 
-      {/* KPI Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-slate-500">Total System Users</p>
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center">
-              <Users className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-slate-900 mt-2">{totalUsers}</p>
-          <div className="flex items-center gap-1 text-[11px] text-emerald-600 font-medium mt-1">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>{activeUsers} active accounts</span>
-          </div>
-        </div>
+      {toastMessage ? (
+        <SettingsNotice severity="success">{toastMessage}</SettingsNotice>
+      ) : null}
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-slate-500">Configured Roles</p>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
-              <Shield className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-slate-900 mt-2">{activeRolesCount}</p>
-          <div className="flex items-center gap-1 text-[11px] text-blue-600 font-medium mt-1">
-            <Link href="/user-role/roles" className="hover:underline flex items-center gap-1">
-              <span>View RBAC Matrix</span>
-              <span>→</span>
-            </Link>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-slate-500">2FA Protected</p>
-            <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center">
-              <KeyRound className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-slate-900 mt-2">{twoFactorUsers} / {totalUsers}</p>
-          <p className="text-[11px] text-slate-500 mt-1">
-            {Math.round((twoFactorUsers / (totalUsers || 1)) * 100)}% 2-Factor Enforced
-          </p>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-slate-500">Teacher Scopes</p>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
-              <Lock className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-slate-900 mt-2">{delegationCount}</p>
-          <div className="flex items-center gap-1 text-[11px] text-amber-600 font-medium mt-1">
-            <Link href="/user-role/delegation" className="hover:underline flex items-center gap-1">
-              <span>Class-Subject Scope</span>
-              <span>→</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Role Dropdown Filter Bar */}
-      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <label htmlFor="user-role-filter-select" className="flex items-center gap-1.5 text-xs font-bold text-slate-700 whitespace-nowrap">
-            <Filter className="w-3.5 h-3.5 text-purple-600" />
-            <span>Filter by Role:</span>
-          </label>
-          <div className="relative">
-            <select
-              id="user-role-filter-select"
-              value={selectedRoleFilter}
-              onChange={(e) => setSelectedRoleFilter(e.target.value)}
-              className="appearance-none bg-white border border-slate-300 hover:border-purple-400 focus:border-purple-600 focus:ring-2 focus:ring-purple-500/20 text-xs font-semibold text-slate-800 rounded-lg pl-3 pr-8 py-1.5 shadow-2xs transition cursor-pointer min-w-[240px]"
-            >
-              <option value="ALL">All Roles ({users.length} accounts)</option>
-              <optgroup label="System & Custom Roles">
-                {roles.map((r) => {
-                  const count = users.filter((u) => u.roleId === r.id).length;
-                  return (
-                    <option key={r.id} value={r.id}>
-                      {r.name} ({count} {count === 1 ? "user" : "users"}) {r.isSystem ? "" : "• Custom"}
-                    </option>
-                  );
-                })}
-              </optgroup>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500">
-              <ChevronDown className="w-3.5 h-3.5" />
-            </div>
-          </div>
-
-          {selectedRoleFilter !== "ALL" && (
-            <AppButton
-              type="button"
+      <SettingsSection
+        title="User directory"
+        subtitle="Manage staff accounts, role assignments, and access privileges."
+        action={
+          <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", alignItems: "center" }}>
+            <Chip
               size="small"
-              variant="soft"
-              color="primary"
-              onClick={() => setSelectedRoleFilter("ALL")}
-              title="Reset to view all roles"
-            >
-              Show All Roles
-            </AppButton>
-          )}
-        </div>
-
-        <div className="text-xs text-slate-500 font-medium">
-          Showing <span className="font-bold text-slate-900">{filteredUsers.length}</span> of{" "}
-          <span className="font-bold text-slate-900">{users.length}</span> accounts
-        </div>
-      </div>
-
-      {/* User Directory Table Container */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
-        {/* Table Filter Bar */}
-        <div className="p-4 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50/50">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search user by name, ID, phone, email, designation..."
+              label={`${totalUsers} users`}
+              sx={{ height: 22, fontWeight: 700, bgcolor: "primary.lighter", color: "primary.dark" }}
+            />
+            <Chip
+              size="small"
+              label={`${activeUsers} active`}
+              color="success"
+              variant="outlined"
+              sx={{ height: 22, fontWeight: 700 }}
+            />
+            <Chip
+              size="small"
+              label={`${twoFactorUsers} with 2FA`}
+              color="info"
+              variant="outlined"
+              sx={{ height: 22, fontWeight: 700 }}
+            />
+            <Chip
+              size="small"
+              label={`${activeRolesCount} roles`}
+              variant="outlined"
+              sx={{ height: 22, fontWeight: 700 }}
+            />
+            <Chip
+              size="small"
+              label={`${delegationCount} scopes`}
+              variant="outlined"
+              sx={{ height: 22, fontWeight: 700 }}
+            />
+            <Chip
+              size="small"
+              label={`${filteredUsers.length} shown`}
+              sx={{ height: 22, fontWeight: 700, bgcolor: "grey.100", color: "text.secondary" }}
+            />
+          </Stack>
+        }
+        toolbar={
+          <SettingsFilterGrid columns={4}>
+            <AppTextField
+              label="Search"
+              placeholder="Name, ID, phone, email…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 shadow-2xs"
             />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
+            <AppSelect
+              label="Role"
+              value={selectedRoleFilter}
+              onChange={setSelectedRoleFilter}
+              options={[
+                { value: "ALL", label: `All Roles (${users.length})` },
+                ...roles.map((r) => {
+                  const count = users.filter((u) => u.roleId === r.id).length;
+                  return {
+                    value: r.id,
+                    label: `${r.name} (${count})${r.isSystem ? "" : " · Custom"}`,
+                  };
+                }),
+              ]}
+            />
             <SessionSelect
               value={selectedSession}
               onChange={(val) => setSelectedSession(val)}
-              label="Session:"
-              includeAll={true}
+              label="Session"
+              includeAll
               allLabel="All Sessions"
               activeOnly={false}
-              labelClassName="text-xs font-semibold text-slate-600 whitespace-nowrap"
-              selectClassName="px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-2xs text-slate-700 font-medium"
+              fullWidth
             />
-            <select
+            <AppSelect
+              label="Status"
               value={selectedStatusFilter}
-              onChange={(e) => setSelectedStatusFilter(e.target.value)}
-              className="px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-2xs text-slate-700 font-medium"
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="ACTIVE">Active Accounts</option>
-              <option value="SUSPENDED">Suspended Accounts</option>
-              <option value="INVITED">Invited / Pending</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-100/75 text-slate-700 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
-              <tr>
-                <th className="px-4 py-3">User & Credential</th>
-                <th className="px-4 py-3">System Role</th>
-                <th className="px-4 py-3">Designation & Dept</th>
-                <th className="px-4 py-3">Contact</th>
-                <th className="px-4 py-3 text-center">2FA</th>
-                <th className="px-4 py-3 text-center">Status</th>
-                <th className="px-4 py-3 text-center">Last Login</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredUsers.length === 0 ? (
+              onChange={setSelectedStatusFilter}
+              options={[
+                { value: "ALL", label: "All Statuses" },
+                { value: "ACTIVE", label: "Active Accounts" },
+                { value: "SUSPENDED", label: "Suspended Accounts" },
+                { value: "INVITED", label: "Invited / Pending" },
+              ]}
+            />
+          </SettingsFilterGrid>
+        }
+      >
+        <Box
+          sx={{
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 2,
+            overflow: "hidden",
+            bgcolor: "background.paper",
+          }}
+        >
+          <Box sx={{ overflowX: "auto" }}>
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-100/75 text-slate-700 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
                 <tr>
-                  <td colSpan={8} className="p-0">
-                    <NoDataFound />
-                  </td>
+                  <th className="px-4 py-3">User & Credential</th>
+                  <th className="px-4 py-3">System Role</th>
+                  <th className="px-4 py-3">Designation & Dept</th>
+                  <th className="px-4 py-3">Contact</th>
+                  <th className="px-4 py-3 text-center">2FA</th>
+                  <th className="px-4 py-3 text-center">Status</th>
+                  <th className="px-4 py-3 text-center">Last Login</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
-              ) : (
-                filteredUsers.map((user) => {
-                  const roleObj = roles.find((r) => r.id === user.roleId);
-                  const isRoot = user.username === "ADMIN-ROOT";
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="p-0">
+                      <NoDataFound />
+                    </td>
+                  </tr>
+                ) : (
+                  filteredUsers.map((user) => {
+                    const roleObj = roles.find((r) => r.id === user.roleId);
+                    const isRoot = user.username === "ADMIN-ROOT";
 
-                  return (
-                    <tr key={user.id} className="hover:bg-slate-50/75 transition-colors">
-                      {/* User & ID */}
-                      <td className="px-4 py-3">
-                        <div className="flex items-center space-x-3">
-                          <div
-                            className={`w-8 h-8 rounded-full ${user.avatarBg} text-white font-bold flex items-center justify-center text-xs shadow-2xs shrink-0`}
-                          >
-                            {user.name.charAt(0)}
+                    return (
+                      <tr key={user.id} className="hover:bg-slate-50/75 transition-colors">
+                        {/* User & ID */}
+                        <td className="px-4 py-3">
+                          <div className="flex items-center space-x-3">
+                            <div
+                              className={`w-8 h-8 rounded-full ${user.avatarBg} text-white font-bold flex items-center justify-center text-xs shadow-2xs shrink-0`}
+                            >
+                              {user.name.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                                <span>{user.name}</span>
+                                {isRoot && (
+                                  <span className="bg-slate-100 text-slate-700 text-[9px] font-bold px-1.5 py-0.2 rounded">
+                                    ROOT
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-slate-500 font-mono">
+                                ID: {user.username}
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                              <span>{user.name}</span>
-                              {isRoot && (
-                                <span className="bg-purple-100 text-purple-800 text-[9px] font-bold px-1.5 py-0.2 rounded">
-                                  ROOT
-                                </span>
+                        </td>
+
+                        {/* Role Badge */}
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                              roleObj?.badgeBg || "bg-slate-100 text-slate-800"
+                            }`}
+                          >
+                            {roleObj?.name || user.roleId}
+                          </span>
+                        </td>
+
+                        {/* Designation */}
+                        <td className="px-4 py-3">
+                          <div className="font-medium text-slate-800">{user.designation}</div>
+                          <div className="text-[11px] text-slate-500">{user.department}</div>
+                        </td>
+
+                        {/* Contact */}
+                        <td className="px-4 py-3">
+                          <div className="text-slate-800 font-mono text-[11px] flex items-center gap-1">
+                            <Phone className="w-3 h-3 text-slate-400" />
+                            <span>{user.phone}</span>
+                          </div>
+                          <div className="text-slate-500 text-[11px] flex items-center gap-1">
+                            <Mail className="w-3 h-3 text-slate-400" />
+                            <span>{user.email}</span>
+                          </div>
+                        </td>
+
+                        {/* 2FA */}
+                        <td className="px-4 py-3 text-center">
+                          {user.twoFactorEnabled ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
+                              <CheckCircle2 className="w-3 h-3" />
+                              Enforced
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">
+                              Disabled
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-4 py-3 text-center">
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              user.status === "ACTIVE"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : user.status === "INVITED"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-rose-100 text-rose-800"
+                            }`}
+                          >
+                            {user.status}
+                          </span>
+                        </td>
+
+                        {/* Last Login */}
+                        <td className="px-4 py-3 text-center text-slate-500 text-[11px]">
+                          {user.lastLogin}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end space-x-1">
+                            {/* Toggle Status */}
+                            <button
+                              onClick={() => toggleStatus(user)}
+                              title={user.status === "ACTIVE" ? "Suspend user" : "Activate user"}
+                              disabled={isRoot}
+                              className={`p-1 rounded hover:bg-slate-200 transition ${
+                                isRoot ? "opacity-30 cursor-not-allowed" : "text-slate-600 cursor-pointer"
+                              }`}
+                            >
+                              {user.status === "ACTIVE" ? (
+                                <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                              ) : (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                               )}
-                            </div>
-                            <div className="text-[11px] text-slate-500 font-mono">
-                              ID: {user.username}
-                            </div>
+                            </button>
+
+                            {/* Reset Password */}
+                            <button
+                              onClick={() => handleResetPassword(user)}
+                              title="Reset Password"
+                              className="p-1 rounded text-slate-600 hover:text-amber-600 hover:bg-slate-200 transition cursor-pointer"
+                            >
+                              <KeyRound className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* Edit User */}
+                            <button
+                              onClick={() => openEditModal(user)}
+                              title="Edit User"
+                              className="p-1 rounded text-slate-600 hover:text-primary hover:bg-slate-200 transition cursor-pointer"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* Delete User */}
+                            <button
+                              onClick={() => handleDeleteUser(user)}
+                              title="Delete User"
+                              disabled={isRoot}
+                              className={`p-1 rounded transition ${
+                                isRoot
+                                  ? "opacity-30 cursor-not-allowed text-slate-400"
+                                  : "text-slate-600 hover:text-rose-600 hover:bg-slate-200 cursor-pointer"
+                              }`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           </div>
-                        </div>
-                      </td>
-
-                      {/* Role Badge */}
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                            roleObj?.badgeBg || "bg-slate-100 text-slate-800"
-                          }`}
-                        >
-                          {roleObj?.name || user.roleId}
-                        </span>
-                      </td>
-
-                      {/* Designation */}
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-slate-800">{user.designation}</div>
-                        <div className="text-[11px] text-slate-500">{user.department}</div>
-                      </td>
-
-                      {/* Contact */}
-                      <td className="px-4 py-3">
-                        <div className="text-slate-800 font-mono text-[11px] flex items-center gap-1">
-                          <Phone className="w-3 h-3 text-slate-400" />
-                          <span>{user.phone}</span>
-                        </div>
-                        <div className="text-slate-500 text-[11px] flex items-center gap-1">
-                          <Mail className="w-3 h-3 text-slate-400" />
-                          <span>{user.email}</span>
-                        </div>
-                      </td>
-
-                      {/* 2FA */}
-                      <td className="px-4 py-3 text-center">
-                        {user.twoFactorEnabled ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
-                            <CheckCircle2 className="w-3 h-3" />
-                            Enforced
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">
-                            Disabled
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Status */}
-                      <td className="px-4 py-3 text-center">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            user.status === "ACTIVE"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : user.status === "INVITED"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-rose-100 text-rose-800"
-                          }`}
-                        >
-                          {user.status}
-                        </span>
-                      </td>
-
-                      {/* Last Login */}
-                      <td className="px-4 py-3 text-center text-slate-500 text-[11px]">
-                        {user.lastLogin}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end space-x-1">
-                          {/* Toggle Status */}
-                          <button
-                            onClick={() => toggleStatus(user)}
-                            title={user.status === "ACTIVE" ? "Suspend user" : "Activate user"}
-                            disabled={isRoot}
-                            className={`p-1 rounded hover:bg-slate-200 transition ${
-                              isRoot ? "opacity-30 cursor-not-allowed" : "text-slate-600 cursor-pointer"
-                            }`}
-                          >
-                            {user.status === "ACTIVE" ? (
-                              <XCircle className="w-3.5 h-3.5 text-rose-600" />
-                            ) : (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            )}
-                          </button>
-
-                          {/* Reset Password */}
-                          <button
-                            onClick={() => handleResetPassword(user)}
-                            title="Reset Password"
-                            className="p-1 rounded text-slate-600 hover:text-amber-600 hover:bg-slate-200 transition cursor-pointer"
-                          >
-                            <KeyRound className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Edit User */}
-                          <button
-                            onClick={() => openEditModal(user)}
-                            title="Edit User"
-                            className="p-1 rounded text-slate-600 hover:text-purple-700 hover:bg-slate-200 transition cursor-pointer"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Delete User */}
-                          <button
-                            onClick={() => handleDeleteUser(user)}
-                            title="Delete User"
-                            disabled={isRoot}
-                            className={`p-1 rounded transition ${
-                              isRoot
-                                ? "opacity-30 cursor-not-allowed text-slate-400"
-                                : "text-slate-600 hover:text-rose-600 hover:bg-slate-200 cursor-pointer"
-                            }`}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </Box>
+        </Box>
+      </SettingsSection>
 
       {/* Modal: Add New User */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
-                  <UserPlus className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-sm">Add New Staff / User Account</h3>
-                  <p className="text-slate-500 text-[11px]">Create credentials & assign system role</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 cursor-pointer text-lg font-bold"
+      <Dialog
+        open={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        scroll="paper"
+      >
+        <Box component="form" onSubmit={handleCreateUser} sx={{ display: "flex", flexDirection: "column" }}>
+          <DialogTitle sx={{ pb: 1 }}>
+            <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 1.5,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  bgcolor: "primary.lighter",
+                  color: "primary.main",
+                }}
               >
-                ×
-              </button>
-            </div>
+                <UserPlus className="w-4 h-4" />
+              </Box>
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  Add New Staff / User Account
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Create credentials & assign system role
+                </Typography>
+              </Box>
+            </Stack>
+          </DialogTitle>
 
-            <form onSubmit={handleCreateUser} className="space-y-4 mt-4 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Full Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Md. Shahidul Alam"
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Employee / User ID *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. TCH-205"
-                    value={formUsername}
-                    onChange={(e) => setFormUsername(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg uppercase focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Assigned Role *</label>
-                  <select
-                    value={formRoleId}
-                    onChange={(e) => {
-                      const newRoleId = e.target.value;
-                      setFormRoleId(newRoleId);
-                      setFormAccessibleModules(getDefaultModulesForRole(newRoleId, roles));
-                    }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none font-medium"
-                  >
-                    {roles.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Designation</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Senior Teacher"
-                    value={formDesignation}
-                    onChange={(e) => setFormDesignation(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Department</label>
-                  <select
-                    value={formDepartment}
-                    onChange={(e) => setFormDepartment(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  >
-                    <option value="Administration">Executive Administration</option>
-                    <option value="Science Department">Science Department</option>
-                    <option value="Commerce Department">Commerce Department</option>
-                    <option value="Humanities Department">Humanities Department</option>
-                    <option value="Accounts & Finance">Accounts & Finance</option>
-                    <option value="Examination Committee">Examination Committee</option>
-                    <option value="IT & Student Section">IT & Student Section</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Mobile Phone (SMS)</label>
-                  <input
-                    type="text"
-                    placeholder="017XXXXXXXX"
-                    value={formPhone}
-                    onChange={(e) => setFormPhone(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none font-mono"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Institutional Email</label>
-                <input
-                  type="email"
-                  placeholder="name@dhakaschool.edu.bd"
-                  value={formEmail}
-                  onChange={(e) => setFormEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
+          <DialogContent dividers sx={{ px: { xs: 2, sm: 3 } }}>
+            <Stack spacing={2} sx={{ pt: 1 }}>
+              <SettingsFilterGrid columns={2}>
+                <AppTextField
+                  label="Full Name"
+                  required
+                  placeholder="e.g. Md. Shahidul Alam"
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
                 />
-              </div>
+                <AppTextField
+                  label="Employee / User ID"
+                  required
+                  placeholder="e.g. TCH-205"
+                  value={formUsername}
+                  onChange={(e) => setFormUsername(e.target.value)}
+                  slotProps={{ input: { sx: { textTransform: "uppercase" } } }}
+                />
+                <AppSelect
+                  label="Assigned Role"
+                  value={formRoleId}
+                  onChange={(value) => {
+                    setFormRoleId(value);
+                    setFormAccessibleModules(getDefaultModulesForRole(value, roles));
+                  }}
+                  options={roles.map((r) => ({ value: r.id, label: r.name }))}
+                />
+                <AppTextField
+                  label="Designation"
+                  placeholder="e.g. Senior Teacher"
+                  value={formDesignation}
+                  onChange={(e) => setFormDesignation(e.target.value)}
+                />
+                <AppSelect
+                  label="Department"
+                  value={formDepartment}
+                  onChange={setFormDepartment}
+                  options={[
+                    { value: "Administration", label: "Executive Administration" },
+                    { value: "Science Department", label: "Science Department" },
+                    { value: "Commerce Department", label: "Commerce Department" },
+                    { value: "Humanities Department", label: "Humanities Department" },
+                    { value: "Accounts & Finance", label: "Accounts & Finance" },
+                    { value: "Examination Committee", label: "Examination Committee" },
+                    { value: "IT & Student Section", label: "IT & Student Section" },
+                  ]}
+                />
+                <AppTextField
+                  label="Mobile Phone (SMS)"
+                  placeholder="017XXXXXXXX"
+                  value={formPhone}
+                  onChange={(e) => setFormPhone(e.target.value)}
+                  slotProps={{ input: { sx: { fontFamily: "monospace" } } }}
+                />
+              </SettingsFilterGrid>
 
-              {/* Which Module are Access by this ID */}
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
+              <AppTextField
+                label="Institutional Email"
+                type="email"
+                placeholder="name@dhakaschool.edu.bd"
+                value={formEmail}
+                onChange={(e) => setFormEmail(e.target.value)}
+              />
+
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 1 }}>
                   Which Module are Access by this ID
-                </label>
-                <div className="relative">
+                </Typography>
+                <Box sx={{ position: "relative" }}>
                   <AppButton
                     type="button"
                     fullWidth
@@ -1020,14 +932,30 @@ export default function UserRolePage() {
 
                   {isAddModuleDropdownOpen && (
                     <>
-                      <div
-                        className="fixed inset-0 z-10"
+                      <Box
+                        sx={{ position: "fixed", inset: 0, zIndex: 10 }}
                         onClick={() => setIsAddModuleDropdownOpen(false)}
                       />
-                      <div className="absolute left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-slate-200 z-20 p-3 text-left">
-                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 text-[11px]">
-                          <span className="font-bold text-slate-700">Check modules to grant for this ID</span>
-                          <div className="flex items-center gap-2">
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          left: 0,
+                          right: 0,
+                          mt: 1,
+                          bgcolor: "background.paper",
+                          borderRadius: 2,
+                          border: 1,
+                          borderColor: "divider",
+                          boxShadow: 6,
+                          zIndex: 20,
+                          p: 1.5,
+                        }}
+                      >
+                        <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between", pb: 1, mb: 1, borderBottom: 1, borderColor: "divider" }}>
+                          <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                            Check modules to grant for this ID
+                          </Typography>
+                          <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
                             <AppButton
                               type="button"
                               variant="link"
@@ -1036,7 +964,6 @@ export default function UserRolePage() {
                             >
                               Select All
                             </AppButton>
-                            <span className="text-slate-300">|</span>
                             <AppButton
                               type="button"
                               variant="link"
@@ -1046,361 +973,380 @@ export default function UserRolePage() {
                             >
                               Clear
                             </AppButton>
-                          </div>
-                        </div>
+                          </Stack>
+                        </Stack>
 
-                        <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+                        <Stack spacing={0.5} sx={{ maxHeight: 192, overflowY: "auto", pr: 0.5 }}>
                           {MODULE_KEYS.map((mod) => {
                             const isChecked = formAccessibleModules.includes(mod.key);
                             return (
-                              <label
+                              <FormControlLabel
                                 key={mod.key}
-                                className={`flex items-start gap-2 p-1.5 rounded-lg text-xs cursor-pointer transition-colors ${
-                                  isChecked
-                                    ? "bg-purple-50/70 text-purple-950 font-semibold"
-                                    : "hover:bg-slate-50 text-slate-700"
-                                }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => {
-                                    setFormAccessibleModules((prev) =>
-                                      prev.includes(mod.key)
-                                        ? prev.filter((k) => k !== mod.key)
-                                        : [...prev, mod.key]
-                                    );
-                                  }}
-                                  className="mt-0.5 rounded text-purple-600 border-slate-300 focus:ring-purple-500 w-3.5 h-3.5 cursor-pointer"
-                                />
-                                <div className="min-w-0">
-                                  <div className="truncate text-[11px] leading-tight">{mod.name}</div>
-                                  <div className="text-[10px] text-slate-400 font-normal leading-tight line-clamp-1">
-                                    {mod.desc}
-                                  </div>
-                                </div>
-                              </label>
+                                sx={{
+                                  m: 0,
+                                  px: 1,
+                                  py: 0.5,
+                                  borderRadius: 1.5,
+                                  bgcolor: isChecked ? "primary.lighter" : "transparent",
+                                  "&:hover": { bgcolor: isChecked ? "primary.lighter" : "action.hover" },
+                                  alignItems: "flex-start",
+                                }}
+                                control={
+                                  <Checkbox
+                                    size="small"
+                                    checked={isChecked}
+                                    onChange={() => {
+                                      setFormAccessibleModules((prev) =>
+                                        prev.includes(mod.key)
+                                          ? prev.filter((k) => k !== mod.key)
+                                          : [...prev, mod.key]
+                                      );
+                                    }}
+                                  />
+                                }
+                                label={
+                                  <Box sx={{ minWidth: 0, pt: 0.25 }}>
+                                    <Typography variant="caption" sx={{ fontWeight: isChecked ? 700 : 500, display: "block", lineHeight: 1.2 }}>
+                                      {mod.name}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", lineHeight: 1.2 }}>
+                                      {mod.desc}
+                                    </Typography>
+                                  </Box>
+                                }
+                              />
                             );
                           })}
-                        </div>
-                      </div>
+                        </Stack>
+                      </Box>
                     </>
                   )}
-                </div>
-              </div>
+                </Box>
+              </Box>
 
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                <div>
-                  <span className="font-bold text-slate-800">Enforce Two-Factor Auth (2FA)</span>
-                  <p className="text-[11px] text-slate-500">Require OTP verification upon signing in</p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={form2FA}
-                  onChange={(e) => setForm2FA(e.target.checked)}
-                  className="w-4 h-4 text-purple-600 rounded border-slate-300 focus:ring-purple-500"
-                />
-              </div>
+              <FormControlLabel
+                sx={{ m: 0, pt: 1, borderTop: 1, borderColor: "divider", alignItems: "flex-start" }}
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={form2FA}
+                    onChange={(e) => setForm2FA(e.target.checked)}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      Enforce Two-Factor Auth (2FA)
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Require OTP verification upon signing in
+                    </Typography>
+                  </Box>
+                }
+              />
+            </Stack>
+          </DialogContent>
 
-              <div className="pt-4 flex items-center justify-end space-x-2">
-                <AppButton
-                  type="button"
-                  variant="ghost"
-                  color="inherit"
-                  size="small"
-                  onClick={() => setIsAddModalOpen(false)}
-                >
-                  Cancel
-                </AppButton>
-                <AppButton type="submit" variant="contained" size="small">
-                  Create User
-                </AppButton>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+          <DialogActions sx={{ px: 3, py: 2 }}>
+            <AppButton
+              type="button"
+              variant="ghost"
+              color="inherit"
+              size="small"
+              onClick={() => setIsAddModalOpen(false)}
+            >
+              Cancel
+            </AppButton>
+            <AppButton type="submit" variant="contained" color="primary" size="small">
+              Create User
+            </AppButton>
+          </DialogActions>
+        </Box>
+      </Dialog>
 
       {/* Modal: Edit User */}
-      {isEditModalOpen && selectedUserToEdit && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+      <Dialog
+        open={isEditModalOpen && Boolean(selectedUserToEdit)}
+        onClose={() => setIsEditModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        scroll="paper"
+      >
+        {selectedUserToEdit && (
+          <Box component="form" onSubmit={handleUpdateUser} sx={{ display: "flex", flexDirection: "column" }}>
+            <DialogTitle sx={{ pb: 1 }}>
+              <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 1.5,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: "info.lighter",
+                    color: "info.main",
+                  }}
+                >
                   <Edit2 className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-sm">Edit User Profile</h3>
-                  <p className="text-slate-500 text-[11px]">Updating credentials for {selectedUserToEdit.username}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 cursor-pointer text-lg font-bold"
-              >
-                ×
-              </button>
-            </div>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                    Edit User Profile
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Updating credentials for {selectedUserToEdit.username}
+                  </Typography>
+                </Box>
+              </Stack>
+            </DialogTitle>
 
-            <form onSubmit={handleUpdateUser} className="space-y-4 mt-4 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Full Name</label>
-                  <input
-                    type="text"
+            <DialogContent dividers sx={{ px: { xs: 2, sm: 3 } }}>
+              <Stack spacing={2} sx={{ pt: 1 }}>
+                <SettingsFilterGrid columns={2}>
+                  <AppTextField
+                    label="Full Name"
                     required
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
                   />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">User ID</label>
-                  <input
-                    type="text"
+                  <AppTextField
+                    label="User ID"
                     required
                     disabled={selectedUserToEdit.username === "ADMIN-ROOT"}
                     value={formUsername}
                     onChange={(e) => setFormUsername(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg uppercase disabled:bg-slate-100 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    slotProps={{ input: { sx: { textTransform: "uppercase" } } }}
                   />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Assigned Role</label>
-                  <select
+                  <AppSelect
+                    label="Assigned Role"
                     value={formRoleId}
                     disabled={selectedUserToEdit.username === "ADMIN-ROOT"}
-                    onChange={(e) => {
-                      const newRoleId = e.target.value;
-                      setFormRoleId(newRoleId);
-                      setFormAccessibleModules(getDefaultModulesForRole(newRoleId, roles));
+                    onChange={(value) => {
+                      setFormRoleId(value);
+                      setFormAccessibleModules(getDefaultModulesForRole(value, roles));
                     }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none font-medium disabled:bg-slate-100"
-                  >
-                    {roles.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Designation</label>
-                  <input
-                    type="text"
+                    options={roles.map((r) => ({ value: r.id, label: r.name }))}
+                  />
+                  <AppTextField
+                    label="Designation"
                     value={formDesignation}
                     onChange={(e) => setFormDesignation(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
                   />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Department</label>
-                  <select
+                  <AppSelect
+                    label="Department"
                     value={formDepartment}
-                    onChange={(e) => setFormDepartment(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  >
-                    <option value="Administration">Executive Administration</option>
-                    <option value="Science Department">Science Department</option>
-                    <option value="Commerce Department">Commerce Department</option>
-                    <option value="Humanities Department">Humanities Department</option>
-                    <option value="Accounts & Finance">Accounts & Finance</option>
-                    <option value="Examination Committee">Examination Committee</option>
-                    <option value="IT & Student Section">IT & Student Section</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Mobile Phone</label>
-                  <input
-                    type="text"
+                    onChange={setFormDepartment}
+                    options={[
+                      { value: "Administration", label: "Executive Administration" },
+                      { value: "Science Department", label: "Science Department" },
+                      { value: "Commerce Department", label: "Commerce Department" },
+                      { value: "Humanities Department", label: "Humanities Department" },
+                      { value: "Accounts & Finance", label: "Accounts & Finance" },
+                      { value: "Examination Committee", label: "Examination Committee" },
+                      { value: "IT & Student Section", label: "IT & Student Section" },
+                    ]}
+                  />
+                  <AppTextField
+                    label="Mobile Phone"
                     value={formPhone}
                     onChange={(e) => setFormPhone(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none font-mono"
+                    slotProps={{ input: { sx: { fontFamily: "monospace" } } }}
                   />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Institutional Email</label>
-                  <input
+                  <AppTextField
+                    label="Institutional Email"
                     type="email"
                     value={formEmail}
                     onChange={(e) => setFormEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
                   />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Account Status</label>
-                  <select
+                  <AppSelect
+                    label="Account Status"
                     value={formStatus}
                     disabled={selectedUserToEdit.username === "ADMIN-ROOT"}
-                    onChange={(e) => setFormStatus(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none disabled:bg-slate-100 font-medium"
-                  >
-                    <option value="ACTIVE">ACTIVE</option>
-                    <option value="SUSPENDED">SUSPENDED</option>
-                    <option value="INVITED">INVITED</option>
-                  </select>
-                </div>
-              </div>
+                    onChange={(value) => setFormStatus(value as "ACTIVE" | "SUSPENDED" | "INVITED")}
+                    options={[
+                      { value: "ACTIVE", label: "ACTIVE" },
+                      { value: "SUSPENDED", label: "SUSPENDED" },
+                      { value: "INVITED", label: "INVITED" },
+                    ]}
+                  />
+                </SettingsFilterGrid>
 
-              {/* Which Module are Access by this ID */}
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Which Module are Access by this ID
-                </label>
-                <div className="relative">
-                  <AppButton
-                    type="button"
-                    fullWidth
-                    variant="outline"
-                    color="inherit"
-                    disabled={selectedUserToEdit.username === "ADMIN-ROOT"}
-                    startIcon={<Layers className="w-4 h-4" />}
-                    endIcon={
-                      <ChevronDown
-                        className={`w-3.5 h-3.5 transition-transform ${
-                          isEditModuleDropdownOpen ? "rotate-180" : ""
-                        }`}
-                      />
-                    }
-                    onClick={() => setIsEditModuleDropdownOpen((v) => !v)}
-                  >
-                    {selectedUserToEdit.username === "ADMIN-ROOT"
-                      ? "All Modules Granted (Master Root Access)"
-                      : formAccessibleModules.length === 0
-                      ? "No modules selected (0 / 7)"
-                      : formAccessibleModules.length === MODULE_KEYS.length
-                      ? "All 7 Modules Accessible"
-                      : `${formAccessibleModules.length} of ${MODULE_KEYS.length} Modules Accessible`}
-                  </AppButton>
+                <Box>
+                  <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 1 }}>
+                    Which Module are Access by this ID
+                  </Typography>
+                  <Box sx={{ position: "relative" }}>
+                    <AppButton
+                      type="button"
+                      fullWidth
+                      variant="outline"
+                      color="inherit"
+                      disabled={selectedUserToEdit.username === "ADMIN-ROOT"}
+                      startIcon={<Layers className="w-4 h-4" />}
+                      endIcon={
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 transition-transform ${
+                            isEditModuleDropdownOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      }
+                      onClick={() => setIsEditModuleDropdownOpen((v) => !v)}
+                    >
+                      {selectedUserToEdit.username === "ADMIN-ROOT"
+                        ? "All Modules Granted (Master Root Access)"
+                        : formAccessibleModules.length === 0
+                        ? "No modules selected (0 / 7)"
+                        : formAccessibleModules.length === MODULE_KEYS.length
+                        ? "All 7 Modules Accessible"
+                        : `${formAccessibleModules.length} of ${MODULE_KEYS.length} Modules Accessible`}
+                    </AppButton>
 
-                  {isEditModuleDropdownOpen && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-10"
-                        onClick={() => setIsEditModuleDropdownOpen(false)}
-                      />
-                      <div className="absolute left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-slate-200 z-20 p-3 text-left">
-                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 text-[11px]">
-                          <span className="font-bold text-slate-700">
-                            Check modules for ID {selectedUserToEdit.username}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <AppButton
-                              type="button"
-                              variant="link"
-                              size="small"
-                              onClick={() => setFormAccessibleModules(MODULE_KEYS.map((m) => m.key))}
-                            >
-                              Select All
-                            </AppButton>
-                            <span className="text-slate-300">|</span>
-                            <AppButton
-                              type="button"
-                              variant="link"
-                              color="error"
-                              size="small"
-                              onClick={() => setFormAccessibleModules([])}
-                            >
-                              Clear
-                            </AppButton>
-                            <span className="text-slate-300">|</span>
-                            <AppButton
-                              type="button"
-                              variant="link"
-                              color="inherit"
-                              size="small"
-                              onClick={() =>
-                                setFormAccessibleModules(
-                                  getDefaultModulesForRole(formRoleId, roles)
-                                )
-                              }
-                            >
-                              Role Default
-                            </AppButton>
-                          </div>
-                        </div>
-
-                        <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
-                          {MODULE_KEYS.map((mod) => {
-                            const isChecked = formAccessibleModules.includes(mod.key);
-                            return (
-                              <label
-                                key={mod.key}
-                                className={`flex items-start gap-2 p-1.5 rounded-lg text-xs cursor-pointer transition-colors ${
-                                  isChecked
-                                    ? "bg-purple-50/70 text-purple-950 font-semibold"
-                                    : "hover:bg-slate-50 text-slate-700"
-                                }`}
+                    {isEditModuleDropdownOpen && (
+                      <>
+                        <Box
+                          sx={{ position: "fixed", inset: 0, zIndex: 10 }}
+                          onClick={() => setIsEditModuleDropdownOpen(false)}
+                        />
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            left: 0,
+                            right: 0,
+                            mt: 1,
+                            bgcolor: "background.paper",
+                            borderRadius: 2,
+                            border: 1,
+                            borderColor: "divider",
+                            boxShadow: 6,
+                            zIndex: 20,
+                            p: 1.5,
+                          }}
+                        >
+                          <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between", pb: 1, mb: 1, borderBottom: 1, borderColor: "divider", flexWrap: "wrap", gap: 0.5 }}>
+                            <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                              Check modules for ID {selectedUserToEdit.username}
+                            </Typography>
+                            <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+                              <AppButton
+                                type="button"
+                                variant="link"
+                                size="small"
+                                onClick={() => setFormAccessibleModules(MODULE_KEYS.map((m) => m.key))}
                               >
-                                <input
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => {
-                                    setFormAccessibleModules((prev) =>
-                                      prev.includes(mod.key)
-                                        ? prev.filter((k) => k !== mod.key)
-                                        : [...prev, mod.key]
-                                    );
+                                Select All
+                              </AppButton>
+                              <AppButton
+                                type="button"
+                                variant="link"
+                                color="error"
+                                size="small"
+                                onClick={() => setFormAccessibleModules([])}
+                              >
+                                Clear
+                              </AppButton>
+                              <AppButton
+                                type="button"
+                                variant="link"
+                                color="inherit"
+                                size="small"
+                                onClick={() =>
+                                  setFormAccessibleModules(getDefaultModulesForRole(formRoleId, roles))
+                                }
+                              >
+                                Role Default
+                              </AppButton>
+                            </Stack>
+                          </Stack>
+
+                          <Stack spacing={0.5} sx={{ maxHeight: 192, overflowY: "auto", pr: 0.5 }}>
+                            {MODULE_KEYS.map((mod) => {
+                              const isChecked = formAccessibleModules.includes(mod.key);
+                              return (
+                                <FormControlLabel
+                                  key={mod.key}
+                                  sx={{
+                                    m: 0,
+                                    px: 1,
+                                    py: 0.5,
+                                    borderRadius: 1.5,
+                                    bgcolor: isChecked ? "primary.lighter" : "transparent",
+                                    "&:hover": { bgcolor: isChecked ? "primary.lighter" : "action.hover" },
+                                    alignItems: "flex-start",
                                   }}
-                                  className="mt-0.5 rounded text-purple-600 border-slate-300 focus:ring-purple-500 w-3.5 h-3.5 cursor-pointer"
+                                  control={
+                                    <Checkbox
+                                      size="small"
+                                      checked={isChecked}
+                                      onChange={() => {
+                                        setFormAccessibleModules((prev) =>
+                                          prev.includes(mod.key)
+                                            ? prev.filter((k) => k !== mod.key)
+                                            : [...prev, mod.key]
+                                        );
+                                      }}
+                                    />
+                                  }
+                                  label={
+                                    <Box sx={{ minWidth: 0, pt: 0.25 }}>
+                                      <Typography variant="caption" sx={{ fontWeight: isChecked ? 700 : 500, display: "block", lineHeight: 1.2 }}>
+                                        {mod.name}
+                                      </Typography>
+                                      <Typography variant="caption" color="text.secondary" sx={{ display: "block", lineHeight: 1.2 }}>
+                                        {mod.desc}
+                                      </Typography>
+                                    </Box>
+                                  }
                                 />
-                                <div className="min-w-0">
-                                  <div className="truncate text-[11px] leading-tight">{mod.name}</div>
-                                  <div className="text-[10px] text-slate-400 font-normal leading-tight line-clamp-1">
-                                    {mod.desc}
-                                  </div>
-                                </div>
-                              </label>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
+                              );
+                            })}
+                          </Stack>
+                        </Box>
+                      </>
+                    )}
+                  </Box>
+                </Box>
 
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                <div>
-                  <span className="font-bold text-slate-800">Two-Factor Authentication</span>
-                  <p className="text-[11px] text-slate-500">Require OTP verification upon signing in</p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={form2FA}
-                  onChange={(e) => setForm2FA(e.target.checked)}
-                  className="w-4 h-4 text-purple-600 rounded border-slate-300 focus:ring-purple-500"
+                <FormControlLabel
+                  sx={{ m: 0, pt: 1, borderTop: 1, borderColor: "divider", alignItems: "flex-start" }}
+                  control={
+                    <Checkbox
+                      size="small"
+                      checked={form2FA}
+                      onChange={(e) => setForm2FA(e.target.checked)}
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                        Two-Factor Authentication
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Require OTP verification upon signing in
+                      </Typography>
+                    </Box>
+                  }
                 />
-              </div>
+              </Stack>
+            </DialogContent>
 
-              <div className="pt-4 flex items-center justify-end space-x-2">
-                <AppButton
-                  type="button"
-                  variant="ghost"
-                  color="inherit"
-                  size="small"
-                  onClick={() => setIsEditModalOpen(false)}
-                >
-                  Cancel
-                </AppButton>
-                <AppButton type="submit" variant="contained" color="info" size="small">
-                  Save Changes
-                </AppButton>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+            <DialogActions sx={{ px: 3, py: 2 }}>
+              <AppButton
+                type="button"
+                variant="ghost"
+                color="inherit"
+                size="small"
+                onClick={() => setIsEditModalOpen(false)}
+              >
+                Cancel
+              </AppButton>
+              <AppButton type="submit" variant="contained" color="primary" size="small">
+                Save Changes
+              </AppButton>
+            </DialogActions>
+          </Box>
+        )}
+      </Dialog>
+    </SettingsPageShell>
   );
 }

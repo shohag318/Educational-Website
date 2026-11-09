@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   isInstitutionLoggedIn,
   AUTH_SESSION_EVENT,
   getAuthSession,
+  clearAuthSession,
   AuthSession,
 } from "@/lib/authSession";
 import { Iconify } from "@/components/iconify/iconify";
+import { PATHS } from "@/config-global";
 
 /** Fluent Color — https://icon-sets.iconify.design/fluent-color/ */
 const FI = {
@@ -74,6 +76,7 @@ const FI = {
   rooms: "fluent-color:building-multiple-24",
   maintenance: "fluent-color:wrench-24",
   depreciation: "fluent-color:data-pie-24",
+  logout: "lucide:log-out",
   chevronRight: "lucide:chevron-right",
   chevronDown: "lucide:chevron-down",
 } as const;
@@ -181,6 +184,7 @@ function resolveOpenGroups(path: string | null): Record<string, boolean> {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isInstLogin, setIsInstLogin] = useState(false);
   const [instSession, setInstSession] = useState<AuthSession | null>(null);
 
@@ -198,6 +202,27 @@ export function Sidebar() {
       window.removeEventListener(AUTH_SESSION_EVENT, handleAuthChange);
     };
   }, []);
+
+  const handleLogout = () => {
+    clearAuthSession();
+    router.push(PATHS.auth.login);
+  };
+
+  const profileName = instSession?.institutionName || "Smart Academy";
+  const profileId = instSession?.adminId || "Guest";
+  const profileRole =
+    instSession?.role === "SUPER_ADMIN"
+      ? "Super Admin"
+      : instSession?.role === "INSTITUTION_ADMIN"
+        ? "Campus Admin"
+        : "User";
+  const profileInitials = (profileId || "SA")
+    .replace(/[^a-zA-Z0-9]/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() || "")
+    .join("") || "SA";
 
   const isModuleAccessible = (moduleKey: string) => {
     if (!isInstLogin) return true;
@@ -1291,15 +1316,34 @@ export function Sidebar() {
         )}
       </nav>
 
-      {/* Footer Status */}
-      <div className="p-3 border-t border-slate-800 text-xs text-slate-400 shrink-0 bg-slate-900">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-[11px] text-slate-400">System</span>
-          <span className="flex items-center space-x-1.5 text-emerald-400 text-[11px] font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Online</span>
-          </span>
+      {/* Profile + Logout */}
+      <div className="shrink-0 border-t border-slate-800 bg-slate-950/80 p-3 space-y-2">
+        <div className="flex items-center gap-2.5 rounded-xl border border-slate-800 bg-slate-900/90 px-2.5 py-2">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/20 text-[11px] font-bold text-emerald-300 border border-emerald-500/30">
+            {profileInitials}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-xs font-bold text-white" title={profileName}>
+              {profileName}
+            </div>
+            <div className="truncate font-mono text-[10px] text-slate-400" title={profileId}>
+              {profileId}
+            </div>
+            <div className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              {profileRole}
+            </div>
+          </div>
         </div>
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-200 transition-colors hover:border-rose-500/40 hover:bg-rose-500/10 hover:text-rose-300"
+        >
+          <NavIcon icon={FI.logout} size={15} />
+          <span>Logout</span>
+        </button>
       </div>
     </aside>
   );

@@ -2,42 +2,48 @@
 
 import { useEffect, useState, useRef, useMemo } from "react";
 import {
+  Box,
+  Checkbox,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  Stack,
+  Typography,
+} from "@mui/material";
+import {
   FileSignature,
   PenTool,
   Stamp,
-  CheckCircle2,
   PlusCircle,
   Search,
   Upload,
   Trash2,
   Edit3,
   Eye,
-  RefreshCw,
-  Sliders,
-  Check,
-  X,
   FileText,
   Award,
-  CreditCard,
   Layers,
-  Sparkles,
-  Info,
   RotateCcw,
-  Palette,
-  ShieldCheck,
-  Building2,
-  Calendar,
-  AlertCircle,
 } from "@/components/iconify/lucide";
-import { SettingNavHeader } from "@/sections/settings/component/setting-nav-header";
+import {
+  SettingsPageShell,
+  SettingsPageHeader,
+  SettingsSection,
+  SettingsFilterGrid,
+  SettingsNotice,
+} from "@/sections/settings/component/settings-page-ui";
 import { AppButton } from "@/components/button/app-button";
+import { AppTextField } from "@/components/text-field/app-text-field";
+import { AppSelect } from "@/components/select/app-select";
 import {
   InstitutionalSignature,
   SignatureType,
   SIGNATURE_TYPE_OPTIONS,
   SCRIPT_FONTS,
   getStoredSignatures,
-  saveStoredSignatures,
   addSignature,
   updateSingleSignature,
   deleteSignature,
@@ -358,199 +364,143 @@ export default function SignatureSetupPage() {
     }
   };
 
+  const activeCount = signatures.filter((s) => s.isActive).length;
+  const sealCount = signatures.filter((s) => s.hasSeal).length;
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16">
-      {/* Module Navigation Menu Bar */}
-      <SettingNavHeader />
-
-      {/* Hero Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-cyan-950 to-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-xl border border-cyan-900/50 relative overflow-hidden">
-        <div className="absolute right-0 top-0 bottom-0 opacity-10 pointer-events-none flex items-center pr-10">
-          <FileSignature className="w-80 h-80 text-cyan-400" />
-        </div>
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
-                Signatory Authority Matrix
-              </span>
-              <span className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center space-x-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Active Protection</span>
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center space-x-3">
-              <span>Signature Setup & Designation Control</span>
-            </h1>
-            <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Configure official authority signatures, designation titles, handwritten digital strokes, and institutional
-              seals for Student Marksheets, Tabulation Sheets, Admit Cards, and Testimonials.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
+    <SettingsPageShell>
+      <SettingsPageHeader
+        heading="Signature Setup"
+        current="Signatures"
+        action={
+          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
             <AppButton
               onClick={() => setShowPreviewModal(true)}
-              variant="outline"
-              color="info"
+              variant="outlined"
+              color="primary"
               size="small"
               startIcon={<Eye className="w-3.5 h-3.5" />}
               title="Preview how signatures appear on printed reports"
             >
-              Document Print Mockup
+              Preview
             </AppButton>
-
             <AppButton
               onClick={handleOpenAdd}
               variant="contained"
-              color="info"
+              color="primary"
               size="small"
               startIcon={<PlusCircle className="w-4 h-4" />}
             >
-              Add New Signatory
+              Add Signatory
             </AppButton>
-          </div>
-        </div>
-      </div>
+          </Stack>
+        }
+      />
 
-      {/* Notification Toast */}
       {notification && (
-        <div
-          className={`p-4 rounded-xl text-xs font-medium flex items-center justify-between shadow-sm animate-fade-in ${
+        <SettingsNotice
+          severity={
             notification.type === "success"
-              ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
-              : "bg-cyan-50 border border-cyan-200 text-cyan-800"
-          }`}
+              ? "success"
+              : notification.type === "error"
+                ? "error"
+                : "info"
+          }
         >
-          <div className="flex items-center space-x-2.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{notification.message}</span>
-          </div>
-          <button
-            onClick={() => setNotification(null)}
-            className="text-slate-400 hover:text-slate-600 font-bold ml-4"
-          >
-            ✕
-          </button>
-        </div>
+          {notification.message}
+        </SettingsNotice>
       )}
 
-      {/* Metric Overview Counters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">Configured Signatories</span>
-            <div className="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center">
-              <FileSignature className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-slate-800">{signatures.length}</span>
-            <span className="text-xs text-cyan-600 font-medium">Official Roles</span>
-          </div>
-        </div>
+      <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+        <Chip
+          size="small"
+          label={`${signatures.length} signatories`}
+          sx={{ height: 22, fontWeight: 700, bgcolor: "primary.lighter", color: "primary.dark" }}
+        />
+        <Chip
+          size="small"
+          label={`${activeCount} active`}
+          color="success"
+          variant="outlined"
+          sx={{ height: 22, fontWeight: 700 }}
+        />
+        <Chip
+          size="small"
+          label={`${sealCount} seals`}
+          color="secondary"
+          variant="outlined"
+          sx={{ height: 22, fontWeight: 700 }}
+        />
+        <Chip
+          size="small"
+          label="7 document types"
+          color="warning"
+          variant="outlined"
+          sx={{ height: 22, fontWeight: 700 }}
+        />
+      </Stack>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">Active Signatures</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-emerald-600">
-              {signatures.filter((s) => s.isActive).length}
-            </span>
-            <span className="text-xs text-slate-500">Live on Reports</span>
-          </div>
-        </div>
+      <SettingsSection
+        title="Institutional signatories"
+        subtitle="Configure official authority signatures, designations, digital strokes, and seals for marksheets, tabulation, admit cards, and testimonials."
+        toolbar={
+          <Stack spacing={1.5}>
+            <SettingsFilterGrid columns={2}>
+              <AppTextField
+                label="Search"
+                placeholder="Name, designation, department…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                startIcon={<Search className="w-4 h-4" />}
+              />
+              <AppSelect
+                label="Document"
+                value={docFilter}
+                onChange={setDocFilter}
+                options={[
+                  { value: "ALL", label: "All Documents" },
+                  { value: "marksheet", label: "Marksheet / Transcript" },
+                  { value: "tabulation", label: "Tabulation Sheet" },
+                  { value: "admitCard", label: "Admit Card" },
+                  { value: "certificate", label: "Testimonial & Certificate" },
+                  { value: "feeReceipt", label: "Fee Receipt" },
+                ]}
+              />
+            </SettingsFilterGrid>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">Official Digital Seals</span>
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-              <Stamp className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-purple-600">
-              {signatures.filter((s) => s.hasSeal).length}
-            </span>
-            <span className="text-xs text-slate-500">Embossed Stamps</span>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">Protected Document Types</span>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-              <Award className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-slate-800">7</span>
-            <span className="text-xs text-amber-600 font-medium">NCTB Standard Formats</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search signatory by name, designation, department..."
-            className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Document filter */}
-          <div className="flex items-center space-x-1.5 text-xs">
-            <span className="text-slate-500 font-medium">Document:</span>
-            <select
-              value={docFilter}
-              onChange={(e) => setDocFilter(e.target.value)}
-              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-700"
-            >
-              <option value="ALL">All Documents</option>
-              <option value="marksheet">Marksheet / Transcript</option>
-              <option value="tabulation">Tabulation Sheet</option>
-              <option value="admitCard">Admit Card</option>
-              <option value="certificate">Testimonial & Certificate</option>
-              <option value="feeReceipt">Fee Receipt</option>
-            </select>
-          </div>
-
-          {/* Status filter */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs">
-            {["ALL", "ACTIVE", "INACTIVE"].map((st) => (
-              <AppButton
-                key={st}
-                size="small"
-                variant="soft"
-                color={statusFilter === st ? "primary" : "inherit"}
-                onClick={() => setStatusFilter(st)}
+            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", alignItems: "center", gap: 1 }}>
+              <Stack
+                direction="row"
+                spacing={0.5}
+                sx={{ p: 0.5, bgcolor: "grey.100", borderRadius: 1.5, border: 1, borderColor: "divider" }}
               >
-                {st}
+                {["ALL", "ACTIVE", "INACTIVE"].map((st) => (
+                  <AppButton
+                    key={st}
+                    size="small"
+                    variant="soft"
+                    color={statusFilter === st ? "primary" : "inherit"}
+                    onClick={() => setStatusFilter(st)}
+                  >
+                    {st}
+                  </AppButton>
+                ))}
+              </Stack>
+
+              <AppButton
+                onClick={handleResetDefaults}
+                size="small"
+                variant="text"
+                color="inherit"
+                title="Reset to factory defaults"
+                startIcon={<RotateCcw className="w-4 h-4" />}
+              >
+                Reset
               </AppButton>
-            ))}
-          </div>
-
-          <button
-            onClick={handleResetDefaults}
-            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
-            title="Reset to factory defaults"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
+            </Stack>
+          </Stack>
+        }
+      >
       {/* Main Signatories Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredSignatures.map((sig) => (
@@ -712,326 +662,354 @@ export default function SignatureSetupPage() {
       </div>
 
       {filteredSignatures.length === 0 && (
-        <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center space-y-3">
+        <Box sx={{ py: 8, textAlign: "center" }}>
           <FileSignature className="w-10 h-10 text-slate-300 mx-auto" />
-          <h3 className="text-sm font-bold text-slate-800">No signatories matched your filter</h3>
-          <p className="text-xs text-slate-400">Try adjusting your search criteria or reset filters.</p>
-          <AppButton
-            onClick={handleOpenAdd}
-            variant="contained"
-            color="info"
-            size="small"
-            startIcon={<PlusCircle className="w-3.5 h-3.5" />}
-          >
-            Add Signatory
-          </AppButton>
-        </div>
+          <Typography variant="subtitle2" sx={{ mt: 1.5, fontWeight: 700 }}>
+            No signatories matched your filter
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+            Try adjusting your search criteria or reset filters.
+          </Typography>
+          <Box sx={{ mt: 2 }}>
+            <AppButton
+              onClick={handleOpenAdd}
+              variant="contained"
+              color="primary"
+              size="small"
+              startIcon={<PlusCircle className="w-3.5 h-3.5" />}
+            >
+              Add Signatory
+            </AppButton>
+          </Box>
+        </Box>
       )}
+      </SettingsSection>
 
       {/* =========================================================================
           MODAL 1: CREATE / EDIT SIGNATORY
       ========================================================================= */}
-      {showEditorModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden animate-scale-in">
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-slate-900 to-cyan-950 p-6 text-white flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-400/30">
-                  <FileSignature className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-white">
-                    {editingSig ? "Edit Institutional Signatory" : "Add Institutional Signatory"}
-                  </h3>
-                  <p className="text-xs text-slate-300">
-                    Control designation, signatory identity, digital signature stroke & seal
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowEditorModal(false)}
-                className="text-slate-400 hover:text-white text-lg font-bold"
+      <Dialog
+        open={showEditorModal}
+        onClose={() => setShowEditorModal(false)}
+        maxWidth="md"
+        fullWidth
+        scroll="paper"
+      >
+        <Box component="form" onSubmit={handleSaveSignatory} sx={{ display: "flex", flexDirection: "column", maxHeight: "90vh" }}>
+          <DialogTitle sx={{ pb: 1 }}>
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  bgcolor: "primary.lighter",
+                  color: "primary.main",
+                }}
               >
-                ✕
-              </button>
-            </div>
+                <FileSignature className="w-5 h-5" />
+              </Box>
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  {editingSig ? "Edit Institutional Signatory" : "Add Institutional Signatory"}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Control designation, signatory identity, digital signature stroke & seal
+                </Typography>
+              </Box>
+            </Stack>
+          </DialogTitle>
 
-            {/* Modal Form */}
-            <form onSubmit={handleSaveSignatory} className="p-6 space-y-5 text-xs max-h-[80vh] overflow-y-auto">
-              {/* Preset Signatory Role */}
-              <div className="space-y-1.5">
-                <label className="font-semibold text-slate-700">Signatory Role Category</label>
-                <select
-                  value={formData.type}
-                  onChange={(e) => handleTypeChange(e.target.value as SignatureType)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-xs font-medium"
-                >
-                  {SIGNATURE_TYPE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <DialogContent dividers sx={{ px: { xs: 2, sm: 3 } }}>
+            <Stack spacing={2.5} sx={{ pt: 1 }}>
+              <AppSelect
+                label="Signatory Role Category"
+                value={formData.type}
+                onChange={(value) => handleTypeChange(value as SignatureType)}
+                options={SIGNATURE_TYPE_OPTIONS.map((opt) => ({
+                  value: opt.value,
+                  label: opt.label,
+                }))}
+              />
 
-              {/* Designation & Name Inputs */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="font-semibold text-slate-700">
-                    Official Designation (English) <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.designation}
-                    onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                    placeholder="e.g. Principal, Exam Controller, Class Teacher"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="font-semibold text-slate-700">Official Designation (Bangla)</label>
-                  <input
-                    type="text"
-                    value={formData.designationBn}
-                    onChange={(e) => setFormData({ ...formData, designationBn: e.target.value })}
-                    placeholder="e.g. অধ্যক্ষ, পরীক্ষা নিয়ন্ত্রক, শ্রেণি শিক্ষক"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="font-semibold text-slate-700">
-                    Signatory Full Name <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Prof. A. K. M. Shamsuddin"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="font-semibold text-slate-700">Department / Office</label>
-                  <input
-                    type="text"
-                    value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    placeholder="e.g. Office of the Principal, Exam Committee"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
-                  />
-                </div>
-              </div>
+              <SettingsFilterGrid columns={2}>
+                <AppTextField
+                  label="Official Designation (English)"
+                  required
+                  value={formData.designation}
+                  onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                  placeholder="e.g. Principal, Exam Controller, Class Teacher"
+                />
+                <AppTextField
+                  label="Official Designation (Bangla)"
+                  value={formData.designationBn}
+                  onChange={(e) => setFormData({ ...formData, designationBn: e.target.value })}
+                  placeholder="e.g. অধ্যক্ষ, পরীক্ষা নিয়ন্ত্রক, শ্রেণি শিক্ষক"
+                />
+                <AppTextField
+                  label="Signatory Full Name"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g. Prof. A. K. M. Shamsuddin"
+                />
+                <AppTextField
+                  label="Department / Office"
+                  value={formData.department}
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                  placeholder="e.g. Office of the Principal, Exam Committee"
+                />
+              </SettingsFilterGrid>
 
               {/* Signature Input Controls (3 Methods) */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-800 flex items-center space-x-1.5">
-                    <PenTool className="w-4 h-4 text-cyan-600" />
-                    <span>Signature Input & Style</span>
-                  </span>
+              <Box sx={{ p: 2, borderRadius: 2, bgcolor: "grey.50", border: 1, borderColor: "divider" }}>
+                <Stack spacing={2}>
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={1}
+                    sx={{ alignItems: { sm: "center" }, justifyContent: "space-between" }}
+                  >
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                      <PenTool className="w-4 h-4 text-cyan-600" />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                        Signature Input & Style
+                      </Typography>
+                    </Stack>
 
-                  {/* Mode Selector Tabs */}
-                  <div className="flex items-center bg-slate-200/80 p-0.5 rounded-lg text-[11px]">
-                    <AppButton
-                      type="button"
-                      size="small"
-                      variant="soft"
-                      color={formData.signatureStyle === "IMAGE" ? "primary" : "inherit"}
-                      onClick={() => setFormData({ ...formData, signatureStyle: "IMAGE" })}
-                    >
-                      Upload File
-                    </AppButton>
-                    <AppButton
-                      type="button"
-                      size="small"
-                      variant="soft"
-                      color={formData.signatureStyle === "DRAWN" ? "primary" : "inherit"}
-                      onClick={() => setFormData({ ...formData, signatureStyle: "DRAWN" })}
-                    >
-                      Digital Draw Pad
-                    </AppButton>
-                    <AppButton
-                      type="button"
-                      size="small"
-                      variant="soft"
-                      color={formData.signatureStyle === "SCRIPT" ? "primary" : "inherit"}
-                      onClick={() => setFormData({ ...formData, signatureStyle: "SCRIPT" })}
-                    >
-                      Script Signature
-                    </AppButton>
-                  </div>
-                </div>
+                    <Stack direction="row" spacing={0.5} sx={{ p: 0.5, bgcolor: "grey.200", borderRadius: 1.5, flexWrap: "wrap" }}>
+                      <AppButton
+                        type="button"
+                        size="small"
+                        variant="soft"
+                        color={formData.signatureStyle === "IMAGE" ? "primary" : "inherit"}
+                        onClick={() => setFormData({ ...formData, signatureStyle: "IMAGE" })}
+                      >
+                        Upload File
+                      </AppButton>
+                      <AppButton
+                        type="button"
+                        size="small"
+                        variant="soft"
+                        color={formData.signatureStyle === "DRAWN" ? "primary" : "inherit"}
+                        onClick={() => setFormData({ ...formData, signatureStyle: "DRAWN" })}
+                      >
+                        Digital Draw Pad
+                      </AppButton>
+                      <AppButton
+                        type="button"
+                        size="small"
+                        variant="soft"
+                        color={formData.signatureStyle === "SCRIPT" ? "primary" : "inherit"}
+                        onClick={() => setFormData({ ...formData, signatureStyle: "SCRIPT" })}
+                      >
+                        Script Signature
+                      </AppButton>
+                    </Stack>
+                  </Stack>
 
-                {/* TAB A: UPLOAD FILE */}
-                {formData.signatureStyle === "IMAGE" && (
-                  <div className="space-y-3">
-                    <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-cyan-400 bg-white transition-colors">
-                      <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                      <p className="text-xs font-semibold text-slate-700">
-                        Upload signature image (PNG, JPG, or SVG)
-                      </p>
-                      <p className="text-[10px] text-slate-400 mt-1">
-                        Recommended: Transparent background PNG, ~300×100 px, high resolution
-                      </p>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="mt-3 block mx-auto text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100"
-                      />
-                    </div>
+                  {formData.signatureStyle === "IMAGE" && (
+                    <Stack spacing={1.5}>
+                      <Box
+                        sx={{
+                          border: "2px dashed",
+                          borderColor: "divider",
+                          borderRadius: 2,
+                          p: 3,
+                          textAlign: "center",
+                          bgcolor: "background.paper",
+                        }}
+                      >
+                        <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                        <Typography variant="caption" sx={{ fontWeight: 600, display: "block" }}>
+                          Upload signature image (PNG, JPG, or SVG)
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+                          Recommended: Transparent background PNG, ~300×100 px, high resolution
+                        </Typography>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="mt-3 block mx-auto text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100"
+                        />
+                      </Box>
 
-                    {formData.signatureUrl && (
-                      <div className="p-3 bg-white rounded-lg border border-slate-200 flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase">Preview:</span>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={formData.signatureUrl}
-                            alt="Signature Preview"
-                            className="h-10 object-contain bg-slate-50 px-2 rounded border border-slate-100"
+                      {formData.signatureUrl && (
+                        <Stack
+                          direction="row"
+                          spacing={2}
+                          sx={{
+                            p: 1.5,
+                            bgcolor: "background.paper",
+                            borderRadius: 1.5,
+                            border: 1,
+                            borderColor: "divider",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: "uppercase" }}>
+                              Preview:
+                            </Typography>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={formData.signatureUrl}
+                              alt="Signature Preview"
+                              className="h-10 object-contain bg-slate-50 px-2 rounded border border-slate-100"
+                            />
+                          </Stack>
+                          <AppButton
+                            type="button"
+                            variant="link"
+                            color="error"
+                            size="small"
+                            onClick={() => setFormData({ ...formData, signatureUrl: "" })}
+                          >
+                            Remove
+                          </AppButton>
+                        </Stack>
+                      )}
+                    </Stack>
+                  )}
+
+                  {formData.signatureStyle === "DRAWN" && (
+                    <Stack spacing={1}>
+                      <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Draw signature directly using mouse or touchscreen:
+                        </Typography>
+                        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                          <Typography variant="caption" color="text.secondary">
+                            Color:
+                          </Typography>
+                          <button
+                            type="button"
+                            onClick={() => setPenColor("#0f172a")}
+                            className={`w-4 h-4 rounded-full bg-slate-900 border ${
+                              penColor === "#0f172a" ? "ring-2 ring-cyan-500" : ""
+                            }`}
                           />
-                        </div>
-                        <AppButton
-                          type="button"
-                          variant="link"
-                          color="error"
-                          size="small"
-                          onClick={() => setFormData({ ...formData, signatureUrl: "" })}
-                        >
-                          Remove
-                        </AppButton>
-                      </div>
-                    )}
-                  </div>
-                )}
+                          <button
+                            type="button"
+                            onClick={() => setPenColor("#1e3a8a")}
+                            className={`w-4 h-4 rounded-full bg-blue-900 border ${
+                              penColor === "#1e3a8a" ? "ring-2 ring-cyan-500" : ""
+                            }`}
+                          />
+                          <AppButton type="button" variant="link" color="error" size="small" onClick={clearCanvas}>
+                            Clear
+                          </AppButton>
+                        </Stack>
+                      </Stack>
 
-                {/* TAB B: DRAW PAD */}
-                {formData.signatureStyle === "DRAWN" && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span>Draw signature directly using mouse or touchscreen:</span>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-[10px]">Color:</span>
-                        <button
-                          type="button"
-                          onClick={() => setPenColor("#0f172a")}
-                          className={`w-4 h-4 rounded-full bg-slate-900 border ${
-                            penColor === "#0f172a" ? "ring-2 ring-cyan-500" : ""
-                          }`}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setPenColor("#1e3a8a")}
-                          className={`w-4 h-4 rounded-full bg-blue-900 border ${
-                            penColor === "#1e3a8a" ? "ring-2 ring-cyan-500" : ""
-                          }`}
-                        />
-                        <AppButton
-                          type="button"
-                          variant="link"
-                          color="error"
-                          size="small"
-                          onClick={clearCanvas}
-                        >
-                          Clear
-                        </AppButton>
-                      </div>
-                    </div>
+                      <canvas
+                        ref={canvasRef}
+                        width={480}
+                        height={120}
+                        onMouseDown={startDrawing}
+                        onMouseMove={draw}
+                        onMouseUp={stopDrawing}
+                        onMouseLeave={stopDrawing}
+                        onTouchStart={startDrawing}
+                        onTouchMove={draw}
+                        onTouchEnd={stopDrawing}
+                        className="w-full h-28 bg-white border border-slate-300 rounded-xl cursor-crosshair shadow-inner"
+                      />
+                      <Typography variant="caption" color="text.secondary" sx={{ textAlign: "center" }}>
+                        Stroke will automatically be captured and converted to high-definition vector asset.
+                      </Typography>
+                    </Stack>
+                  )}
 
-                    <canvas
-                      ref={canvasRef}
-                      width={480}
-                      height={120}
-                      onMouseDown={startDrawing}
-                      onMouseMove={draw}
-                      onMouseUp={stopDrawing}
-                      onMouseLeave={stopDrawing}
-                      onTouchStart={startDrawing}
-                      onTouchMove={draw}
-                      onTouchEnd={stopDrawing}
-                      className="w-full h-28 bg-white border border-slate-300 rounded-xl cursor-crosshair shadow-inner"
-                    />
-                    <p className="text-[10px] text-slate-400 text-center">
-                      Stroke will automatically be captured and converted to high-definition vector asset.
-                    </p>
-                  </div>
-                )}
-
-                {/* TAB C: SCRIPT TYPOGRAPHY */}
-                {formData.signatureStyle === "SCRIPT" && (
-                  <div className="space-y-3">
-                    <p className="text-[11px] text-slate-600">
-                      Select a handwritten calligraphic script rendered from the signatory&apos;s name:
-                    </p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {SCRIPT_FONTS.map((font) => (
-                        <button
-                          key={font.id}
-                          type="button"
-                          onClick={() => setFormData({ ...formData, scriptFont: font.id })}
-                          className={`p-3 rounded-xl border text-center transition-all ${
-                            formData.scriptFont === font.id
-                              ? "border-cyan-500 bg-cyan-50 text-cyan-900 ring-2 ring-cyan-500/20"
-                              : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
-                          }`}
-                        >
-                          <span className="text-[10px] block text-slate-400 font-sans">{font.name}</span>
-                          <span className={`text-base block mt-1 ${font.fontClass}`}>
-                            {formData.name || "Signatory Name"}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+                  {formData.signatureStyle === "SCRIPT" && (
+                    <Stack spacing={1.5}>
+                      <Typography variant="caption" color="text.secondary">
+                        Select a handwritten calligraphic script rendered from the signatory&apos;s name:
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gap: 1,
+                          gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" },
+                        }}
+                      >
+                        {SCRIPT_FONTS.map((font) => (
+                          <button
+                            key={font.id}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, scriptFont: font.id })}
+                            className={`p-3 rounded-xl border text-center transition-all ${
+                              formData.scriptFont === font.id
+                                ? "border-cyan-500 bg-cyan-50 text-cyan-900 ring-2 ring-cyan-500/20"
+                                : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+                            }`}
+                          >
+                            <span className="text-[10px] block text-slate-400 font-sans">{font.name}</span>
+                            <span className={`text-base block mt-1 ${font.fontClass}`}>
+                              {formData.name || "Signatory Name"}
+                            </span>
+                          </button>
+                        ))}
+                      </Box>
+                    </Stack>
+                  )}
+                </Stack>
+              </Box>
 
               {/* Official Seal / Stamp */}
-              <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-200/80 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="font-bold text-purple-950 flex items-center space-x-2 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={formData.hasSeal}
-                      onChange={(e) => setFormData({ ...formData, hasSeal: e.target.checked })}
-                      className="rounded bg-white border-purple-300 text-purple-600 focus:ring-0"
+              <Box sx={{ p: 2, borderRadius: 2, bgcolor: "secondary.lighter", border: 1, borderColor: "secondary.light" }}>
+                <Stack spacing={1.5}>
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          size="small"
+                          checked={formData.hasSeal}
+                          onChange={(e) => setFormData({ ...formData, hasSeal: e.target.checked })}
+                        />
+                      }
+                      label={
+                        <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                          <Stamp className="w-3.5 h-3.5 text-purple-700" />
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                            Include Official Seal / Institutional Stamp
+                          </Typography>
+                        </Stack>
+                      }
                     />
-                    <span className="flex items-center space-x-1.5">
-                      <Stamp className="w-3.5 h-3.5 text-purple-700" />
-                      <span>Include Official Seal / Institutional Stamp</span>
-                    </span>
-                  </label>
-                  <span className="text-[10px] text-purple-600 font-medium">Digital Watermark</span>
-                </div>
+                    <Typography variant="caption" color="secondary.main" sx={{ fontWeight: 600 }}>
+                      Digital Watermark
+                    </Typography>
+                  </Stack>
 
-                {formData.hasSeal && (
-                  <div className="space-y-1.5 pt-1">
-                    <label className="font-semibold text-slate-700">Seal Legend Text</label>
-                    <input
-                      type="text"
+                  {formData.hasSeal && (
+                    <AppTextField
+                      label="Seal Legend Text"
                       value={formData.sealText}
                       onChange={(e) => setFormData({ ...formData, sealText: e.target.value })}
                       placeholder="e.g. OFFICE OF THE PRINCIPAL / DHAKA IDEAL MODEL"
-                      className="w-full px-3 py-2 border border-purple-200 rounded-lg bg-white text-xs font-mono uppercase"
+                      slotProps={{ input: { sx: { fontFamily: "monospace", textTransform: "uppercase" } } }}
                     />
-                  </div>
-                )}
-              </div>
+                  )}
+                </Stack>
+              </Box>
 
               {/* Document Applicability Matrix */}
-              <div className="space-y-2">
-                <span className="font-bold text-slate-800 block">
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
                   Applicable Documents (Select where this signature appears):
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                </Typography>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gap: 1,
+                    gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", md: "repeat(3, minmax(0, 1fr))" },
+                  }}
+                >
                   {[
                     { key: "marksheet", label: "Marksheet & Transcript" },
                     { key: "tabulation", label: "Tabulation Sheet" },
@@ -1041,122 +1019,129 @@ export default function SignatureSetupPage() {
                     { key: "certificate", label: "Testimonial & Certificate" },
                     { key: "feeReceipt", label: "Fee & Money Receipt" },
                   ].map((doc) => (
-                    <label
+                    <FormControlLabel
                       key={doc.key}
-                      className="flex items-center space-x-2 p-2.5 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-100 cursor-pointer select-none"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.documents[doc.key as keyof typeof formData.documents]}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            documents: {
-                              ...formData.documents,
-                              [doc.key]: e.target.checked,
-                            },
-                          })
-                        }
-                        className="rounded bg-white border-slate-300 text-cyan-600 focus:ring-0"
-                      />
-                      <span className="text-slate-700 font-medium text-[11px]">{doc.label}</span>
-                    </label>
+                      sx={{
+                        m: 0,
+                        px: 1.25,
+                        py: 0.75,
+                        borderRadius: 1.5,
+                        border: 1,
+                        borderColor: "divider",
+                        bgcolor: "grey.50",
+                      }}
+                      control={
+                        <Checkbox
+                          size="small"
+                          checked={formData.documents[doc.key as keyof typeof formData.documents]}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              documents: {
+                                ...formData.documents,
+                                [doc.key]: e.target.checked,
+                              },
+                            })
+                          }
+                        />
+                      }
+                      label={<Typography variant="caption" sx={{ fontWeight: 600 }}>{doc.label}</Typography>}
+                    />
                   ))}
-                </div>
-              </div>
+                </Box>
+              </Box>
 
-              {/* Order & Status */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="font-semibold text-slate-700">Display Order</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="20"
-                    value={formData.displayOrder}
-                    onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 1 })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
-                  />
-                </div>
+              <SettingsFilterGrid columns={2}>
+                <AppTextField
+                  label="Display Order"
+                  type="number"
+                  value={formData.displayOrder}
+                  onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value, 10) || 1 })}
+                  slotProps={{ htmlInput: { min: 1, max: 20 } }}
+                />
+                <AppSelect
+                  label="Signature Status"
+                  value={formData.isActive ? "ACTIVE" : "INACTIVE"}
+                  onChange={(value) => setFormData({ ...formData, isActive: value === "ACTIVE" })}
+                  options={[
+                    { value: "ACTIVE", label: "ACTIVE (Printed on documents)" },
+                    { value: "INACTIVE", label: "INACTIVE (Hidden)" },
+                  ]}
+                />
+              </SettingsFilterGrid>
+            </Stack>
+          </DialogContent>
 
-                <div className="space-y-1.5">
-                  <label className="font-semibold text-slate-700">Signature Status</label>
-                  <select
-                    value={formData.isActive ? "ACTIVE" : "INACTIVE"}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.value === "ACTIVE" })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-xs font-medium"
-                  >
-                    <option value="ACTIVE">ACTIVE (Printed on documents)</option>
-                    <option value="INACTIVE">INACTIVE (Hidden)</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Modal Actions */}
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
-                <AppButton
-                  type="button"
-                  variant="ghost"
-                  color="inherit"
-                  size="small"
-                  onClick={() => setShowEditorModal(false)}
-                >
-                  Cancel
-                </AppButton>
-                <AppButton type="submit" variant="contained" color="info" size="small">
-                  Save Institutional Signatory
-                </AppButton>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+          <DialogActions sx={{ px: 3, py: 2 }}>
+            <AppButton
+              type="button"
+              variant="ghost"
+              color="inherit"
+              size="small"
+              onClick={() => setShowEditorModal(false)}
+            >
+              Cancel
+            </AppButton>
+            <AppButton type="submit" variant="contained" color="primary" size="small">
+              Save Institutional Signatory
+            </AppButton>
+          </DialogActions>
+        </Box>
+      </Dialog>
 
       {/* =========================================================================
           MODAL 2: DOCUMENT PRINT MOCKUP PREVIEW
       ========================================================================= */}
-      {showPreviewModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl overflow-hidden animate-scale-in">
-            {/* Modal Header */}
-            <div className="bg-slate-900 p-5 text-white flex items-center justify-between">
-              <div className="flex items-center space-x-2.5">
-                <FileText className="w-5 h-5 text-cyan-400" />
-                <div>
-                  <h3 className="text-sm font-bold">Document Print Mockup: Signatures in Action</h3>
-                  <p className="text-[11px] text-slate-400">
-                    Live simulation of official NCTB Marksheet & Tabulation Sheet signature footers
-                  </p>
-                </div>
-              </div>
-              <button onClick={() => setShowPreviewModal(false)} className="text-slate-400 hover:text-white">
-                ✕
-              </button>
-            </div>
+      <Dialog
+        open={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        maxWidth="lg"
+        fullWidth
+        scroll="paper"
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
+            <FileText className="w-5 h-5 text-cyan-600" />
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                Document Print Mockup: Signatures in Action
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Live simulation of official NCTB Marksheet & Tabulation Sheet signature footers
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
 
-            <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto bg-slate-50">
-              {/* Marksheet Simulation */}
-              <div className="bg-white p-6 rounded-xl border border-slate-300 shadow-sm space-y-6">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                  <div className="flex items-center space-x-2">
+        <DialogContent dividers sx={{ bgcolor: "grey.50", px: { xs: 2, sm: 3 } }}>
+          <Stack spacing={3} sx={{ py: 1 }}>
+            {/* Marksheet Simulation */}
+            <Box sx={{ bgcolor: "background.paper", p: 3, borderRadius: 2, border: 1, borderColor: "divider" }}>
+              <Stack spacing={2}>
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between", pb: 1.5, borderBottom: 1, borderColor: "divider" }}>
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                     <Award className="w-4 h-4 text-emerald-600" />
-                    <span className="font-bold text-xs text-slate-800">
+                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
                       NCTB Student Academic Marksheet Footer
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">
-                    Official Transcript Format
-                  </span>
-                </div>
+                    </Typography>
+                  </Stack>
+                  <Chip size="small" label="Official Transcript Format" color="success" variant="outlined" sx={{ height: 22, fontWeight: 700 }} />
+                </Stack>
 
-                <p className="text-[11px] text-slate-500 italic">
+                <Typography variant="caption" color="text.secondary" sx={{ fontStyle: "italic" }}>
                   The signatures below automatically render on every generated marksheet PDF and print layout:
-                </p>
+                </Typography>
 
-                {/* 3-Column Marksheet Signatures Footer */}
-                <div className="grid grid-cols-3 gap-6 pt-6 text-center">
-                  {/* Left: Class Teacher */}
-                  <div className="flex flex-col items-center justify-end">
+                <Box
+                  sx={{
+                    display: "grid",
+                    gap: 3,
+                    gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" },
+                    pt: 2,
+                    textAlign: "center",
+                  }}
+                >
+                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end" }}>
                     {signatures
                       .filter((s) => s.isActive && s.documents.marksheet && s.type === "CLASS_TEACHER")
                       .slice(0, 1)
@@ -1177,10 +1162,9 @@ export default function SignatureSetupPage() {
                           </span>
                         </div>
                       ))}
-                  </div>
+                  </Box>
 
-                  {/* Center: Exam Controller */}
-                  <div className="flex flex-col items-center justify-end">
+                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end" }}>
                     {signatures
                       .filter((s) => s.isActive && s.documents.marksheet && s.type === "EXAM_CONTROLLER")
                       .slice(0, 1)
@@ -1201,10 +1185,9 @@ export default function SignatureSetupPage() {
                           </span>
                         </div>
                       ))}
-                  </div>
+                  </Box>
 
-                  {/* Right: Principal / Headmaster */}
-                  <div className="flex flex-col items-center justify-end">
+                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end" }}>
                     {signatures
                       .filter((s) => s.isActive && s.documents.marksheet && s.type === "HEAD_OF_INSTITUTION")
                       .slice(0, 1)
@@ -1225,25 +1208,33 @@ export default function SignatureSetupPage() {
                           </span>
                         </div>
                       ))}
-                  </div>
-                </div>
-              </div>
+                  </Box>
+                </Box>
+              </Stack>
+            </Box>
 
-              {/* Tabulation Sheet Simulation */}
-              <div className="bg-white p-6 rounded-xl border border-slate-300 shadow-sm space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                  <div className="flex items-center space-x-2">
+            {/* Tabulation Sheet Simulation */}
+            <Box sx={{ bgcolor: "background.paper", p: 3, borderRadius: 2, border: 1, borderColor: "divider" }}>
+              <Stack spacing={2}>
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between", pb: 1.5, borderBottom: 1, borderColor: "divider" }}>
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                     <Layers className="w-4 h-4 text-blue-600" />
-                    <span className="font-bold text-xs text-slate-800">
+                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
                       NCTB Comprehensive Tabulation Book (Gazette) Footer
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold">
-                    4-Authority Gazette
-                  </span>
-                </div>
+                    </Typography>
+                  </Stack>
+                  <Chip size="small" label="4-Authority Gazette" color="info" variant="outlined" sx={{ height: 22, fontWeight: 700 }} />
+                </Stack>
 
-                <div className="grid grid-cols-4 gap-4 pt-4 text-center">
+                <Box
+                  sx={{
+                    display: "grid",
+                    gap: 2,
+                    gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(4, minmax(0, 1fr))" },
+                    pt: 1,
+                    textAlign: "center",
+                  }}
+                >
                   {signatures
                     .filter((s) => s.isActive && s.documents.tabulation)
                     .slice(0, 4)
@@ -1262,23 +1253,23 @@ export default function SignatureSetupPage() {
                         <span className="text-[9px] text-slate-500 block">{s.designation}</span>
                       </div>
                     ))}
-                </div>
-              </div>
-            </div>
+                </Box>
+              </Stack>
+            </Box>
+          </Stack>
+        </DialogContent>
 
-            <div className="p-4 bg-white border-t border-slate-200 flex items-center justify-end">
-              <AppButton
-                onClick={() => setShowPreviewModal(false)}
-                variant="contained"
-                color="secondary"
-                size="small"
-              >
-                Close Preview
-              </AppButton>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <AppButton
+            onClick={() => setShowPreviewModal(false)}
+            variant="contained"
+            color="primary"
+            size="small"
+          >
+            Close Preview
+          </AppButton>
+        </DialogActions>
+      </Dialog>
+    </SettingsPageShell>
   );
 }

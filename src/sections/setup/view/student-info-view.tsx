@@ -1,7 +1,10 @@
 "use client";
 
-import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState, useMemo } from "react";
+import { AppTable, Label, type AppTableColumn, AppCard, TableFilterBar } from "@/components";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import {
   Contact,
   Filter,
@@ -632,6 +635,148 @@ export default function StudentInfoPage() {
     return ALL_COLUMNS.filter((col) => selectedColumnKeys.includes(col.key));
   }, [selectedColumnKeys]);
 
+  const studentInfoColumns = useMemo(() => {
+    if (activeColumns.length === 0) {
+      return [
+        {
+          id: "empty",
+          label: "Columns",
+          sortable: false,
+          render: () => (
+            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
+              No columns selected. Please select at least one column from the customizer above.
+            </Typography>
+          ),
+        },
+      ] as AppTableColumn<any>[];
+    }
+
+    const cols: AppTableColumn<any>[] = [
+      {
+        id: "index",
+        label: "#",
+        align: "center",
+        width: 56,
+        sortable: false,
+        render: (_st, index) => (
+          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+            {index + 1}
+          </Typography>
+        ),
+      },
+      ...activeColumns.map((col) => ({
+        id: col.key,
+        label: col.label,
+        sortable: col.key === "roll" || col.key === "fullName" || col.key === "studentIdNo",
+        render: (st: any) => {
+          const val = col.getValue(st);
+          if (col.key === "shift") {
+            return (
+              <Label color={val === "Morning" ? "warning" : val === "Day" ? "info" : "default"} variant="soft">
+                {val}
+              </Label>
+            );
+          }
+          if (col.key === "status") {
+            const isActive = Boolean(st.student?.isActive);
+            return (
+              <AppButton
+                type="button"
+                size="small"
+                variant="soft"
+                color={isActive ? "success" : "error"}
+                disabled={statusUpdating}
+                onClick={() => handleToggleSingleStatus(st.student?.id, isActive)}
+                title="Click to toggle Active / Inactive"
+              >
+                {isActive ? "Active" : "Inactive"}
+              </AppButton>
+            );
+          }
+          if (col.key === "studentCategory") {
+            const isMilitary = String(val).toLowerCase() === "military";
+            return (
+              <Label color={isMilitary ? "warning" : "info"} variant="soft">
+                {val}
+              </Label>
+            );
+          }
+          if (col.key === "service") {
+            const srvList = String(val).split(",").map((s) => s.trim()).filter(Boolean);
+            const isNone = srvList.length === 0 || val === "None" || val === "-";
+            if (isNone) return <Typography variant="caption" color="text.secondary">—</Typography>;
+            return (
+              <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
+                {srvList.map((s, i) => (
+                  <Label key={i} variant="soft" color={s === "Bus" ? "info" : s === "Hostel" ? "secondary" : "default"}>
+                    {s}
+                  </Label>
+                ))}
+              </Stack>
+            );
+          }
+          if (col.key === "roll") {
+            return (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                #{val}
+              </Typography>
+            );
+          }
+          if (col.key === "studentIdNo" || col.key === "guardianPhone") {
+            return (
+              <Typography variant="body2" sx={{ fontFamily: "monospace", whiteSpace: "nowrap" }}>
+                {val}
+              </Typography>
+            );
+          }
+          if (col.key === "fullName") {
+            return (
+              <Typography variant="body2" sx={{ fontWeight: 600, whiteSpace: "nowrap" }}>
+                {val}
+              </Typography>
+            );
+          }
+          return (
+            <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
+              {val || "-"}
+            </Typography>
+          );
+        },
+      })),
+      {
+        id: "actions",
+        label: "Actions",
+        align: "center",
+        sortable: false,
+        render: (st) => (
+          <Stack direction="row" spacing={0.75} sx={{ justifyContent: "center" }} className="no-print">
+            <AppButton
+              type="button"
+              size="small"
+              variant="soft"
+              onClick={() => openPromoteModal([st])}
+              title="Promote this student to next class"
+              startIcon={<GraduationCap className="w-3 h-3" />}
+            >
+              Promote
+            </AppButton>
+            <IconButton
+              size="small"
+              color="error"
+              disabled={deleting}
+              onClick={() => handleDeleteSingleStudent(st)}
+              title="Permanently delete this student"
+            >
+              <Trash2 className="w-3 h-3" />
+            </IconButton>
+          </Stack>
+        ),
+      },
+    ];
+    return cols;
+  }, [activeColumns, statusUpdating, deleting]);
+
+
   // CSV Export Handler
   const handleDownloadCSV = () => {
     if (students.length === 0 || activeColumns.length === 0) {
@@ -1096,304 +1241,32 @@ export default function StudentInfoPage() {
         </div>
       </div>
 
-      {/* Student Data Table */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 no-print">
-          <div className="flex items-center space-x-2">
-            <Users className="w-4 h-4 text-emerald-600" />
-            <h2 className="text-sm font-bold text-slate-800">
-              Student Records ({students.length} found)
-            </h2>
-            <div className="flex items-center space-x-1.5 ml-2">
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                {activeCount} Active
-              </span>
-              {inactiveCount > 0 && (
-                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                  {inactiveCount} Inactive
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Quick Filter Buttons: Active & Inactive */}
-          <div className="flex items-center gap-2">
-            <AppButton
-              type="button"
-              size="small"
-              variant="soft"
-              color={selectedStatus === "ACTIVE" ? "primary" : "inherit"}
-              onClick={() => setSelectedStatus(selectedStatus === "ACTIVE" ? "ALL" : "ACTIVE")}
-              title={selectedStatus === "ACTIVE" ? "Showing Active students. Click to show all." : "Filter: Show Active students"}
-              startIcon={<UserCheck className="w-3.5 h-3.5" />}
-            >
-              Active
-            </AppButton>
-
-            <AppButton
-              type="button"
-              size="small"
-              variant="soft"
-              color={selectedStatus === "INACTIVE" ? "primary" : "inherit"}
-              onClick={() => setSelectedStatus(selectedStatus === "INACTIVE" ? "ALL" : "INACTIVE")}
-              title={selectedStatus === "INACTIVE" ? "Showing Inactive students. Click to show all." : "Filter: Show Inactive students"}
-              startIcon={<UserX className="w-3.5 h-3.5" />}
-            >
-              Inactive
-            </AppButton>
-
-            {selectedStatus !== "ALL" && (
-              <AppButton
-                type="button"
-                size="small"
-                variant="ghost"
-                color="inherit"
-                onClick={() => setSelectedStatus("ALL")}
-                title="Reset status filter to show all students"
-              >
-                Show All
-              </AppButton>
-            )}
-          </div>
-
-          <span className="text-xs text-slate-500">
-            Exporting will include only the {activeColumns.length} selected columns shown below.
-          </span>
+      {activeColumns.length === 0 ? (
+        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400 italic text-xs">
+          No columns selected. Please select at least one column from the customizer above.
         </div>
-
-        {activeColumns.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 italic text-xs">
-            No columns selected. Please select at least one column from the customizer above.
-          </div>
-        ) : (
-          <div className="table-scroll-container overflow-x-auto overflow-y-auto scroll-smooth border-b border-slate-200 print:max-h-none print:overflow-visible">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 text-[11px] sticky top-0 z-10 shadow-xs">
-                <tr className="h-10">
-                  <th className="p-2.5 border-r border-slate-200 w-10 text-center no-print bg-slate-50">
-                    <input
-                      type="checkbox"
-                      checked={students.length > 0 && selectedEnrollmentIds.length === students.length}
-                      onChange={handleSelectAll}
-                      className="rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
-                      title="Select / Deselect All"
-                    />
-                  </th>
-                  <th className="p-2.5 border-r border-slate-200 w-12 text-center bg-slate-50">#</th>
-                  {activeColumns.map((col) => (
-                    <th key={col.key} className="p-2.5 border-r border-slate-200 whitespace-nowrap bg-slate-50">
-                      {col.label}
-                    </th>
-                  ))}
-                  <th className="p-2.5 border-r border-slate-200 text-center no-print w-32 bg-slate-50">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
-                {students.map((st, index) => {
-                  const isSelected = selectedEnrollmentIds.includes(st.id);
-                  return (
-                    <tr
-                      key={st.id}
-                      className={`hover:bg-slate-50 transition-colors h-10 ${
-                        isSelected ? "bg-indigo-50/50" : ""
-                      }`}
-                    >
-                      <td className="p-2.5 border-r border-slate-100 text-center no-print">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => handleToggleSelect(st.id)}
-                          className="rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
-                        />
-                      </td>
-                      <td className="p-2.5 border-r border-slate-100 text-center font-mono text-slate-400">
-                        {index + 1}
-                      </td>
-                      {activeColumns.map((col) => {
-                        const val = col.getValue(st);
-
-                        // Badges for shift and status
-                        if (col.key === "shift") {
-                          return (
-                            <td key={col.key} className="p-2.5 border-r border-slate-100 font-medium">
-                              <span
-                                className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                  val === "Morning"
-                                    ? "bg-amber-50 text-amber-800 border border-amber-200"
-                                    : val === "Day"
-                                    ? "bg-blue-50 text-blue-800 border border-blue-200"
-                                    : "text-slate-700"
-                                }`}
-                              >
-                                {val}
-                              </span>
-                            </td>
-                          );
-                        }
-
-                        if (col.key === "status") {
-                          const isActive = Boolean(st.student?.isActive);
-                          return (
-                            <td key={col.key} className="p-2.5 border-r border-slate-100">
-                              <AppButton
-                                type="button"
-                                size="small"
-                                variant="soft"
-                                color={isActive ? "success" : "error"}
-                                disabled={statusUpdating}
-                                onClick={() => handleToggleSingleStatus(st.student?.id, isActive)}
-                                title="Click to toggle Active / Inactive"
-                              >
-                                {isActive ? "Active" : "Inactive"}
-                              </AppButton>
-                            </td>
-                          );
-                        }
-
-                        if (col.key === "studentCategory") {
-                          const isMilitary = String(val).toLowerCase() === "military";
-                          return (
-                            <td key={col.key} className="p-2.5 border-r border-slate-100 font-medium">
-                              <span
-                                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                  isMilitary
-                                    ? "bg-amber-50 text-amber-800 border border-amber-300"
-                                    : "bg-sky-50 text-sky-800 border border-sky-200"
-                                }`}
-                              >
-                                {val}
-                              </span>
-                            </td>
-                          );
-                        }
-
-                        if (col.key === "service") {
-                          const srvList = String(val).split(",").map((s) => s.trim()).filter(Boolean);
-                          const isNone = srvList.length === 0 || val === "None" || val === "-";
-                          return (
-                            <td key={col.key} className="p-2.5 border-r border-slate-100 font-medium">
-                              {isNone ? (
-                                <span className="text-slate-400 text-[11px]">—</span>
-                              ) : (
-                                <div className="flex flex-wrap gap-1">
-                                  {srvList.map((s, i) => (
-                                    <span
-                                      key={i}
-                                      className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                        s === "Bus"
-                                          ? "bg-blue-50 text-blue-700 border border-blue-200"
-                                          : s === "Hostel"
-                                          ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
-                                          : s === "Extra Coaching"
-                                          ? "bg-purple-50 text-purple-700 border border-purple-200"
-                                          : "bg-slate-100 text-slate-700 border border-slate-200"
-                                      }`}
-                                    >
-                                      {s}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </td>
-                          );
-                        }
-
-                        if (col.key === "roll") {
-                          return (
-                            <td key={col.key} className="p-2.5 border-r border-slate-100 font-mono font-bold text-slate-900">
-                              #{val}
-                            </td>
-                          );
-                        }
-
-                        if (col.key === "studentIdNo") {
-                          return (
-                            <td key={col.key} className="p-2.5 border-r border-slate-100 font-mono text-slate-700">
-                              {val}
-                            </td>
-                          );
-                        }
-
-                        if (col.key === "fullName") {
-                          return (
-                            <td key={col.key} className="p-2.5 border-r border-slate-100 font-semibold text-slate-900 whitespace-nowrap">
-                              {val}
-                            </td>
-                          );
-                        }
-
-                        if (col.key === "guardianPhone") {
-                          return (
-                            <td key={col.key} className="p-2.5 border-r border-slate-100 font-mono text-slate-700 whitespace-nowrap">
-                              {val}
-                            </td>
-                          );
-                        }
-
-                        return (
-                          <td key={col.key} className="p-2.5 border-r border-slate-100 text-slate-700 whitespace-nowrap">
-                            {val || "-"}
-                          </td>
-                        );
-                      })}
-                      <td className="p-2.5 border-r border-slate-100 text-center no-print">
-                        <div className="flex items-center justify-center space-x-1.5">
-                          <AppButton
-                            type="button"
-                            size="small"
-                            variant="soft"
-                            onClick={() => openPromoteModal([st])}
-                            title="Promote this student to next class"
-                            startIcon={<GraduationCap className="w-3 h-3" />}
-                          >
-                            Promote
-                          </AppButton>
-                          <button
-                            type="button"
-                            disabled={deleting}
-                            onClick={() => handleDeleteSingleStudent(st)}
-                            className="p-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-[11px] font-semibold inline-flex items-center transition-colors cursor-pointer disabled:opacity-50"
-                            title="Permanently delete this student"
-                          >
-                            <Trash2 className="w-3 h-3 text-rose-600" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-
-                {students.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={activeColumns.length + 3}
-                      className={loading ? "p-12 text-center text-slate-400 italic text-xs" : "p-0"}
-                    >
-                      {loading ? "Loading student records..." : <NoDataFound />}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Footer info */}
-        <div className="p-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 no-print">
-          <div className="flex items-center space-x-2">
-            <span>
-              Total: <strong className="text-slate-800">{students.length}</strong> students enrolled
-            </span>
-            <span className="text-slate-300">•</span>
-            <span>
-              Showing 15 rows view (scroll right for all columns, scroll down for all records)
-            </span>
-          </div>
-          <span>
-            Columns: <strong className="text-slate-800">{activeColumns.length}</strong> visible
-          </span>
-        </div>
-      </div>
+      ) : (
+        <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<any>
+        embedded
+          rows={students}
+          rowKey={(row) => row.id}
+          loading={loading}
+          defaultOrderBy="roll"
+          minWidth={Math.max(800, activeColumns.length * 110 + 220)}
+          showCheckbox
+          selected={selectedEnrollmentIds}
+          onSelectRow={handleToggleSelect}
+          onSelectAllRows={(checked) => {
+            if (checked) setSelectedEnrollmentIds(students.map((s) => s.id));
+            else setSelectedEnrollmentIds([]);
+          }}
+          columns={studentInfoColumns}
+        />
+        </TableFilterBar>
+      </AppCard>
+      )}
 
       {/* Signature blocks for print */}
       <div className="hidden print:grid grid-cols-3 gap-6 text-center text-xs font-semibold text-slate-700 pt-16">

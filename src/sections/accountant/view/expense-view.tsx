@@ -27,6 +27,11 @@ import {
 } from "@/sections/accountant/schema/accountant-store";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
+import { AppTable, AppCard, TableFilterBar } from "@/components";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 export default function OperatingExpensePage() {
   const [expenses, setExpenses] = useState<ExpenseEntry[]>([]);
@@ -350,84 +355,99 @@ export default function OperatingExpensePage() {
         </div>
       </div>
 
-      {/* Expense Records Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 bg-slate-50/70 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              Official Payment Voucher Debit Ledger
-            </h3>
-            <span className="text-[11px] font-semibold text-slate-500">
-              ({filteredExpenses.length} records)
-            </span>
-          </div>
-          <span className="text-[11px] text-slate-500">
-            Total Filtered: <strong className="font-mono text-rose-700">৳ {filteredExpenses.reduce((s, i) => s + i.amount, 0).toLocaleString()}</strong>
-          </span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-50 text-[11px] font-semibold text-slate-600 uppercase tracking-wider border-b border-slate-200">
-              <tr>
-                <th className="py-3 px-3">Voucher #</th>
-                <th className="py-3 px-3">Date</th>
-                <th className="py-3 px-4">Expense Particulars</th>
-                <th className="py-3 px-3">Category</th>
-                <th className="py-3 px-3">Payee / Vendor</th>
-                <th className="py-3 px-3">Payment Channel</th>
-                <th className="py-3 px-3">Approved By</th>
-                <th className="py-3 px-3 text-right">Amount (৳)</th>
-                <th className="py-3 px-3 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredExpenses.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/70 transition">
-                  <td className="py-3 px-3 font-mono font-bold text-slate-800">
-                    {item.voucherNo}
-                  </td>
-                  <td className="py-3 px-3 font-mono text-slate-500">
-                    {item.date}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="font-semibold text-slate-900">{item.title}</div>
-                    {item.referenceNo && (
-                      <div className="text-[11px] text-slate-400 font-mono mt-0.5">Ref: {item.referenceNo}</div>
-                    )}
-                  </td>
-                  <td className="py-3 px-3">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getCategoryBadge(item.category)}`}>
-                      {item.category.replace(/_/g, " ")}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 font-medium text-slate-800">
-                    {item.payee}
-                  </td>
-                  <td className="py-3 px-3 text-slate-600">
-                    {item.paymentMethod}
-                  </td>
-                  <td className="py-3 px-3 text-[11px] text-slate-500">
-                    {item.approvedBy}
-                  </td>
-                  <td className="py-3 px-3 text-right font-mono font-bold text-rose-600">
-                    ৳ {item.amount.toLocaleString()}
-                  </td>
-                  <td className="py-3 px-3 text-center">
-                    <button
-                      onClick={() => handleDeleteExpense(item.id, item.voucherNo)}
-                      className="p-1 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer"
-                      title="Delete Voucher"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<ExpenseEntry>
+        embedded
+        rows={filteredExpenses}
+        rowKey={(row) => row.id}
+        defaultOrderBy="date"
+        minWidth={960}
+        columns={[
+          {
+            id: "voucherNo",
+            label: "Voucher #",
+            render: (item) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                {item.voucherNo}
+              </Typography>
+            ),
+          },
+          {
+            id: "date",
+            label: "Date",
+            render: (item) => (
+              <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>
+                {item.date}
+              </Typography>
+            ),
+          },
+          {
+            id: "title",
+            label: "Expense Particulars",
+            render: (item) => (
+              <>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {item.title}
+                </Typography>
+                {item.referenceNo ? (
+                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+                    Ref: {item.referenceNo}
+                  </Typography>
+                ) : null}
+              </>
+            ),
+          },
+          {
+            id: "category",
+            label: "Category",
+            render: (item) => (
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getCategoryBadge(item.category)}`}>
+                {item.category.replace(/_/g, " ")}
+              </span>
+            ),
+          },
+          { id: "payee", label: "Payee / Vendor" },
+          { id: "paymentMethod", label: "Payment Channel" },
+          {
+            id: "approvedBy",
+            label: "Approved By",
+            render: (item) => (
+              <Typography variant="caption" color="text.secondary">
+                {item.approvedBy}
+              </Typography>
+            ),
+          },
+          {
+            id: "amount",
+            label: "Amount (৳)",
+            align: "right",
+            render: (item) => (
+              <Typography variant="caption" sx={{ fontWeight: 700, color: "error.main" }}>
+                ৳ {item.amount.toLocaleString()}
+              </Typography>
+            ),
+          },
+          {
+            id: "actions",
+            label: "Action",
+            align: "center",
+            sortable: false,
+            render: (item) => (
+              <IconButton
+                size="small"
+                color="error"
+                onClick={() => handleDeleteExpense(item.id, item.voucherNo)}
+                title="Delete Voucher"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </IconButton>
+            ),
+          },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
 
       {/* Add Expense Modal */}
       {isAddModalOpen && (

@@ -24,6 +24,10 @@ import {
   TrendingUp,
 } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
+import { AppTable, Label, AppCard, TableFilterBar } from "@/components";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
 import { ManualFeeNavHeader } from "@/sections/fees/component/manual-fee-nav-header";
 import {
   FeeCollectionVoucher,
@@ -902,101 +906,122 @@ export default function ManualFeeCollectionPage() {
       {/* ========================================================
           RECENT COLLECTIONS LEDGER (TODAY'S ACTIVITY)
          ======================================================== */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
-        <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div className="flex items-center space-x-2">
-            <Clock className="w-4 h-4 text-emerald-600" />
-            <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wide">
-              Recent Manual Collections &amp; Money Receipts
-            </h3>
-          </div>
-
-          <div className="flex items-center space-x-3 text-xs">
-            <span className="text-slate-500">{vouchers.length} Total Receipts on Record</span>
-            <Link
-              href="/fees/collection/history"
-              className="text-emerald-700 font-bold hover:underline flex items-center gap-1"
-            >
-              <span>View All Vouchers &amp; History</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left border-collapse">
-            <thead className="bg-slate-100/70 text-[10px] font-bold text-slate-600 uppercase border-b border-slate-200 tracking-wider">
-              <tr>
-                <th className="py-2.5 px-3">Receipt No</th>
-                <th className="py-2.5 px-3">Student Name &amp; Roll</th>
-                <th className="py-2.5 px-2">Class / Sec</th>
-                <th className="py-2.5 px-2">Cycle</th>
-                <th className="py-2.5 px-2">Mode</th>
-                <th className="py-2.5 px-3 text-right">Net Paid (৳)</th>
-                <th className="py-2.5 px-2">Date / Time</th>
-                <th className="py-2.5 px-2">Cashier</th>
-                <th className="py-2.5 px-3 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {vouchers.slice(0, 10).map((v) => (
-                <tr key={v.id} className="hover:bg-slate-50/80 transition">
-                  <td className="py-2.5 px-3 font-mono font-bold text-slate-900">
-                    {v.voucherNo}
-                  </td>
-                  <td className="py-2.5 px-3">
-                    <div className="font-bold text-slate-900">{v.studentName}</div>
-                    <div className="text-[10px] text-slate-400">Roll: {v.studentRoll}</div>
-                  </td>
-                  <td className="py-2.5 px-2 text-slate-700">
-                    {v.className} ({v.sectionName || "A"})
-                  </td>
-                  <td className="py-2.5 px-2 font-semibold text-slate-700">
-                    {v.monthKey} {v.session}
-                  </td>
-                  <td className="py-2.5 px-2">
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase">
-                      {v.paymentMethod}
-                    </span>
-                  </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-950">
-                    ৳{v.netPaidAmount.toLocaleString()}
-                  </td>
-                  <td className="py-2.5 px-2 text-slate-500 text-[11px]">
-                    {v.collectionDate}
-                  </td>
-                  <td className="py-2.5 px-2 text-slate-600 text-[11px] truncate max-w-[100px]">
-                    {v.cashierName || "Counter"}
-                  </td>
-                  <td className="py-2.5 px-3 text-center">
-                    <div className="flex items-center justify-center space-x-1.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveReceiptVoucher(v);
-                          setIsReceiptModalOpen(true);
-                        }}
-                        className="p-1.5 text-emerald-700 hover:bg-emerald-50 rounded-md transition cursor-pointer"
-                        title="Print Money Receipt"
-                      >
-                        <Printer className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleVoidVoucher(v)}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition cursor-pointer"
-                        title="Void / Delete Voucher"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<FeeCollectionVoucher>
+        embedded
+        rows={vouchers.slice(0, 10)}
+        rowKey={(row) => row.id}
+        defaultOrderBy="collectionDate"
+        minWidth={1000}
+        columns={[
+          {
+            id: "voucherNo",
+            label: "Receipt No",
+            render: (v) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                {v.voucherNo}
+              </Typography>
+            ),
+          },
+          {
+            id: "studentName",
+            label: "Student Name & Roll",
+            render: (v) => (
+              <>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {v.studentName}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Roll: {v.studentRoll}
+                </Typography>
+              </>
+            ),
+          },
+          {
+            id: "className",
+            label: "Class / Sec",
+            render: (v) => `${v.className} (${v.sectionName || "A"})`,
+          },
+          {
+            id: "monthKey",
+            label: "Cycle",
+            render: (v) => (
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {v.monthKey} {v.session}
+              </Typography>
+            ),
+          },
+          {
+            id: "paymentMethod",
+            label: "Mode",
+            render: (v) => (
+              <Label color="success" variant="soft">
+                {v.paymentMethod}
+              </Label>
+            ),
+          },
+          {
+            id: "netPaidAmount",
+            label: "Net Paid (৳)",
+            align: "right",
+            render: (v) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                ৳{v.netPaidAmount.toLocaleString()}
+              </Typography>
+            ),
+          },
+          {
+            id: "collectionDate",
+            label: "Date / Time",
+            render: (v) => (
+              <Typography variant="caption" color="text.secondary">
+                {v.collectionDate}
+              </Typography>
+            ),
+          },
+          {
+            id: "cashierName",
+            label: "Cashier",
+            sortable: false,
+            render: (v) => (
+              <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 100 }}>
+                {v.cashierName || "Counter"}
+              </Typography>
+            ),
+          },
+          {
+            id: "actions",
+            label: "Action",
+            align: "center",
+            sortable: false,
+            render: (v) => (
+              <Stack direction="row" spacing={0.5} sx={{ justifyContent: "center" }}>
+                <IconButton
+                  size="small"
+                  color="success"
+                  onClick={() => {
+                    setActiveReceiptVoucher(v);
+                    setIsReceiptModalOpen(true);
+                  }}
+                  title="Print Money Receipt"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={() => handleVoidVoucher(v)}
+                  title="Void / Delete Voucher"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </IconButton>
+              </Stack>
+            ),
+          },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
 
       {/* Money Receipt Print Modal */}
       <MoneyReceiptModal

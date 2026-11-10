@@ -1,7 +1,7 @@
 "use client";
 
 import { NoDataFound } from "@/components/table/no-data-found";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import {
   Users,
@@ -27,10 +27,10 @@ import { StudentAdminPageShell } from "@/sections/student/component/admin-page-s
 import { StudentPageHeader } from "@/sections/student/component/student-page-header";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
-import { AppCard } from "@/components/card/app-card";
 import { AppSelect } from "@/components/select/app-select";
 import { AppTextField } from "@/components/text-field/app-text-field";
 import { DatePicker } from "@/components/date-picker/date-picker";
+import { AppCard, AppTable, Label, TableFilterBar, type AppTableColumn } from "@/components";
 import { Box, Checkbox, FormControlLabel, Grid, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { getScopedStorageKey, getActiveTenantCode, TENANT_SWITCH_EVENT } from "@/lib/clientTenant";
 
@@ -1236,11 +1236,51 @@ export default function StudentsPage() {
     }
   };
 
+  const enrollmentColumns = useMemo(() => {
+    const cols: AppTableColumn<any>[] = activeFields.map((field) => ({
+      id: field.key,
+      label: field.label,
+      sortable: field.key === "classRoll" || field.key === "firstName" || field.key === "studentIdNo",
+      render: (enr) => {
+        const fourthSub = enr.allocations?.find((a: any) => a.subjectType === "OPTIONAL_4TH");
+        let customData: Record<string, any> = {};
+        if (enr.student.customFields) {
+          try {
+            customData =
+              typeof enr.student.customFields === "string"
+                ? JSON.parse(enr.student.customFields)
+                : enr.student.customFields;
+          } catch {
+            /* ignore */
+          }
+        }
+        return renderTableCell(enr, field, fourthSub, customData);
+      },
+    }));
+    cols.push({
+      id: "actions",
+      label: "Actions",
+      align: "right",
+      sortable: false,
+      render: (enr) => (
+        <Stack direction="row" spacing={0.5} sx={{ justifyContent: "flex-end" }}>
+          <IconButton size="small" color="success" onClick={() => handleOpenEditStudent(enr)} title={`Edit ${enr.student.firstName}`}>
+            <Pencil className="w-3.5 h-3.5" />
+          </IconButton>
+          <IconButton size="small" color="error" onClick={() => handleDeleteStudent(enr)} title={`Delete ${enr.student.firstName}`}>
+            <Trash2 className="w-3.5 h-3.5" />
+          </IconButton>
+        </Stack>
+      ),
+    });
+    return cols;
+  }, [activeFields, selectedSectionId]);
+
   return (
     <StudentAdminPageShell>
       <StudentPageHeader heading="Student Enrollment" current="Enrollment" />
 
-      <AppCard sx={{ mb: 3 }}>
+      <AppCard>
         <Grid container spacing={1.5}>
           <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
             <SessionSelect
@@ -1309,7 +1349,7 @@ export default function StudentsPage() {
         </Grid>
       </AppCard>
 
-      <AppCard sx={{ mb: 3 }}>
+      <AppCard>
         <Stack spacing={2}>
         {/* Hidden Excel File Input */}
         <input
@@ -2012,159 +2052,25 @@ export default function StudentsPage() {
         </div>
       )}
 
-      {/* Enrolled Students Table */}
-      <AppCard sx={{ "& .MuiCardContent-root": { p: 0, "&:last-child": { pb: 0 } } }}>
-        <Box className="overflow-hidden">
-        <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-sm font-bold text-slate-800">
-              Enrolled Students ({students.length})
-            </h2>
-            <span className="text-[11px] font-medium text-slate-400">
-              • Displaying {activeFields.length} field columns
-            </span>
-            {selectedGroup && selectedGroup !== "ALL" && (
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200">
-                {formatGroupName(selectedGroup)}
-              </span>
-            )}
-            {selectedShift ? (
-              <span
-                className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
-                  selectedShift === "MORNING"
-                    ? "bg-amber-50 text-amber-700 border border-amber-200"
-                    : "bg-blue-50 text-blue-700 border border-blue-200"
-                }`}
-              >
-                {selectedShift === "MORNING" ? "Morning Shift" : "Day Shift"}
-              </span>
-            ) : selectedSection?.shift ? (
-              <span
-                className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
-                  selectedSection.shift === "MORNING"
-                    ? "bg-amber-50 text-amber-700 border border-amber-200"
-                    : "bg-blue-50 text-blue-700 border border-blue-200"
-                }`}
-              >
-                {selectedSection.shift === "MORNING" ? "Morning Shift" : "Day Shift"}
-              </span>
-            ) : null}
-            {selectedSection && (
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-                {selectedSection.name}
-              </span>
-            )}
-          </div>
-
-          {/* Action buttons on the right of the header */}
-          <div className="flex items-center space-x-2">
-            {selectedEnrollmentIds.size > 0 && (
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color="error"
-                onClick={handleDeleteSelected}
-                title="Delete all selected students"
-                startIcon={<Trash2 className="w-3.5 h-3.5" />}
-              >
-                Delete Selected ({selectedEnrollmentIds.size})
-              </AppButton>
-            )}
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase text-[10px] tracking-wider">
-              <tr>
-                <th className="p-3 w-8">
-                  <input
-                    type="checkbox"
-                    checked={students.length > 0 && selectedEnrollmentIds.size === students.length}
-                    onChange={toggleSelectAll}
-                    className="rounded text-emerald-600 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer"
-                    title="Select / Unselect All Students"
-                  />
-                </th>
-                {activeFields.map((field) => (
-                  <th key={field.key} className="p-3 whitespace-nowrap">
-                    {field.label}
-                  </th>
-                ))}
-                <th className="p-3 text-right whitespace-nowrap">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {students.map((enr) => {
-                const fourthSub = enr.allocations?.find((a: any) => a.subjectType === "OPTIONAL_4TH");
-                let customData: Record<string, any> = {};
-                if (enr.student.customFields) {
-                  try {
-                    customData =
-                      typeof enr.student.customFields === "string"
-                        ? JSON.parse(enr.student.customFields)
-                        : enr.student.customFields;
-                  } catch (e) {}
-                }
-                const isSelected = selectedEnrollmentIds.has(enr.id);
-
-                return (
-                  <tr
-                    key={enr.id}
-                    className={`hover:bg-slate-50/80 transition-colors ${
-                      isSelected ? "bg-emerald-50/40" : ""
-                    }`}
-                  >
-                    <td className="p-3 w-8">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleSelectStudent(enr.id)}
-                        className="rounded text-emerald-600 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer"
-                      />
-                    </td>
-                    {activeFields.map((field) => (
-                      <td key={field.key} className="p-3 text-slate-700 whitespace-nowrap">
-                        {renderTableCell(enr, field, fourthSub, customData)}
-                      </td>
-                    ))}
-                    <td className="p-3 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end space-x-1">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEditStudent(enr)}
-                          className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                          title={`Edit ${enr.student.firstName}`}
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteStudent(enr)}
-                          className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                          title={`Delete ${enr.student.firstName}`}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {students.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={Math.max(1, activeFields.length + 2)}
-                    className={loading ? "p-8 text-center text-slate-400 italic" : "p-0"}
-                  >
-                    {loading ? "Loading students..." : <NoDataFound />}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        </Box>
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<any>
+        embedded
+        rows={students}
+        rowKey={(row) => row.id}
+        loading={loading}
+        defaultOrderBy="classRoll"
+        minWidth={Math.max(800, activeFields.length * 120 + 160)}
+        showCheckbox
+        selected={Array.from(selectedEnrollmentIds)}
+        onSelectRow={toggleSelectStudent}
+        onSelectAllRows={(checked) => {
+          if (checked) setSelectedEnrollmentIds(new Set(students.map((s: any) => s.id)));
+          else setSelectedEnrollmentIds(new Set());
+        }}
+        columns={enrollmentColumns}
+      />
+        </TableFilterBar>
       </AppCard>
     </StudentAdminPageShell>
   );

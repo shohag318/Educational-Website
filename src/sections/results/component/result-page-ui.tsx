@@ -25,11 +25,13 @@ export function ResultsPageShell({
   maxWidth?: "lg" | "xl" | false;
 }) {
   return (
-    <Container maxWidth={maxWidth} sx={{ py: { xs: 2, md: 3 }, pb: 10 }}>
-      <Box className="no-print" sx={{ mb: 3 }}>
+    <Container maxWidth={maxWidth} disableGutters sx={{ py: 0, pb: { xs: 4, md: 6 } }}>
+      <Box className="no-print" sx={{ mb: 2.5 }}>
         <ResultNavHeader />
       </Box>
-      <Stack spacing={2.5}>{children}</Stack>
+      <Stack spacing={2.5} useFlexGap sx={{ width: 1 }}>
+        {children}
+      </Stack>
     </Container>
   );
 }

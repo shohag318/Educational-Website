@@ -1,6 +1,5 @@
 "use client";
 
-import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -32,8 +31,12 @@ import * as XLSX from "xlsx";
 import { ManualFeeNavHeader } from "@/sections/fees/component/manual-fee-nav-header";
 import { FeeCollectionCounterModal } from "@/sections/fees/component/fee-collection-counter-modal";
 import { AppButton } from "@/components/button/app-button";
+import { AppTable, AppCard, TableFilterBar } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import { getScopedStorageKey, getActiveTenantCode, TENANT_SWITCH_EVENT } from "@/lib/clientTenant";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 interface StudentEnrollment {
   id: string;
@@ -882,229 +885,219 @@ export default function AbsentFineCalculationPage() {
       </div>
 
       {/* Main Absent Fine Registry Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
-        {/* Table Header */}
-        <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center space-x-2">
-            <CalendarX2 className="w-4 h-4 text-emerald-600" />
-            <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wide">
-              Student Absent Fine Matrix — {MONTHS.find((m) => m.key === selectedMonthKey)?.name} {selectedSession}
-            </h3>
-            <span className="text-[10px] font-bold bg-white text-slate-700 px-2 py-0.5 rounded border border-slate-200">
-              {filteredList.length} Students
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 no-print">
-            <AppButton
-              type="button"
-              variant="outline"
-              size="small"
-              startIcon={<FileSpreadsheet size={14} />}
-              onClick={handleExportExcel}
-            >
-              Export to Excel
-            </AppButton>
-
-            <AppButton
-              type="button"
-              variant="outline"
-              size="small"
-              startIcon={<Printer size={14} />}
-              onClick={() => window.print()}
-            >
-              Print Registry
-            </AppButton>
-          </div>
-        </div>
-
-        {/* Table Content */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left border-collapse">
-            <thead className="bg-slate-100/80 text-[10px] font-bold text-slate-700 uppercase border-b border-slate-200 tracking-wider">
-              <tr>
-                <th className="py-2.5 px-3">Roll</th>
-                <th className="py-2.5 px-3">Student Name</th>
-                <th className="py-2.5 px-2">Class / Sec</th>
-                <th className="py-2.5 px-2 text-center">Working</th>
-                <th className="py-2.5 px-2 text-center">Present</th>
-                <th className="py-2.5 px-2 text-center">Absent Days</th>
-                <th className="py-2.5 px-2 text-center">Billable</th>
-                <th className="py-2.5 px-2 text-center">Rate</th>
-                <th className="py-2.5 px-3 text-right">Calculated Fine</th>
-                <th className="py-2.5 px-2 text-center">Waiver (৳)</th>
-                <th className="py-2.5 px-3 text-right">Net Fine (৳)</th>
-                <th className="py-2.5 px-2 text-center">Ledger Sync</th>
-                <th className="py-2.5 px-3 text-center no-print">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {loading ? (
-                <tr>
-                  <td colSpan={13} className="py-12 text-center text-xs text-slate-400 italic">
-                    Loading student attendance summaries...
-                  </td>
-                </tr>
-              ) : filteredList.length === 0 ? (
-                <tr>
-                  <td colSpan={13} className="p-0">
-                    <NoDataFound />
-                  </td>
-                </tr>
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<StudentAttendanceSummary>
+        embedded
+        rows={filteredList}
+        rowKey={(row) => row.enrollmentId}
+        defaultOrderBy="classRoll"
+        minWidth={1200}
+        loading={loading}
+        columns={[
+          {
+            id: "classRoll",
+            label: "Roll",
+            render: (summary) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                {summary.classRoll}
+              </Typography>
+            ),
+          },
+          {
+            id: "studentName",
+            label: "Student Name",
+            render: (summary) => (
+              <>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {summary.studentName}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+                  ID: {summary.studentId}
+                </Typography>
+              </>
+            ),
+          },
+          {
+            id: "className",
+            label: "Class / Sec",
+            sortable: false,
+            render: (summary) => (
+              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "nowrap" }}>
+                {summary.className} • {summary.sectionName}
+              </Typography>
+            ),
+          },
+          {
+            id: "totalWorkingDays",
+            label: "Working",
+            align: "center",
+            render: (summary) => (
+              <Typography variant="body2" sx={{ fontFamily: "monospace", color: "text.secondary" }}>
+                {summary.totalWorkingDays}
+              </Typography>
+            ),
+          },
+          {
+            id: "presentDays",
+            label: "Present",
+            align: "center",
+            render: (summary) => (
+              <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 600, color: "success.dark" }}>
+                {summary.presentDays}
+              </Typography>
+            ),
+          },
+          {
+            id: "absentDays",
+            label: "Absent Days",
+            align: "center",
+            sortable: false,
+            render: (summary) => {
+              const fine = computeStudentFine(summary);
+              return (
+                <button
+                  type="button"
+                  onClick={() => setViewingStudentDates(summary)}
+                  title="Click to view exact absence dates"
+                  className={`font-mono font-bold px-2 py-0.5 rounded transition inline-flex items-center gap-1 cursor-pointer ${
+                    fine.effectiveAbsent > 0
+                      ? "bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100"
+                      : "text-slate-400"
+                  }`}
+                >
+                  <span>{fine.effectiveAbsent}</span>
+                  {summary.absentDates.length > 0 && <Info className="w-2.5 h-2.5 text-rose-400" />}
+                </button>
+              );
+            },
+          },
+          {
+            id: "billable",
+            label: "Billable",
+            align: "center",
+            sortable: false,
+            render: (summary) => (
+              <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 600 }}>
+                {computeStudentFine(summary).totalBillableAbsentDays}
+              </Typography>
+            ),
+          },
+          {
+            id: "rate",
+            label: "Rate",
+            align: "center",
+            sortable: false,
+            render: () => (
+              <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>
+                ৳{policy.ratePerDay}
+              </Typography>
+            ),
+          },
+          {
+            id: "grossFine",
+            label: "Calculated Fine",
+            align: "right",
+            sortable: false,
+            render: (summary) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                ৳{computeStudentFine(summary).grossFine.toLocaleString()}
+              </Typography>
+            ),
+          },
+          {
+            id: "waiverDiscount",
+            label: "Waiver (৳)",
+            align: "center",
+            sortable: false,
+            render: (summary) => (
+              <input
+                type="number"
+                min={0}
+                value={summary.waiverDiscount || ""}
+                placeholder="0"
+                onChange={(e) => handleUpdateWaiver(summary.enrollmentId, Number(e.target.value))}
+                className="w-16 py-1 px-1.5 text-center bg-slate-50 border border-slate-200 rounded font-mono text-xs focus:ring-1 focus:ring-emerald-500"
+              />
+            ),
+          },
+          {
+            id: "netFine",
+            label: "Net Fine (৳)",
+            align: "right",
+            sortable: false,
+            render: (summary) => {
+              const fine = computeStudentFine(summary);
+              return fine.netFine > 0 ? (
+                <span className="font-mono font-extrabold text-sm text-rose-700">৳{fine.netFine.toLocaleString()}</span>
               ) : (
-                filteredList.map((summary) => {
-                  const fine = computeStudentFine(summary);
-                  const isSynced = summary.syncedFineAmount > 0 && summary.syncedFineAmount === fine.netFine;
-
-                  return (
-                    <tr key={summary.enrollmentId} className="hover:bg-slate-50/80 transition">
-                      <td className="py-2.5 px-3 font-mono font-bold text-slate-900">
-                        {summary.classRoll}
-                      </td>
-
-                      <td className="py-2.5 px-3">
-                        <div className="font-bold text-slate-900">{summary.studentName}</div>
-                        <div className="text-[10px] text-slate-400 font-mono">ID: {summary.studentId}</div>
-                      </td>
-
-                      <td className="py-2.5 px-2 text-slate-600 whitespace-nowrap">
-                        {summary.className} • {summary.sectionName}
-                      </td>
-
-                      <td className="py-2.5 px-2 text-center font-mono text-slate-600">
-                        {summary.totalWorkingDays}
-                      </td>
-
-                      <td className="py-2.5 px-2 text-center font-mono font-semibold text-emerald-700">
-                        {summary.presentDays}
-                      </td>
-
-                      {/* Absent Days with Date detail link */}
-                      <td className="py-2.5 px-2 text-center">
-                        <button
-                          type="button"
-                          onClick={() => setViewingStudentDates(summary)}
-                          title="Click to view exact absence dates"
-                          className={`font-mono font-bold px-2 py-0.5 rounded transition inline-flex items-center gap-1 cursor-pointer ${
-                            fine.effectiveAbsent > 0
-                              ? "bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100"
-                              : "text-slate-400"
-                          }`}
-                        >
-                          <span>{fine.effectiveAbsent}</span>
-                          {summary.absentDates.length > 0 && <Info className="w-2.5 h-2.5 text-rose-400" />}
-                        </button>
-                      </td>
-
-                      <td className="py-2.5 px-2 text-center font-mono text-slate-700 font-semibold">
-                        {fine.totalBillableAbsentDays}
-                      </td>
-
-                      <td className="py-2.5 px-2 text-center font-mono text-slate-500 text-[11px]">
-                        ৳{policy.ratePerDay}
-                      </td>
-
-                      <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-800">
-                        ৳{fine.grossFine.toLocaleString()}
-                      </td>
-
-                      {/* Waiver / Discount adjustment */}
-                      <td className="py-2.5 px-2 text-center">
-                        <input
-                          type="number"
-                          min={0}
-                          value={summary.waiverDiscount || ""}
-                          placeholder="0"
-                          onChange={(e) => handleUpdateWaiver(summary.enrollmentId, Number(e.target.value))}
-                          className="w-16 py-1 px-1.5 text-center bg-slate-50 border border-slate-200 rounded font-mono text-xs focus:ring-1 focus:ring-emerald-500"
-                        />
-                      </td>
-
-                      {/* Net Fine */}
-                      <td className="py-2.5 px-3 text-right font-mono font-extrabold text-sm">
-                        {fine.netFine > 0 ? (
-                          <span className="text-rose-700">৳{fine.netFine.toLocaleString()}</span>
-                        ) : (
-                          <span className="text-slate-400 font-normal">৳0</span>
-                        )}
-                      </td>
-
-                      {/* Sync Status */}
-                      <td className="py-2.5 px-2 text-center whitespace-nowrap">
-                        {isSynced ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                            <Check className="w-3 h-3" />
-                            Synced
-                          </span>
-                        ) : summary.syncedFineAmount > 0 ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
-                            Diff: ৳{summary.syncedFineAmount}
-                          </span>
-                        ) : fine.netFine > 0 ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                            Pending
-                          </span>
-                        ) : (
-                          <span className="text-slate-300 text-[10px]">—</span>
-                        )}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="py-2.5 px-3 text-center no-print">
-                        <div className="flex items-center justify-center space-x-1.5">
-                          <button
-                            type="button"
-                            onClick={() => handleSyncStudentToLedger(summary.enrollmentId)}
-                            title="Sync fine into Student Fee Record"
-                            className="p-1.5 bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 rounded-lg border border-slate-200 transition cursor-pointer"
-                          >
-                            <Save className="w-3.5 h-3.5" />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setIsCounterWindowOpen(true)}
-                            title="Open Collection Counter Window"
-                            className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg border border-emerald-200 transition cursor-pointer"
-                          >
-                            <HandCoins className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-            {filteredList.length > 0 && (
-              <tfoot className="bg-slate-100 font-bold border-t border-slate-200 text-slate-800">
-                <tr>
-                  <td colSpan={5} className="py-2.5 px-3">
-                    Filtered Total:
-                  </td>
-                  <td className="py-2.5 px-2 text-center font-mono text-rose-700">
-                    {filteredList.reduce((s, c) => s + c.absentDays + c.manualAbsentAdjustment, 0)}d
-                  </td>
-                  <td className="py-2.5 px-2 text-center font-mono">
-                    {filteredList.reduce((s, c) => s + computeStudentFine(c).totalBillableAbsentDays, 0)}d
-                  </td>
-                  <td className="py-2.5 px-2 text-center">—</td>
-                  <td className="py-2.5 px-3 text-right font-mono">
-                    ৳{filteredList.reduce((s, c) => s + computeStudentFine(c).grossFine, 0).toLocaleString()}
-                  </td>
-                  <td className="py-2.5 px-2 text-center font-mono">
-                    ৳{filteredList.reduce((s, c) => s + (c.waiverDiscount || 0), 0).toLocaleString()}
-                  </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-extrabold text-sm text-emerald-950">
-                    ৳{filteredList.reduce((s, c) => s + computeStudentFine(c).netFine, 0).toLocaleString()}
-                  </td>
-                  <td colSpan={2}></td>
-                </tr>
-              </tfoot>
-            )}
-          </table>
-        </div>
-      </div>
+                <span className="text-slate-400 font-normal">৳0</span>
+              );
+            },
+          },
+          {
+            id: "ledgerSync",
+            label: "Ledger Sync",
+            align: "center",
+            sortable: false,
+            render: (summary) => {
+              const fine = computeStudentFine(summary);
+              const isSynced = summary.syncedFineAmount > 0 && summary.syncedFineAmount === fine.netFine;
+              if (isSynced) {
+                return (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    <Check className="w-3 h-3" />
+                    Synced
+                  </span>
+                );
+              }
+              if (summary.syncedFineAmount > 0) {
+                return (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                    Diff: ৳{summary.syncedFineAmount}
+                  </span>
+                );
+              }
+              if (fine.netFine > 0) {
+                return (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                    Pending
+                  </span>
+                );
+              }
+              return <span className="text-slate-300 text-[10px]">—</span>;
+            },
+          },
+          {
+            id: "actions",
+            label: "Action",
+            align: "center",
+            sortable: false,
+            render: (summary) => (
+              <div className="flex items-center justify-center space-x-1.5 no-print">
+                <button
+                  type="button"
+                  onClick={() => handleSyncStudentToLedger(summary.enrollmentId)}
+                  title="Sync fine into Student Fee Record"
+                  className="p-1.5 bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 rounded-lg border border-slate-200 transition cursor-pointer"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCounterWindowOpen(true)}
+                  title="Open Collection Counter Window"
+                  className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg border border-emerald-200 transition cursor-pointer"
+                >
+                  <HandCoins className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ),
+          },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
 
       {/* Student Absent Dates Modal */}
       {viewingStudentDates && (

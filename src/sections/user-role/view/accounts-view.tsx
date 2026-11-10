@@ -1,7 +1,6 @@
 // src/app/user-role/page.tsx
 "use client";
 
-import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Box,
@@ -32,6 +31,7 @@ import { SessionSelect } from "@/components/SessionSelect";
 import { AppSelect } from "@/components/select/app-select";
 import { AppTextField } from "@/components/text-field/app-text-field";
 import { AppButton } from "@/components/button/app-button";
+import { AppTable, TableFilterBar } from "@/components";
 import {
   SettingsPageShell,
   SettingsPageHeader,
@@ -617,190 +617,190 @@ export default function UserRolePage() {
           </SettingsFilterGrid>
         }
       >
-        <Box
-          sx={{
-            border: 1,
-            borderColor: "divider",
-            borderRadius: 2,
-            overflow: "hidden",
-            bgcolor: "background.paper",
-          }}
-        >
-          <Box sx={{ overflowX: "auto" }}>
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-100/75 text-slate-700 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
-                <tr>
-                  <th className="px-4 py-3">User & Credential</th>
-                  <th className="px-4 py-3">System Role</th>
-                  <th className="px-4 py-3">Designation & Dept</th>
-                  <th className="px-4 py-3">Contact</th>
-                  <th className="px-4 py-3 text-center">2FA</th>
-                  <th className="px-4 py-3 text-center">Status</th>
-                  <th className="px-4 py-3 text-center">Last Login</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredUsers.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="p-0">
-                      <NoDataFound />
-                    </td>
-                  </tr>
+        <TableFilterBar showSearch={false}>
+          <AppTable<UserAccount>
+            embedded
+            rows={filteredUsers}
+          rowKey={(row) => row.id}
+          defaultOrderBy="name"
+          minWidth={1100}
+          columns={[
+            {
+              id: "name",
+              label: "User & Credential",
+              render: (user) => {
+                const isRoot = user.username === "ADMIN-ROOT";
+                return (
+                  <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                    <div
+                      className={`w-8 h-8 rounded-full ${user.avatarBg} text-white font-bold flex items-center justify-center text-xs shadow-2xs shrink-0`}
+                    >
+                      {user.name.charAt(0)}
+                    </div>
+                    <div>
+                      <Typography variant="body2" sx={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 0.75 }}>
+                        <span>{user.name}</span>
+                        {isRoot && (
+                          <span className="bg-slate-100 text-slate-700 text-[9px] font-bold px-1.5 py-0.2 rounded">
+                            ROOT
+                          </span>
+                        )}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+                        ID: {user.username}
+                      </Typography>
+                    </div>
+                  </Stack>
+                );
+              },
+            },
+            {
+              id: "roleId",
+              label: "System Role",
+              render: (user) => {
+                const roleObj = roles.find((r) => r.id === user.roleId);
+                return (
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                      roleObj?.badgeBg || "bg-slate-100 text-slate-800"
+                    }`}
+                  >
+                    {roleObj?.name || user.roleId}
+                  </span>
+                );
+              },
+            },
+            {
+              id: "designation",
+              label: "Designation & Dept",
+              render: (user) => (
+                <>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {user.designation}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {user.department}
+                  </Typography>
+                </>
+              ),
+            },
+            {
+              id: "phone",
+              label: "Contact",
+              sortable: false,
+              render: (user) => (
+                <>
+                  <div className="text-slate-800 font-mono text-[11px] flex items-center gap-1">
+                    <Phone className="w-3 h-3 text-slate-400" />
+                    <span>{user.phone}</span>
+                  </div>
+                  <div className="text-slate-500 text-[11px] flex items-center gap-1">
+                    <Mail className="w-3 h-3 text-slate-400" />
+                    <span>{user.email}</span>
+                  </div>
+                </>
+              ),
+            },
+            {
+              id: "twoFactorEnabled",
+              label: "2FA",
+              align: "center",
+              render: (user) =>
+                user.twoFactorEnabled ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Enforced
+                  </span>
                 ) : (
-                  filteredUsers.map((user) => {
-                    const roleObj = roles.find((r) => r.id === user.roleId);
-                    const isRoot = user.username === "ADMIN-ROOT";
-
-                    return (
-                      <tr key={user.id} className="hover:bg-slate-50/75 transition-colors">
-                        {/* User & ID */}
-                        <td className="px-4 py-3">
-                          <div className="flex items-center space-x-3">
-                            <div
-                              className={`w-8 h-8 rounded-full ${user.avatarBg} text-white font-bold flex items-center justify-center text-xs shadow-2xs shrink-0`}
-                            >
-                              {user.name.charAt(0)}
-                            </div>
-                            <div>
-                              <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                                <span>{user.name}</span>
-                                {isRoot && (
-                                  <span className="bg-slate-100 text-slate-700 text-[9px] font-bold px-1.5 py-0.2 rounded">
-                                    ROOT
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-[11px] text-slate-500 font-mono">
-                                ID: {user.username}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Role Badge */}
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                              roleObj?.badgeBg || "bg-slate-100 text-slate-800"
-                            }`}
-                          >
-                            {roleObj?.name || user.roleId}
-                          </span>
-                        </td>
-
-                        {/* Designation */}
-                        <td className="px-4 py-3">
-                          <div className="font-medium text-slate-800">{user.designation}</div>
-                          <div className="text-[11px] text-slate-500">{user.department}</div>
-                        </td>
-
-                        {/* Contact */}
-                        <td className="px-4 py-3">
-                          <div className="text-slate-800 font-mono text-[11px] flex items-center gap-1">
-                            <Phone className="w-3 h-3 text-slate-400" />
-                            <span>{user.phone}</span>
-                          </div>
-                          <div className="text-slate-500 text-[11px] flex items-center gap-1">
-                            <Mail className="w-3 h-3 text-slate-400" />
-                            <span>{user.email}</span>
-                          </div>
-                        </td>
-
-                        {/* 2FA */}
-                        <td className="px-4 py-3 text-center">
-                          {user.twoFactorEnabled ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
-                              <CheckCircle2 className="w-3 h-3" />
-                              Enforced
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">
-                              Disabled
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Status */}
-                        <td className="px-4 py-3 text-center">
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              user.status === "ACTIVE"
-                                ? "bg-emerald-100 text-emerald-800"
-                                : user.status === "INVITED"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-rose-100 text-rose-800"
-                            }`}
-                          >
-                            {user.status}
-                          </span>
-                        </td>
-
-                        {/* Last Login */}
-                        <td className="px-4 py-3 text-center text-slate-500 text-[11px]">
-                          {user.lastLogin}
-                        </td>
-
-                        {/* Actions */}
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end space-x-1">
-                            {/* Toggle Status */}
-                            <button
-                              onClick={() => toggleStatus(user)}
-                              title={user.status === "ACTIVE" ? "Suspend user" : "Activate user"}
-                              disabled={isRoot}
-                              className={`p-1 rounded hover:bg-slate-200 transition ${
-                                isRoot ? "opacity-30 cursor-not-allowed" : "text-slate-600 cursor-pointer"
-                              }`}
-                            >
-                              {user.status === "ACTIVE" ? (
-                                <XCircle className="w-3.5 h-3.5 text-rose-600" />
-                              ) : (
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                              )}
-                            </button>
-
-                            {/* Reset Password */}
-                            <button
-                              onClick={() => handleResetPassword(user)}
-                              title="Reset Password"
-                              className="p-1 rounded text-slate-600 hover:text-amber-600 hover:bg-slate-200 transition cursor-pointer"
-                            >
-                              <KeyRound className="w-3.5 h-3.5" />
-                            </button>
-
-                            {/* Edit User */}
-                            <button
-                              onClick={() => openEditModal(user)}
-                              title="Edit User"
-                              className="p-1 rounded text-slate-600 hover:text-primary hover:bg-slate-200 transition cursor-pointer"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-
-                            {/* Delete User */}
-                            <button
-                              onClick={() => handleDeleteUser(user)}
-                              title="Delete User"
-                              disabled={isRoot}
-                              className={`p-1 rounded transition ${
-                                isRoot
-                                  ? "opacity-30 cursor-not-allowed text-slate-400"
-                                  : "text-slate-600 hover:text-rose-600 hover:bg-slate-200 cursor-pointer"
-                              }`}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </Box>
-        </Box>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">
+                    Disabled
+                  </span>
+                ),
+            },
+            {
+              id: "status",
+              label: "Status",
+              align: "center",
+              render: (user) => (
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    user.status === "ACTIVE"
+                      ? "bg-emerald-100 text-emerald-800"
+                      : user.status === "INVITED"
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-rose-100 text-rose-800"
+                  }`}
+                >
+                  {user.status}
+                </span>
+              ),
+            },
+            {
+              id: "lastLogin",
+              label: "Last Login",
+              align: "center",
+              render: (user) => (
+                <Typography variant="caption" color="text.secondary">
+                  {user.lastLogin}
+                </Typography>
+              ),
+            },
+            {
+              id: "actions",
+              label: "Actions",
+              align: "right",
+              sortable: false,
+              render: (user) => {
+                const isRoot = user.username === "ADMIN-ROOT";
+                return (
+                  <div className="flex items-center justify-end space-x-1">
+                    <button
+                      onClick={() => toggleStatus(user)}
+                      title={user.status === "ACTIVE" ? "Suspend user" : "Activate user"}
+                      disabled={isRoot}
+                      className={`p-1 rounded hover:bg-slate-200 transition ${
+                        isRoot ? "opacity-30 cursor-not-allowed" : "text-slate-600 cursor-pointer"
+                      }`}
+                    >
+                      {user.status === "ACTIVE" ? (
+                        <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                      ) : (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => handleResetPassword(user)}
+                      title="Reset Password"
+                      className="p-1 rounded text-slate-600 hover:text-amber-600 hover:bg-slate-200 transition cursor-pointer"
+                    >
+                      <KeyRound className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => openEditModal(user)}
+                      title="Edit User"
+                      className="p-1 rounded text-slate-600 hover:text-primary hover:bg-slate-200 transition cursor-pointer"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteUser(user)}
+                      title="Delete User"
+                      disabled={isRoot}
+                      className={`p-1 rounded transition ${
+                        isRoot
+                          ? "opacity-30 cursor-not-allowed text-slate-400"
+                          : "text-slate-600 hover:text-rose-600 hover:bg-slate-200 cursor-pointer"
+                      }`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                );
+              },
+            },
+          ]}
+        />
+        </TableFilterBar>
       </SettingsSection>
 
       {/* Modal: Add New User */}
@@ -1035,7 +1035,7 @@ export default function UserRolePage() {
                 }
                 label={
                   <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       Enforce Two-Factor Auth (2FA)
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -1318,7 +1318,7 @@ export default function UserRolePage() {
                   }
                   label={
                     <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
                         Two-Factor Authentication
                       </Typography>
                       <Typography variant="caption" color="text.secondary">

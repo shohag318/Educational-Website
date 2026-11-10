@@ -101,6 +101,17 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     MuiPaper: {
       styleOverrides: {
         rounded: { borderRadius: 16 },
+        root: {
+          backgroundImage: "none",
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 16,
+          boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
+        },
       },
     },
     MuiTextField: {
@@ -219,9 +230,11 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     MuiTableContainer: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
-          border: `1px solid ${theme.palette.divider}`,
-          backgroundColor: theme.palette.background.paper,
+          // Radius/border belong on the outer Card (CommonTable), not here —
+          // otherwise header bg leaves a white gap in the rounded corners.
+          borderRadius: 0,
+          border: "none",
+          backgroundColor: "transparent",
           boxShadow: "none",
         },
       },
@@ -240,14 +253,16 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     MuiTableHead: {
       styleOverrides: {
         root: {
-          backgroundColor: theme.palette.common.white,
+          backgroundColor: theme.palette.grey[100],
           "& .MuiTableCell-head": {
-            fontWeight: 500,
+            fontWeight: 700,
             fontSize: 13,
             lineHeight: 1.4,
-            color: theme.palette.text.secondary,
-            backgroundColor: theme.palette.common.white,
+            letterSpacing: "-0.01em",
+            color: theme.palette.text.primary,
+            backgroundColor: theme.palette.grey[100],
             whiteSpace: "nowrap",
+            borderRadius: 0,
             borderBottom: `1px solid ${theme.palette.divider}`,
             paddingTop: 14,
             paddingBottom: 14,
@@ -262,6 +277,18 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
         root: {
           "& .MuiTableRow-root:last-of-type .MuiTableCell-root": {
             borderBottom: 0,
+          },
+          "& .MuiTypography-subtitle2, & .MuiTypography-body2": {
+            fontSize: 13.5,
+            fontWeight: 700,
+            lineHeight: 1.45,
+            color: theme.palette.text.primary,
+          },
+          "& .MuiTypography-caption": {
+            fontSize: 12,
+            fontWeight: 500,
+            lineHeight: 1.4,
+            color: theme.palette.text.secondary,
           },
         },
       },
@@ -285,18 +312,21 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
       styleOverrides: {
         root: {
           borderColor: theme.palette.divider,
-          borderBottom: `1px solid ${theme.palette.divider}`,
+          borderBottom: `1px solid ${alpha(theme.palette.grey[500], 0.12)}`,
           fontSize: 13.5,
+          lineHeight: 1.5,
           color: theme.palette.text.primary,
-          paddingTop: 14,
-          paddingBottom: 14,
+          paddingTop: 16,
+          paddingBottom: 16,
           paddingLeft: 16,
           paddingRight: 16,
           verticalAlign: "middle",
         },
         head: {
-          fontWeight: 500,
-          color: theme.palette.text.secondary,
+          fontWeight: 700,
+          fontSize: 13,
+          color: theme.palette.text.primary,
+          backgroundColor: theme.palette.grey[100],
         },
         sizeSmall: {
           paddingTop: 10,
@@ -313,7 +343,19 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
           borderTop: `1px solid ${theme.palette.divider}`,
         },
         toolbar: {
-          minHeight: 52,
+          minHeight: 56,
+          paddingLeft: 16,
+          paddingRight: 8,
+        },
+        selectLabel: {
+          fontSize: 13,
+          fontWeight: 500,
+          color: theme.palette.text.secondary,
+        },
+        displayedRows: {
+          fontSize: 13,
+          fontWeight: 500,
+          color: theme.palette.text.secondary,
         },
       },
     },

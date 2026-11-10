@@ -1,6 +1,5 @@
 "use client";
 
-import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -32,6 +31,9 @@ import { SmsNavHeader } from "@/sections/sms/component/sms-nav-header";
 import { getStoredSchoolInfo } from "@/lib/settingsStore";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
+import { AppTable, TableFilterBar } from "@/components";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { getScopedStorageKey, getActiveTenantCode, TENANT_SWITCH_EVENT } from "@/lib/clientTenant";
 
 interface StudentRecord {
@@ -658,40 +660,63 @@ export default function CustomSMSPage() {
               No recent custom broadcasts sent yet.
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-100 text-slate-500 font-bold uppercase text-[10px]">
-                    <th className="p-2">Date / Time</th>
-                    <th className="p-2">Recipients</th>
-                    <th className="p-2">Sender ID</th>
-                    <th className="p-2">Gateway</th>
-                    <th className="p-2">Message Excerpt</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {customLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50">
-                      <td className="p-2 font-mono text-slate-600">
-                        {new Date(log.date).toLocaleString()}
-                      </td>
-                      <td className="p-2 font-bold text-emerald-700">
-                        {log.recipientCount} Sent {log.failedCount > 0 && `(${log.failedCount} failed)`}
-                      </td>
-                      <td className="p-2 font-mono text-slate-700">{log.senderId}</td>
-                      <td className="p-2">
-                        <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-700">
-                          {log.provider}
-                        </span>
-                      </td>
-                      <td className="p-2 font-mono text-slate-600 max-w-xs truncate">
-                        {log.sampleMessage}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <TableFilterBar showSearch={false}>
+          <AppTable<(typeof customLogs)[number]>
+        embedded
+              rows={customLogs}
+              rowKey={(row) => row.id}
+              defaultOrderBy="date"
+              minWidth={800}
+              columns={[
+                {
+                  id: "date",
+                  label: "Date / Time",
+                  render: (log) => (
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>
+                      {new Date(log.date).toLocaleString()}
+                    </Typography>
+                  ),
+                },
+                {
+                  id: "recipientCount",
+                  label: "Recipients",
+                  render: (log) => (
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: "success.dark" }}>
+                      {log.recipientCount} Sent {log.failedCount > 0 && `(${log.failedCount} failed)`}
+                    </Typography>
+                  ),
+                },
+                {
+                  id: "senderId",
+                  label: "Sender ID",
+                  render: (log) => (
+                    <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+                      {log.senderId}
+                    </Typography>
+                  ),
+                },
+                {
+                  id: "provider",
+                  label: "Gateway",
+                  render: (log) => (
+                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-700">
+                      {log.provider}
+                    </span>
+                  ),
+                },
+                {
+                  id: "sampleMessage",
+                  label: "Message Excerpt",
+                  sortable: false,
+                  render: (log) => (
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }} noWrap>
+                      {log.sampleMessage}
+                    </Typography>
+                  ),
+                },
+              ]}
+            />
+        </TableFilterBar>
           )}
         </div>
       )}
@@ -1086,109 +1111,112 @@ export default function CustomSMSPage() {
               </div>
             </div>
 
-            {/* Recipients Table */}
-            <div className="overflow-x-auto border border-slate-200 rounded-xl">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="bg-slate-100/80 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px]">
-                    <th className="p-3 w-10 text-center">
+            <TableFilterBar showSearch={false}>
+          <AppTable<any>
+        embedded
+              rows={filteredStudents}
+              rowKey={(row) => row.id}
+              defaultOrderBy="classRoll"
+              minWidth={900}
+              loading={loadingStudents}
+              columns={[
+                {
+                  id: "select",
+                  label: "",
+                  sortable: false,
+                  width: 48,
+                  align: "center",
+                  render: (st) => {
+                    const hasPhone = Boolean(
+                      st.student.guardianPhone && st.student.guardianPhone.trim().length >= 8
+                    );
+                    const isSelected = selectedStudentIds.includes(st.id);
+                    return (
                       <input
                         type="checkbox"
-                        checked={
-                          filteredStudents.length > 0 &&
-                          filteredStudents.every((s) => selectedStudentIds.includes(s.id))
-                        }
-                        onChange={(e) => {
-                          if (e.target.checked) handleSelectAll();
-                          else handleDeselectAll();
-                        }}
-                        className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                        disabled={!hasPhone}
+                        checked={isSelected}
+                        onChange={() => toggleSelectStudent(st.id)}
+                        className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer disabled:opacity-40"
                       />
-                    </th>
-                    <th className="p-3">Roll</th>
-                    <th className="p-3">Student Name</th>
-                    <th className="p-3">Class & Section</th>
-                    <th className="p-3">Guardian Phone</th>
-                    <th className="p-3">Rendered Message Preview</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {loadingStudents ? (
-                    <tr>
-                      <td colSpan={6} className="p-8 text-center text-slate-400 italic">
-                        Loading targeted students...
-                      </td>
-                    </tr>
-                  ) : filteredStudents.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="p-0">
-                        <NoDataFound />
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredStudents.map((st) => {
-                      const isSelected = selectedStudentIds.includes(st.id);
-                      const hasPhone = Boolean(
-                        st.student.guardianPhone && st.student.guardianPhone.trim().length >= 8
-                      );
-                      const renderedText = renderMessageForStudent(st);
-
-                      return (
-                        <tr
-                          key={st.id}
-                          onClick={() => {
-                            if (hasPhone) toggleSelectStudent(st.id);
-                          }}
-                          className={`hover:bg-slate-50 transition-colors cursor-pointer ${
-                            isSelected ? "bg-indigo-50/40" : ""
-                          }`}
-                        >
-                          <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}>
-                            <input
-                              type="checkbox"
-                              disabled={!hasPhone}
-                              checked={isSelected}
-                              onChange={() => toggleSelectStudent(st.id)}
-                              className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer disabled:opacity-40"
-                            />
-                          </td>
-                          <td className="p-3 font-mono font-bold text-slate-900">
-                            #{st.classRoll}
-                          </td>
-                          <td className="p-3 font-semibold text-slate-900">
-                            {st.student.firstName} {st.student.lastName}
-                            {st.student.guardianName && (
-                              <span className="block text-[11px] font-normal text-slate-400">
-                                C/O {st.student.guardianName}
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-3 text-slate-600 whitespace-nowrap">
-                            {st.class?.name} • {st.section?.name}
-                          </td>
-                          <td className="p-3">
-                            {hasPhone ? (
-                              <span className="font-mono text-emerald-700 font-semibold flex items-center space-x-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                <span>{st.student.guardianPhone}</span>
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center space-x-1 text-rose-600 text-[11px] font-semibold">
-                                <AlertCircle className="w-3 h-3" />
-                                <span>Missing Phone</span>
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-3 font-mono text-slate-600 text-[11px] max-w-md truncate" title={renderedText}>
-                            {renderedText}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    );
+                  },
+                },
+                {
+                  id: "classRoll",
+                  label: "Roll",
+                  render: (st) => (
+                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                      #{st.classRoll}
+                    </Typography>
+                  ),
+                },
+                {
+                  id: "student",
+                  label: "Student Name",
+                  sortable: false,
+                  render: (st) => (
+                    <>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {st.student.firstName} {st.student.lastName}
+                      </Typography>
+                      {st.student.guardianName ? (
+                        <Typography variant="caption" color="text.secondary">
+                          C/O {st.student.guardianName}
+                        </Typography>
+                      ) : null}
+                    </>
+                  ),
+                },
+                {
+                  id: "class",
+                  label: "Class & Section",
+                  sortable: false,
+                  render: (st) => (
+                    <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "nowrap" }}>
+                      {st.class?.name} • {st.section?.name}
+                    </Typography>
+                  ),
+                },
+                {
+                  id: "phone",
+                  label: "Guardian Phone",
+                  sortable: false,
+                  render: (st) => {
+                    const hasPhone = Boolean(
+                      st.student.guardianPhone && st.student.guardianPhone.trim().length >= 8
+                    );
+                    return hasPhone ? (
+                      <span className="font-mono text-emerald-700 font-semibold flex items-center space-x-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span>{st.student.guardianPhone}</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center space-x-1 text-rose-600 text-[11px] font-semibold">
+                        <AlertCircle className="w-3 h-3" />
+                        <span>Missing Phone</span>
+                      </span>
+                    );
+                  },
+                },
+                {
+                  id: "preview",
+                  label: "Rendered Message Preview",
+                  sortable: false,
+                  render: (st) => (
+                    <Typography
+                      variant="caption"
+                      sx={{ fontFamily: "monospace", color: "text.secondary", maxWidth: 360 }}
+                      noWrap
+                      title={renderMessageForStudent(st)}
+                    >
+                      {renderMessageForStudent(st)}
+                    </Typography>
+                  ),
+                },
+              ]}
+            />
+        </TableFilterBar>
           </div>
         )}
       </div>

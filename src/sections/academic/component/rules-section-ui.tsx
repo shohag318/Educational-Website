@@ -7,27 +7,12 @@ import {
   ResultsFilterCard,
 } from "@/sections/results/component/result-page-ui";
 
-/** Soft page atmosphere wrapper for the rules route. */
+/** Page content wrapper — stacks section cards with visible gaps (exam-config style). */
 export function RulesAtmosphere({ children }: { children: ReactNode }) {
   return (
-    <Box
-      sx={{
-        position: "relative",
-        "&::before": {
-          content: '""',
-          pointerEvents: "none",
-          position: "absolute",
-          inset: { xs: "-8px -12px 0", md: "-16px -24px 0" },
-          zIndex: 0,
-          background:
-            "radial-gradient(ellipse 70% 40% at 0% 0%, rgba(5,150,105,0.07), transparent 55%), radial-gradient(ellipse 55% 35% at 100% 8%, rgba(2,132,199,0.05), transparent 50%)",
-          borderRadius: 4,
-        },
-        "& > *": { position: "relative", zIndex: 1 },
-      }}
-    >
+    <Stack spacing={2.5} sx={{ width: 1 }}>
       {children}
-    </Box>
+    </Stack>
   );
 }
 
@@ -116,7 +101,17 @@ export function RulesSection({
         <Divider />
       )}
 
-      <Box sx={{ px: { xs: 2.25, sm: 2.75 }, py: { xs: 2.25, sm: 2.75 } }}>{children}</Box>
+      <Box
+        sx={{
+          px: { xs: 2.25, sm: 2.75 },
+          py: { xs: 2.25, sm: 2.75 },
+          bgcolor: "grey.50",
+          // Nested white/list cards get a clear gap against this soft canvas
+          "& > .MuiStack-root": { gap: 1.5 },
+        }}
+      >
+        {children}
+      </Box>
     </ResultsPanel>
   );
 }

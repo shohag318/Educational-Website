@@ -1,6 +1,5 @@
 "use client";
 
-import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -51,7 +50,10 @@ import {
   calculateStudentWaiver,
 } from "@/sections/fees/schema/waiver-store";
 import { AppButton } from "@/components/button/app-button";
+import { AppTable, AppCard, TableFilterBar } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 // Validity Duration Options
 const DURATION_OPTIONS = [
@@ -970,253 +972,256 @@ export default function ScholarshipWaiverPage() {
       {/* ========================================================
           STUDENTS SCHOLARSHIP LEDGER TABLE
          ======================================================== */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        {/* Table Top Controls & Quick Filter Tabs */}
-        <div className="p-4 bg-slate-50/80 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center space-x-1.5 mr-2">
-              <Users className="w-4 h-4 text-emerald-600" />
-              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-                Scholarship Roster
-              </h3>
-            </div>
+      <AppCard>
+        <TableFilterBar
+          tabs={[
+            { value: "ALL", label: `All (${students.length})` },
+            { value: "WITH_WAIVER", label: `Awardees (${stats.waiverCount})` },
+            { value: "FULL_FREE", label: `100% Free (${stats.fullFreeCount})` },
+            { value: "PARTIAL", label: `Partial (${stats.partialCount})` },
+            { value: "NO_WAIVER", label: `Standard (${stats.noWaiverCount})` },
+          ]}
+          tabValue={waiverFilter}
+          onTabChange={(value) => setWaiverFilter(value as typeof waiverFilter)}
+          showSearch={false}
+        >
+          <AppTable<any>
+            embedded
+            rows={filteredStudents}
+        rowKey={(row) => row.id}
+        defaultOrderBy="classRoll"
+        minWidth={1100}
+        loading={loading}
+        showCheckbox
+        selected={selectedStudentIds}
+        onSelectRow={handleToggleStudentSelection}
+        onSelectAllRows={(checked) => {
+          if (checked) {
+            setSelectedStudentIds(filteredStudents.map((s: any) => s.id));
+          } else {
+            setSelectedStudentIds([]);
+          }
+        }}
+        columns={[
+          {
+            id: "classRoll",
+            label: "Roll",
+            align: "center",
+            render: (enr) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                {enr.classRoll}
+              </Typography>
+            ),
+          },
+          {
+            id: "student",
+            label: "Student Name & ID",
+            sortable: false,
+            render: (enr) => (
+              <>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {enr.student?.firstName} {enr.student?.lastName}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+                  ID: {enr.student?.studentIdNo || "N/A"}
+                </Typography>
+              </>
+            ),
+          },
+          {
+            id: "class",
+            label: "Class & Section",
+            sortable: false,
+            render: (enr) => (
+              <>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {enr.class?.name}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {enr.section?.name} • {enr.groupType}
+                </Typography>
+              </>
+            ),
+          },
+          {
+            id: "baseTuition",
+            label: "Base Tuition",
+            align: "right",
+            sortable: false,
+            render: (enr) => (
+              <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 500, color: "text.secondary" }}>
+                ৳ {getStudentBaseTuition(enr).toLocaleString()}
+              </Typography>
+            ),
+          },
+          {
+            id: "scheme",
+            label: "Scholarship Scheme",
+            sortable: false,
+            render: (enr) => {
+              const sId = enr.student?.id || enr.id;
+              const rollKey = `roll_${enr.classRoll}`;
+              const assignedWaiver =
+                waivers[sId] ||
+                waivers[enr.id] ||
+                (waivers[rollKey] && waivers[rollKey].status === "ACTIVE" ? waivers[rollKey] : undefined);
+              const baseTuition = getStudentBaseTuition(enr);
+              const waiverCalc = calculateStudentWaiver(assignedWaiver, baseTuition, baseAuxiliaryFees, enr.classRoll);
 
-            {/* Quick Segmented Tabs */}
-            <div className="flex items-center bg-slate-200/80 p-0.5 rounded-lg text-[11px] font-medium">
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={waiverFilter === "ALL" ? "primary" : "inherit"}
-                onClick={() => setWaiverFilter("ALL")}
-              >
-                All ({students.length})
-              </AppButton>
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={waiverFilter === "WITH_WAIVER" ? "primary" : "inherit"}
-                startIcon={<Award size={12} />}
-                onClick={() => setWaiverFilter("WITH_WAIVER")}
-              >
-                Awardees ({stats.waiverCount})
-              </AppButton>
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={waiverFilter === "FULL_FREE" ? "primary" : "inherit"}
-                onClick={() => setWaiverFilter("FULL_FREE")}
-              >
-                100% Free ({stats.fullFreeCount})
-              </AppButton>
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={waiverFilter === "PARTIAL" ? "primary" : "inherit"}
-                onClick={() => setWaiverFilter("PARTIAL")}
-              >
-                Partial ({stats.partialCount})
-              </AppButton>
-              <AppButton
-                type="button"
-                size="small"
-                variant="soft"
-                color={waiverFilter === "NO_WAIVER" ? "primary" : "inherit"}
-                onClick={() => setWaiverFilter("NO_WAIVER")}
-              >
-                Standard ({stats.noWaiverCount})
-              </AppButton>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <span className="text-[11px]">
-              Showing <strong className="text-slate-800">{filteredStudents.length}</strong> of {students.length} students
-            </span>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="p-12 text-center text-slate-500 text-xs">
-            <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-            Loading enrolled cohort and calculating scholarship ledger...
-          </div>
-        ) : filteredStudents.length === 0 ? (
-          <NoDataFound />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-slate-50 text-[11px] font-semibold text-slate-600 uppercase tracking-wider border-b border-slate-200">
-                <tr>
-                  <th className="py-3 px-3 text-center w-10">
-                    <input
-                      type="checkbox"
-                      checked={selectedStudentIds.length === filteredStudents.length && filteredStudents.length > 0}
-                      onChange={handleSelectAllStudents}
-                      className="rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 cursor-pointer"
-                    />
-                  </th>
-                  <th className="py-3 px-3 text-center w-14">Roll</th>
-                  <th className="py-3 px-4">Student Name & ID</th>
-                  <th className="py-3 px-3">Class & Section</th>
-                  <th className="py-3 px-3 text-right">Base Tuition</th>
-                  <th className="py-3 px-3">Scholarship Scheme</th>
-                  <th className="py-3 px-3 text-right">Waiver Applied</th>
-                  <th className="py-3 px-3 text-right">Net Tuition</th>
-                  <th className="py-3 px-3 text-center">Ledger Status</th>
-                  <th className="py-3 px-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredStudents.map((enr) => {
-                  const sId = enr.student?.id || enr.id;
-                  const rollKey = `roll_${enr.classRoll}`;
-                  const assignedWaiver = waivers[sId] || waivers[enr.id] || (waivers[rollKey] && waivers[rollKey].status === "ACTIVE" ? waivers[rollKey] : undefined);
-                  const baseTuition = getStudentBaseTuition(enr);
-                  const waiverCalc = calculateStudentWaiver(assignedWaiver, baseTuition, baseAuxiliaryFees, enr.classRoll);
-                  const netTuition = Math.max(0, baseTuition - waiverCalc.waiverAmount);
-                  const isSelected = selectedStudentIds.includes(enr.id);
-
-                  return (
-                    <tr
-                      key={enr.id}
-                      className={`hover:bg-slate-50/80 transition-colors ${
-                        isSelected ? "bg-amber-50/40" : ""
-                      }`}
+              if (waiverCalc.isSpecialScholarship) {
+                return (
+                  <div className="space-y-0.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">
+                      <Sparkles className="w-3 h-3 text-amber-600 shrink-0" />
+                      <span className="truncate max-w-[170px]">{waiverCalc.waiverTitle}</span>
+                    </span>
+                    <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                      <span className="text-slate-400">Scope:</span>
+                      <span className="font-medium text-slate-700">
+                        {assignedWaiver?.appliesTo === "TOTAL_PAYABLE" ? "All Fee Heads" : "Tuition Only"}
+                      </span>
+                    </div>
+                    {assignedWaiver?.effectiveFrom && (
+                      <p className="text-[10px] text-indigo-600 flex items-center gap-0.5">
+                        <Clock className="w-2.5 h-2.5" />
+                        <span>{assignedWaiver.effectiveFrom}</span>
+                      </p>
+                    )}
+                  </div>
+                );
+              }
+              if (enr.classRoll <= 3) {
+                return (
+                  <div className="space-y-0.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                      <Award className="w-3 h-3 text-indigo-600" />
+                      Merit Top-3 Standard
+                    </span>
+                    <p className="text-[10px] text-slate-400">৳500 Concession</p>
+                  </div>
+                );
+              }
+              return <span className="text-slate-400 text-[11px]">Standard (No Scheme)</span>;
+            },
+          },
+          {
+            id: "waiverApplied",
+            label: "Waiver Applied",
+            align: "right",
+            sortable: false,
+            render: (enr) => {
+              const sId = enr.student?.id || enr.id;
+              const rollKey = `roll_${enr.classRoll}`;
+              const assignedWaiver =
+                waivers[sId] ||
+                waivers[enr.id] ||
+                (waivers[rollKey] && waivers[rollKey].status === "ACTIVE" ? waivers[rollKey] : undefined);
+              const baseTuition = getStudentBaseTuition(enr);
+              const waiverCalc = calculateStudentWaiver(assignedWaiver, baseTuition, baseAuxiliaryFees, enr.classRoll);
+              if (waiverCalc.waiverAmount <= 0) {
+                return <span className="text-slate-400">৳ 0</span>;
+              }
+              return (
+                <div className="font-mono font-bold text-rose-600">
+                  <span>-৳ {waiverCalc.waiverAmount.toLocaleString()}</span>
+                  <div className="text-[10px] text-rose-500 font-semibold font-sans">
+                    ({waiverCalc.waiverPercentage}% Off)
+                  </div>
+                </div>
+              );
+            },
+          },
+          {
+            id: "netTuition",
+            label: "Net Tuition",
+            align: "right",
+            sortable: false,
+            render: (enr) => {
+              const sId = enr.student?.id || enr.id;
+              const rollKey = `roll_${enr.classRoll}`;
+              const assignedWaiver =
+                waivers[sId] ||
+                waivers[enr.id] ||
+                (waivers[rollKey] && waivers[rollKey].status === "ACTIVE" ? waivers[rollKey] : undefined);
+              const baseTuition = getStudentBaseTuition(enr);
+              const waiverCalc = calculateStudentWaiver(assignedWaiver, baseTuition, baseAuxiliaryFees, enr.classRoll);
+              const netTuition = Math.max(0, baseTuition - waiverCalc.waiverAmount);
+              return (
+                <Typography variant="caption" sx={{ fontWeight: 700, color: "success.dark" }}>
+                  ৳ {netTuition.toLocaleString()}
+                </Typography>
+              );
+            },
+          },
+          {
+            id: "ledgerStatus",
+            label: "Ledger Status",
+            align: "center",
+            sortable: false,
+            render: (enr) => {
+              const sId = enr.student?.id || enr.id;
+              const rollKey = `roll_${enr.classRoll}`;
+              const assignedWaiver =
+                waivers[sId] ||
+                waivers[enr.id] ||
+                (waivers[rollKey] && waivers[rollKey].status === "ACTIVE" ? waivers[rollKey] : undefined);
+              const baseTuition = getStudentBaseTuition(enr);
+              const waiverCalc = calculateStudentWaiver(assignedWaiver, baseTuition, baseAuxiliaryFees, enr.classRoll);
+              return waiverCalc.waiverAmount > 0 ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                  Active Waiver
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600">
+                  Standard
+                </span>
+              );
+            },
+          },
+          {
+            id: "actions",
+            label: "Actions",
+            align: "center",
+            sortable: false,
+            render: (enr) => {
+              const sId = enr.student?.id || enr.id;
+              const rollKey = `roll_${enr.classRoll}`;
+              const assignedWaiver =
+                waivers[sId] ||
+                waivers[enr.id] ||
+                (waivers[rollKey] && waivers[rollKey].status === "ACTIVE" ? waivers[rollKey] : undefined);
+              return (
+                <div className="flex items-center justify-center gap-1.5">
+                  <AppButton
+                    type="button"
+                    variant="contained"
+                    color="warning"
+                    size="small"
+                    startIcon={<Edit size={12} />}
+                    onClick={() => handleOpenAssignModal(enr)}
+                    title="Assign or Edit Scholarship"
+                  >
+                    {assignedWaiver ? "Edit" : "Assign"}
+                  </AppButton>
+                  {assignedWaiver && (
+                    <button
+                      type="button"
+                      onClick={() => handleRevokeWaiver(enr)}
+                      className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer"
+                      title="Revoke Scholarship & Restore Tuition"
                     >
-                      <td className="py-3 px-3 text-center">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => handleToggleStudentSelection(enr.id)}
-                          className="rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 cursor-pointer"
-                        />
-                      </td>
-
-                      <td className="py-3 px-3 text-center font-bold font-mono text-slate-900">
-                        {enr.classRoll}
-                      </td>
-
-                      <td className="py-3 px-4">
-                        <div className="font-semibold text-slate-900">
-                          {enr.student?.firstName} {enr.student?.lastName}
-                        </div>
-                        <div className="text-[11px] text-slate-500 font-mono">
-                          ID: {enr.student?.studentIdNo || "N/A"}
-                        </div>
-                      </td>
-
-                      <td className="py-3 px-3">
-                        <span className="font-medium text-slate-800">{enr.class?.name}</span>
-                        <div className="text-[11px] text-slate-500">
-                          {enr.section?.name} • {enr.groupType}
-                        </div>
-                      </td>
-
-                      <td className="py-3 px-3 text-right font-mono font-medium text-slate-600">
-                        ৳ {baseTuition.toLocaleString()}
-                      </td>
-
-                      <td className="py-3 px-3">
-                        {waiverCalc.isSpecialScholarship ? (
-                          <div className="space-y-0.5">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">
-                              <Sparkles className="w-3 h-3 text-amber-600 shrink-0" />
-                              <span className="truncate max-w-[170px]">{waiverCalc.waiverTitle}</span>
-                            </span>
-                            <div className="flex items-center gap-1 text-[10px] text-slate-500">
-                              <span className="text-slate-400">Scope:</span>
-                              <span className="font-medium text-slate-700">
-                                {assignedWaiver?.appliesTo === "TOTAL_PAYABLE" ? "All Fee Heads" : "Tuition Only"}
-                              </span>
-                            </div>
-                            {assignedWaiver?.effectiveFrom && (
-                              <p className="text-[10px] text-indigo-600 flex items-center gap-0.5">
-                                <Clock className="w-2.5 h-2.5" />
-                                <span>{assignedWaiver.effectiveFrom}</span>
-                              </p>
-                            )}
-                          </div>
-                        ) : enr.classRoll <= 3 ? (
-                          <div className="space-y-0.5">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                              <Award className="w-3 h-3 text-indigo-600" />
-                              Merit Top-3 Standard
-                            </span>
-                            <p className="text-[10px] text-slate-400">৳500 Concession</p>
-                          </div>
-                        ) : (
-                          <span className="text-slate-400 text-[11px]">Standard (No Scheme)</span>
-                        )}
-                      </td>
-
-                      <td className="py-3 px-3 text-right font-mono font-bold text-rose-600">
-                        {waiverCalc.waiverAmount > 0 ? (
-                          <div>
-                            <span>-৳ {waiverCalc.waiverAmount.toLocaleString()}</span>
-                            <div className="text-[10px] text-rose-500 font-semibold font-sans">
-                              ({waiverCalc.waiverPercentage}% Off)
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-slate-400">৳ 0</span>
-                        )}
-                      </td>
-
-                      <td className="py-3 px-3 text-right font-mono font-bold text-emerald-700">
-                        ৳ {netTuition.toLocaleString()}
-                      </td>
-
-                      <td className="py-3 px-3 text-center">
-                        {waiverCalc.waiverAmount > 0 ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                            Active Waiver
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600">
-                            Standard
-                          </span>
-                        )}
-                      </td>
-
-                      <td className="py-3 px-4 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <AppButton
-                            type="button"
-                            variant="contained"
-                            color="warning"
-                            size="small"
-                            startIcon={<Edit size={12} />}
-                            onClick={() => handleOpenAssignModal(enr)}
-                            title="Assign or Edit Scholarship"
-                          >
-                            {assignedWaiver ? "Edit" : "Assign"}
-                          </AppButton>
-
-                          {assignedWaiver && (
-                            <button
-                              type="button"
-                              onClick={() => handleRevokeWaiver(enr)}
-                              className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer"
-                              title="Revoke Scholarship & Restore Tuition"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              );
+            },
+          },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
 
       {/* ========================================================
           ASSIGN / EDIT SCHOLARSHIP MODAL

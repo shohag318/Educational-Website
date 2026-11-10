@@ -1,6 +1,5 @@
 "use client";
 
-import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Boxes,
@@ -48,6 +47,11 @@ import {
 } from "@/sections/assets/schema/asset-store";
 import { TENANT_SWITCH_EVENT } from "@/lib/clientTenant";
 import { AppButton } from "@/components/button/app-button";
+import { AppTable, Label, AppCard, TableFilterBar } from "@/components";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 export default function InstitutionAssetsPage() {
   const [assets, setAssets] = useState<InstitutionAsset[]>([]);
@@ -515,218 +519,181 @@ export default function InstitutionAssetsPage() {
         </div>
       </div>
 
-      {/* Main Asset Registry Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
-        <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center space-x-2">
-            <Boxes className="w-4 h-4 text-blue-600" />
-            <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wide">
-              Official Institutional Asset Register &amp; Inventory
-            </h3>
-            <span className="text-[10px] font-bold bg-white text-slate-700 px-2 py-0.5 rounded border border-slate-200">
-              {filteredAssets.length} Assets
-            </span>
-          </div>
-
-          <div className="text-xs font-mono font-bold text-slate-700">
-            Book Value: <span className="text-blue-700 font-extrabold">৳{filteredAssets.reduce((s, a) => s + a.currentValue, 0).toLocaleString()}</span>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left border-collapse">
-            <thead className="bg-slate-100/80 text-[10px] font-bold text-slate-700 uppercase border-b border-slate-200 tracking-wider">
-              <tr>
-                <th className="py-2.5 px-3">Asset Code</th>
-                <th className="py-2.5 px-3">Asset Name &amp; Spec</th>
-                <th className="py-2.5 px-2">Category</th>
-                <th className="py-2.5 px-3">Location / Room</th>
-                <th className="py-2.5 px-2 text-center">Qty</th>
-                <th className="py-2.5 px-3 text-right">Purchase (৳)</th>
-                <th className="py-2.5 px-3 text-right">Book Value (৳)</th>
-                <th className="py-2.5 px-2 text-center">Condition</th>
-                <th className="py-2.5 px-2 text-center">Status</th>
-                <th className="py-2.5 px-3">Custodian</th>
-                <th className="py-2.5 px-3 text-center no-print">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredAssets.length === 0 ? (
-                <tr>
-                  <td colSpan={11} className="p-0">
-                    <NoDataFound />
-                  </td>
-                </tr>
-              ) : (
-                filteredAssets.map((asset) => {
-                  const catInfo = ASSET_CATEGORIES.find((c) => c.key === asset.category);
-
-                  return (
-                    <tr key={asset.id} className="hover:bg-slate-50/80 transition">
-                      {/* Code with tag icon */}
-                      <td className="py-2.5 px-3 font-mono font-bold text-slate-900 whitespace-nowrap">
-                        <AppButton
-                          type="button"
-                          onClick={() => setTagPreviewAsset(asset)}
-                          title="Click to preview barcode sticker tag"
-                          variant="link"
-                          startIcon={<Barcode className="w-3.5 h-3.5" />}
-                        >
-                          {asset.assetCode}
-                        </AppButton>
-                      </td>
-
-                      {/* Name & Serial */}
-                      <td className="py-2.5 px-3">
-                        <div className="font-bold text-slate-900">{asset.name}</div>
-                        {asset.serialNumber && (
-                          <div className="text-[10px] text-slate-400 font-mono">
-                            SN: {asset.serialNumber}
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Category Badge */}
-                      <td className="py-2.5 px-2 whitespace-nowrap">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${catInfo?.badgeBg || "bg-slate-100 text-slate-700"}`}>
-                          {catInfo?.label.split(" ")[0]}
-                        </span>
-                      </td>
-
-                      {/* Location */}
-                      <td className="py-2.5 px-3 text-slate-700">
-                        <div>{asset.location}</div>
-                        {asset.building && (
-                          <div className="text-[10px] text-slate-400">{asset.building}</div>
-                        )}
-                      </td>
-
-                      {/* Quantity */}
-                      <td className="py-2.5 px-2 text-center font-mono font-bold text-slate-800">
-                        {asset.quantity || 1}
-                      </td>
-
-                      {/* Purchase Price */}
-                      <td className="py-2.5 px-3 text-right font-mono font-semibold text-slate-700">
-                        ৳{asset.purchasePrice.toLocaleString()}
-                      </td>
-
-                      {/* Current Book Value */}
-                      <td className="py-2.5 px-3 text-right font-mono font-extrabold text-blue-900">
-                        ৳{asset.currentValue.toLocaleString()}
-                      </td>
-
-                      {/* Condition */}
-                      <td className="py-2.5 px-2 text-center whitespace-nowrap">
-                        <span
-                          className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded ${
-                            asset.condition === "EXCELLENT"
-                              ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                              : asset.condition === "GOOD"
-                              ? "bg-blue-100 text-blue-800 border border-blue-200"
-                              : asset.condition === "NEEDS_REPAIR"
-                              ? "bg-amber-100 text-amber-800 border border-amber-300"
-                              : asset.condition === "DAMAGED"
-                              ? "bg-rose-100 text-rose-800 border border-rose-300"
-                              : "bg-slate-100 text-slate-600"
-                          }`}
-                        >
-                          {asset.condition.replace("_", " ")}
-                        </span>
-                      </td>
-
-                      {/* Status */}
-                      <td className="py-2.5 px-2 text-center whitespace-nowrap">
-                        <span
-                          className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                            asset.status === "IN_USE"
-                              ? "bg-emerald-50 text-emerald-700"
-                              : asset.status === "MAINTENANCE"
-                              ? "bg-amber-50 text-amber-700"
-                              : "bg-slate-100 text-slate-600"
-                          }`}
-                        >
-                          {asset.status.replace("_", " ")}
-                        </span>
-                      </td>
-
-                      {/* Custodian */}
-                      <td className="py-2.5 px-3 text-slate-600 text-[11px] truncate max-w-[140px]" title={asset.custodian}>
-                        {asset.custodian}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="py-2.5 px-3 text-center no-print">
-                        <div className="flex items-center justify-center space-x-1">
-                          <button
-                            type="button"
-                            onClick={() => setTagPreviewAsset(asset)}
-                            title="Print Barcode Tag Sticker"
-                            className="p-1 hover:bg-slate-100 text-slate-500 hover:text-blue-700 rounded transition cursor-pointer"
-                          >
-                            <Barcode className="w-3.5 h-3.5" />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setMaintenanceAsset(asset);
-                              setMaintIssue("");
-                              setMaintVendor(asset.supplierName || "");
-                              setMaintCost(0);
-                            }}
-                            title="Log Repair / Maintenance"
-                            className="p-1 hover:bg-amber-50 text-slate-500 hover:text-amber-700 rounded transition cursor-pointer"
-                          >
-                            <Wrench className="w-3.5 h-3.5" />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditModal(asset)}
-                            title="Edit Asset Details"
-                            className="p-1 hover:bg-blue-50 text-slate-500 hover:text-blue-700 rounded transition cursor-pointer"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteAsset(asset)}
-                            title="Delete Asset"
-                            className="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded transition cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-            {filteredAssets.length > 0 && (
-              <tfoot className="bg-slate-100 font-bold border-t border-slate-200 text-slate-800">
-                <tr>
-                  <td colSpan={4} className="py-2.5 px-3">
-                    Total Filtered Register:
-                  </td>
-                  <td className="py-2.5 px-2 text-center font-mono">
-                    {filteredAssets.reduce((s, a) => s + (a.quantity || 1), 0)}
-                  </td>
-                  <td className="py-2.5 px-3 text-right font-mono">
-                    ৳{filteredAssets.reduce((s, a) => s + a.purchasePrice, 0).toLocaleString()}
-                  </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-extrabold text-blue-900 text-sm">
-                    ৳{filteredAssets.reduce((s, a) => s + a.currentValue, 0).toLocaleString()}
-                  </td>
-                  <td colSpan={4}></td>
-                </tr>
-              </tfoot>
-            )}
-          </table>
-        </div>
-      </div>
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<InstitutionAsset>
+        embedded
+        rows={filteredAssets}
+        rowKey={(row) => row.id}
+        defaultOrderBy="assetCode"
+        minWidth={1100}
+        columns={[
+          {
+            id: "assetCode",
+            label: "Asset Code",
+            render: (asset) => (
+              <AppButton
+                type="button"
+                onClick={() => setTagPreviewAsset(asset)}
+                title="Click to preview barcode sticker tag"
+                variant="link"
+                startIcon={<Barcode className="w-3.5 h-3.5" />}
+              >
+                {asset.assetCode}
+              </AppButton>
+            ),
+          },
+          {
+            id: "name",
+            label: "Asset Name & Spec",
+            render: (asset) => (
+              <>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {asset.name}
+                </Typography>
+                {asset.serialNumber ? (
+                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+                    SN: {asset.serialNumber}
+                  </Typography>
+                ) : null}
+              </>
+            ),
+          },
+          {
+            id: "category",
+            label: "Category",
+            render: (asset) => {
+              const catInfo = ASSET_CATEGORIES.find((c) => c.key === asset.category);
+              return (
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${catInfo?.badgeBg || "bg-slate-100 text-slate-700"}`}>
+                  {catInfo?.label.split(" ")[0]}
+                </span>
+              );
+            },
+          },
+          {
+            id: "location",
+            label: "Location / Room",
+            render: (asset) => (
+              <>
+                <Typography variant="body2">{asset.location}</Typography>
+                {asset.building ? (
+                  <Typography variant="caption" color="text.secondary">
+                    {asset.building}
+                  </Typography>
+                ) : null}
+              </>
+            ),
+          },
+          {
+            id: "quantity",
+            label: "Qty",
+            align: "center",
+            render: (asset) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                {asset.quantity || 1}
+              </Typography>
+            ),
+          },
+          {
+            id: "purchasePrice",
+            label: "Purchase (৳)",
+            align: "right",
+            render: (asset) => (
+              <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 600 }}>
+                ৳{asset.purchasePrice.toLocaleString()}
+              </Typography>
+            ),
+          },
+          {
+            id: "currentValue",
+            label: "Book Value (৳)",
+            align: "right",
+            render: (asset) => (
+              <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 800, color: "primary.dark" }}>
+                ৳{asset.currentValue.toLocaleString()}
+              </Typography>
+            ),
+          },
+          {
+            id: "condition",
+            label: "Condition",
+            align: "center",
+            render: (asset) => (
+              <Label
+                color={
+                  asset.condition === "EXCELLENT" || asset.condition === "GOOD"
+                    ? "success"
+                    : asset.condition === "NEEDS_REPAIR"
+                    ? "warning"
+                    : asset.condition === "DAMAGED"
+                    ? "error"
+                    : "default"
+                }
+                variant="soft"
+              >
+                {asset.condition.replace("_", " ")}
+              </Label>
+            ),
+          },
+          {
+            id: "status",
+            label: "Status",
+            align: "center",
+            render: (asset) => (
+              <Label
+                color={asset.status === "IN_USE" ? "success" : asset.status === "MAINTENANCE" ? "warning" : "default"}
+                variant="soft"
+              >
+                {asset.status.replace("_", " ")}
+              </Label>
+            ),
+          },
+          {
+            id: "custodian",
+            label: "Custodian",
+            render: (asset) => (
+              <Typography variant="caption" color="text.secondary" noWrap title={asset.custodian} sx={{ maxWidth: 140 }}>
+                {asset.custodian}
+              </Typography>
+            ),
+          },
+          {
+            id: "actions",
+            label: "Actions",
+            align: "center",
+            sortable: false,
+            render: (asset) => (
+              <Stack direction="row" spacing={0.25} sx={{ justifyContent: "center" }} className="no-print">
+                <IconButton size="small" onClick={() => setTagPreviewAsset(asset)} title="Print Barcode Tag Sticker">
+                  <Barcode className="w-3.5 h-3.5" />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  color="warning"
+                  onClick={() => {
+                    setMaintenanceAsset(asset);
+                    setMaintIssue("");
+                    setMaintVendor(asset.supplierName || "");
+                    setMaintCost(0);
+                  }}
+                  title="Log Repair / Maintenance"
+                >
+                  <Wrench className="w-3.5 h-3.5" />
+                </IconButton>
+                <IconButton size="small" color="primary" onClick={() => handleOpenEditModal(asset)} title="Edit Asset Details">
+                  <Pencil className="w-3.5 h-3.5" />
+                </IconButton>
+                <IconButton size="small" color="error" onClick={() => handleDeleteAsset(asset)} title="Delete Asset">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </IconButton>
+              </Stack>
+            ),
+          },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
 
       {/* ========================================================
           ADD / EDIT ASSET MODAL

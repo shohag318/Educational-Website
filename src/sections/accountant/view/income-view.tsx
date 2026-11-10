@@ -28,6 +28,11 @@ import {
 } from "@/sections/accountant/schema/accountant-store";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
+import { AppCard, AppTable, Label, TableFilterBar } from "@/components";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 export default function InstitutionalIncomePage() {
   const [selectedSession, setSelectedSession] = useState("ALL");
@@ -147,27 +152,6 @@ export default function InstitutionalIncomePage() {
     saveStoredIncomes(updated);
     setIncomes(updated);
     showToast(`Voucher ${voucher} deleted.`);
-  };
-
-  const getCategoryBadge = (cat: IncomeEntry["category"]) => {
-    switch (cat) {
-      case "STUDENT_TUITION":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200";
-      case "SESSION_DEVELOPMENT":
-        return "bg-teal-50 text-teal-700 border-teal-200";
-      case "EXAM_ASSESSMENT":
-        return "bg-indigo-50 text-indigo-700 border-indigo-200";
-      case "LAB_PRACTICAL":
-        return "bg-cyan-50 text-cyan-700 border-cyan-200";
-      case "DONATION_GRANT":
-        return "bg-purple-50 text-purple-700 border-purple-200";
-      case "BANK_INTEREST":
-        return "bg-amber-50 text-amber-700 border-amber-200";
-      case "CANTEEN_RENT":
-        return "bg-sky-50 text-sky-700 border-sky-200";
-      default:
-        return "bg-slate-100 text-slate-700 border-slate-200";
-    }
   };
 
   return (
@@ -349,80 +333,117 @@ export default function InstitutionalIncomePage() {
         </div>
       </div>
 
-      {/* Income Records Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 bg-slate-50/70 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              Official Income Vouchers Ledger
-            </h3>
-            <span className="text-[11px] font-semibold text-slate-500">
-              ({filteredIncomes.length} records)
-            </span>
-          </div>
-          <span className="text-[11px] text-slate-500">
-            Total Filtered: <strong className="font-mono text-emerald-700">৳ {filteredIncomes.reduce((s, i) => s + i.amount, 0).toLocaleString()}</strong>
-          </span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-50 text-[11px] font-semibold text-slate-600 uppercase tracking-wider border-b border-slate-200">
-              <tr>
-                <th className="py-3 px-3">Voucher #</th>
-                <th className="py-3 px-3">Date</th>
-                <th className="py-3 px-4">Particulars / Source</th>
-                <th className="py-3 px-3">Category</th>
-                <th className="py-3 px-3">Payment Channel</th>
-                <th className="py-3 px-3">Reference No</th>
-                <th className="py-3 px-3 text-right">Amount (৳)</th>
-                <th className="py-3 px-3 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredIncomes.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/70 transition">
-                  <td className="py-3 px-3 font-mono font-bold text-slate-800">
-                    {item.voucherNo}
-                  </td>
-                  <td className="py-3 px-3 font-mono text-slate-500">
-                    {item.date}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="font-semibold text-slate-900">{item.title}</div>
-                    {item.remarks && (
-                      <div className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">{item.remarks}</div>
-                    )}
-                  </td>
-                  <td className="py-3 px-3">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getCategoryBadge(item.category)}`}>
-                      {item.category.replace(/_/g, " ")}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 font-medium text-slate-700">
-                    {item.paymentMethod}
-                  </td>
-                  <td className="py-3 px-3 font-mono text-[11px] text-slate-500">
-                    {item.referenceNo || "—"}
-                  </td>
-                  <td className="py-3 px-3 text-right font-mono font-bold text-emerald-700">
-                    ৳ {item.amount.toLocaleString()}
-                  </td>
-                  <td className="py-3 px-3 text-center">
-                    <button
-                      onClick={() => handleDeleteIncome(item.id, item.voucherNo)}
-                      className="p-1 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer"
-                      title="Delete Voucher"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <AppCard>
+        <TableFilterBar
+          showSearch={false}
+          endAdornment={
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                Official Income Vouchers Ledger
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                ({filteredIncomes.length} records)
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Total Filtered:{" "}
+                <Box component="strong" sx={{ fontWeight: 700, color: "success.dark" }}>
+                  ৳ {filteredIncomes.reduce((s, i) => s + i.amount, 0).toLocaleString()}
+                </Box>
+              </Typography>
+            </Stack>
+          }
+        >
+      <AppTable<IncomeEntry>
+        embedded
+        rows={filteredIncomes}
+        rowKey={(row) => row.id}
+        defaultOrderBy="date"
+        minWidth={900}
+        columns={[
+          {
+            id: "voucherNo",
+            label: "Voucher #",
+            render: (item) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                {item.voucherNo}
+              </Typography>
+            ),
+          },
+          {
+            id: "date",
+            label: "Date",
+            render: (item) => (
+              <Typography variant="caption" color="text.secondary">
+                {item.date}
+              </Typography>
+            ),
+          },
+          {
+            id: "title",
+            label: "Particulars / Source",
+            render: (item) => (
+              <>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {item.title}
+                </Typography>
+                {item.remarks ? (
+                  <Typography variant="caption" color="text.secondary" noWrap>
+                    {item.remarks}
+                  </Typography>
+                ) : null}
+              </>
+            ),
+          },
+          {
+            id: "category",
+            label: "Category",
+            render: (item) => (
+              <Label variant="soft">{item.category.replace(/_/g, " ")}</Label>
+            ),
+          },
+          {
+            id: "paymentMethod",
+            label: "Payment Channel",
+          },
+          {
+            id: "referenceNo",
+            label: "Reference No",
+            render: (item) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }} color="text.secondary">
+                {item.referenceNo || "—"}
+              </Typography>
+            ),
+          },
+          {
+            id: "amount",
+            label: "Amount (৳)",
+            align: "right",
+            render: (item) => (
+              <Typography variant="caption" sx={{ fontWeight: 700, color: "success.dark" }}>
+                ৳ {item.amount.toLocaleString()}
+              </Typography>
+            ),
+          },
+          {
+            id: "actions",
+            label: "Action",
+            align: "center",
+            sortable: false,
+            render: (item) => (
+              <IconButton
+                size="small"
+                color="error"
+                onClick={() => handleDeleteIncome(item.id, item.voucherNo)}
+                title="Delete Voucher"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </IconButton>
+            ),
+          },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
 
       {/* Add Income Modal */}
       {isAddModalOpen && (

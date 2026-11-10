@@ -22,6 +22,10 @@ import {
 } from "@/sections/assets/schema/asset-store";
 import { TENANT_SWITCH_EVENT } from "@/lib/clientTenant";
 import { AppButton } from "@/components/button/app-button";
+import { AppTable, AppCard, TableFilterBar } from "@/components";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 export default function AssetDepreciationPage() {
   const [assets, setAssets] = useState<InstitutionAsset[]>([]);
@@ -181,49 +185,26 @@ export default function AssetDepreciationPage() {
         </div>
       </div>
 
-      {/* Category Wise Valuation Summary Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
-        <div className="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wide flex items-center gap-2">
-            <Layers className="w-4 h-4 text-blue-600" />
-            <span>Asset Category Valuation Summary ({selectedYear})</span>
-          </h3>
-          <span className="text-[10px] text-slate-500 font-semibold">Straight-Line Method (SLM)</span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left border-collapse">
-            <thead className="bg-slate-100/70 text-[10px] font-bold text-slate-600 uppercase border-b border-slate-200">
-              <tr>
-                <th className="py-2 px-3">Asset Category</th>
-                <th className="py-2 px-2 text-center">Entries</th>
-                <th className="py-2 px-2 text-center">Depr. Rate</th>
-                <th className="py-2 px-3 text-right">Historical Cost (৳)</th>
-                <th className="py-2 px-3 text-right">Accumulated Depr. (৳)</th>
-                <th className="py-2 px-3 text-right">Net Book Value (৳)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {categorySummaries.map((cat) => (
-                <tr key={cat.key} className="hover:bg-slate-50">
-                  <td className="py-2 px-3 font-semibold text-slate-900">{cat.label}</td>
-                  <td className="py-2 px-2 text-center font-mono">{cat.itemCount}</td>
-                  <td className="py-2 px-2 text-center font-mono text-slate-600">{cat.defaultDepreciation}%</td>
-                  <td className="py-2 px-3 text-right font-mono font-semibold text-slate-700">
-                    ৳{cat.originalCost.toLocaleString()}
-                  </td>
-                  <td className="py-2 px-3 text-right font-mono font-semibold text-rose-700">
-                    -৳{cat.accumulatedDepr.toLocaleString()}
-                  </td>
-                  <td className="py-2 px-3 text-right font-mono font-extrabold text-blue-900">
-                    ৳{cat.bookValue.toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<(typeof categorySummaries)[number]>
+        embedded
+        rows={categorySummaries}
+        rowKey={(row) => row.key}
+        defaultOrderBy="label"
+        minWidth={800}
+        rowsPerPageOptions={[5, 10, 25]}
+        columns={[
+          { id: "label", label: "Asset Category", render: (cat) => <Typography variant="body2" sx={{ fontWeight: 600 }}>{cat.label}</Typography> },
+          { id: "itemCount", label: "Entries", align: "center", render: (cat) => <Typography variant="body2" sx={{ fontFamily: "monospace" }}>{cat.itemCount}</Typography> },
+          { id: "defaultDepreciation", label: "Depr. Rate", align: "center", render: (cat) => <Typography variant="body2" sx={{ fontFamily: "monospace", color: "text.secondary" }}>{cat.defaultDepreciation}%</Typography> },
+          { id: "originalCost", label: "Historical Cost (৳)", align: "right", render: (cat) => <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 600 }}>৳{cat.originalCost.toLocaleString()}</Typography> },
+          { id: "accumulatedDepr", label: "Accumulated Depr. (৳)", align: "right", render: (cat) => <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 600, color: "error.dark" }}>-৳{cat.accumulatedDepr.toLocaleString()}</Typography> },
+          { id: "bookValue", label: "Net Book Value (৳)", align: "right", render: (cat) => <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 800, color: "primary.dark" }}>৳{cat.bookValue.toLocaleString()}</Typography> },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
 
       {/* Controls & Filter Toolbar */}
       <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs no-print">
@@ -283,85 +264,28 @@ export default function AssetDepreciationPage() {
         </div>
       </div>
 
-      {/* Main Asset-by-Asset Depreciation Schedule Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
-        <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wide">
-            Detailed Asset Depreciation &amp; Net Book Value Schedule ({selectedYear})
-          </h3>
-          <span className="text-[10px] font-bold bg-white text-slate-700 px-2 py-0.5 rounded border border-slate-200">
-            {assetDepreciationList.length} Assets
-          </span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left border-collapse">
-            <thead className="bg-slate-100/80 text-[10px] font-bold text-slate-700 uppercase border-b border-slate-200 tracking-wider">
-              <tr>
-                <th className="py-2.5 px-3">Asset Code</th>
-                <th className="py-2.5 px-3">Asset Name</th>
-                <th className="py-2.5 px-2 text-center">Acquired</th>
-                <th className="py-2.5 px-2 text-center">Active (Yrs)</th>
-                <th className="py-2.5 px-2 text-center">Rate</th>
-                <th className="py-2.5 px-3 text-right">Cost Price (৳)</th>
-                <th className="py-2.5 px-3 text-right">Annual Depr. (৳)</th>
-                <th className="py-2.5 px-3 text-right">Accumulated Depr. (৳)</th>
-                <th className="py-2.5 px-3 text-right">Net Book Value (৳)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {assetDepreciationList.map((asset) => (
-                <tr key={asset.id} className="hover:bg-slate-50 transition">
-                  <td className="py-2.5 px-3 font-mono font-bold text-slate-900">
-                    {asset.assetCode}
-                  </td>
-                  <td className="py-2.5 px-3 font-semibold text-slate-800">
-                    {asset.name}
-                  </td>
-                  <td className="py-2.5 px-2 text-center font-mono text-slate-600">
-                    {asset.purchaseYear}
-                  </td>
-                  <td className="py-2.5 px-2 text-center font-mono font-bold text-slate-700">
-                    {asset.yearsActive}
-                  </td>
-                  <td className="py-2.5 px-2 text-center font-mono text-slate-500 text-[11px]">
-                    {asset.depreciationRate}%
-                  </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-semibold text-slate-700">
-                    ৳{asset.purchasePrice.toLocaleString()}
-                  </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-amber-700 font-semibold">
-                    ৳{asset.annualDepreciationAmount.toLocaleString()}
-                  </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-rose-700 font-semibold">
-                    -৳{asset.accumulatedDepreciation.toLocaleString()}
-                  </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-extrabold text-blue-900 text-sm">
-                    ৳{asset.netBookValue.toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot className="bg-slate-100 font-bold border-t border-slate-200 text-slate-800">
-              <tr>
-                <td colSpan={5} className="py-2.5 px-3">Total Balance:</td>
-                <td className="py-2.5 px-3 text-right font-mono">
-                  ৳{totals.totalOriginalCost.toLocaleString()}
-                </td>
-                <td className="py-2.5 px-3 text-right font-mono text-amber-800">
-                  ৳{totals.totalAnnualExpense.toLocaleString()}
-                </td>
-                <td className="py-2.5 px-3 text-right font-mono text-rose-800">
-                  -৳{totals.totalAccumulatedDepr.toLocaleString()}
-                </td>
-                <td className="py-2.5 px-3 text-right font-mono font-extrabold text-blue-950 text-sm">
-                  ৳{totals.totalNetBookValue.toLocaleString()}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<(typeof assetDepreciationList)[number]>
+        embedded
+        rows={assetDepreciationList}
+        rowKey={(row) => row.id}
+        defaultOrderBy="assetCode"
+        minWidth={1100}
+        columns={[
+          { id: "assetCode", label: "Asset Code", render: (asset) => <Typography variant="caption" sx={{ fontWeight: 700 }}>{asset.assetCode}</Typography> },
+          { id: "name", label: "Asset Name", render: (asset) => <Typography variant="body2" sx={{ fontWeight: 600 }}>{asset.name}</Typography> },
+          { id: "purchaseYear", label: "Acquired", align: "center", render: (asset) => <Typography variant="body2" sx={{ fontFamily: "monospace", color: "text.secondary" }}>{asset.purchaseYear}</Typography> },
+          { id: "yearsActive", label: "Active (Yrs)", align: "center", render: (asset) => <Typography variant="caption" sx={{ fontWeight: 700 }}>{asset.yearsActive}</Typography> },
+          { id: "depreciationRate", label: "Rate", align: "center", render: (asset) => <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>{asset.depreciationRate}%</Typography> },
+          { id: "purchasePrice", label: "Cost Price (৳)", align: "right", render: (asset) => <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 600 }}>৳{asset.purchasePrice.toLocaleString()}</Typography> },
+          { id: "annualDepreciationAmount", label: "Annual Depr. (৳)", align: "right", render: (asset) => <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 600, color: "warning.dark" }}>৳{asset.annualDepreciationAmount.toLocaleString()}</Typography> },
+          { id: "accumulatedDepreciation", label: "Accumulated Depr. (৳)", align: "right", render: (asset) => <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 600, color: "error.dark" }}>-৳{asset.accumulatedDepreciation.toLocaleString()}</Typography> },
+          { id: "netBookValue", label: "Net Book Value (৳)", align: "right", render: (asset) => <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 800, color: "primary.dark" }}>৳{asset.netBookValue.toLocaleString()}</Typography> },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
     </div>
   );
 }

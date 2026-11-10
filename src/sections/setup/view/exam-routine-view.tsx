@@ -39,7 +39,7 @@ import {
   RulesFilterGrid,
   RulesSection,
 } from "@/sections/academic/component/rules-section-ui";
-import { AppSelect, AppTextField } from "@/components";
+import { AppSelect, AppTextField, AppTable, TableFilterBar } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import { DatePicker, TimePicker } from "@/components/date-picker/date-picker";
 import { AppButton } from "@/components/button/app-button";
@@ -1257,140 +1257,164 @@ export default function ExamRoutinePage() {
             {filteredRoutineItems.length === 0 ? (
               <NoDataFound />
             ) : (
-              <Box sx={{ overflowX: "auto", mx: { xs: -2.25, sm: -2.75 }, mb: { xs: -2.25, sm: -2.75 } }}>
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
-                      <th className="py-3 px-3 text-center w-12">#</th>
-                      <th className="py-3 px-3">Date & Day</th>
-                      <th className="py-3 px-3">Time Slot</th>
-                      <th className="py-3 px-3">Subject Code & Title</th>
-                      <th className="py-3 px-3">Paper / Format</th>
-                      <th className="py-3 px-3">Group / Shift</th>
-                      <th className="py-3 px-3">Room & Invigilator</th>
-                      <th className="py-3 px-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700">
-                    {filteredRoutineItems.map((item, index) => (
-                      <tr
-                        key={item.id}
-                        className="hover:bg-slate-50/90 transition-colors group"
-                      >
-                        {/* Index and Reordering */}
-                        <td className="py-3 px-3 text-center font-mono font-bold text-slate-400">
-                          <div className="flex flex-col items-center justify-center">
-                            <button
-                              type="button"
-                              onClick={() => handleMoveItem(index, "up")}
-                              disabled={index === 0}
-                              className="text-slate-300 hover:text-slate-700 disabled:opacity-20 cursor-pointer"
-                              title="Move Up"
-                            >
-                              <ChevronUp className="w-3 h-3" />
-                            </button>
-                            <span className="text-slate-700 text-[11px]">{index + 1}</span>
-                            <button
-                              type="button"
-                              onClick={() => handleMoveItem(index, "down")}
-                              disabled={index === filteredRoutineItems.length - 1}
-                              className="text-slate-300 hover:text-slate-700 disabled:opacity-20 cursor-pointer"
-                              title="Move Down"
-                            >
-                              <ChevronDown className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </td>
-
-                        {/* Date & Day */}
-                        <td className="py-3 px-3 whitespace-nowrap">
-                          <div className="font-bold text-slate-900">
-                            {formatDateBnEn(item.date)}
-                          </div>
-                          <span className="inline-block mt-0.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                            {item.day || getDayNameFromDate(item.date)}
-                          </span>
-                        </td>
-
-                        {/* Time Slot */}
-                        <td className="py-3 px-3 whitespace-nowrap font-medium">
-                          <div className="flex items-center space-x-1.5 text-slate-800">
-                            <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                            <span>
-                              {item.startTime} — {item.endTime}
+              <TableFilterBar showSearch={false}>
+                <AppTable<any>
+                  embedded
+                  rows={filteredRoutineItems}
+                rowKey={(row) => row.id}
+                defaultOrderBy="_stable"
+                minWidth={1000}
+                columns={[
+                  {
+                    id: "order",
+                    label: "#",
+                    align: "center",
+                    sortable: false,
+                    width: 56,
+                    render: (item, index) => (
+                      <div className="flex flex-col items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => handleMoveItem(index, "up")}
+                          disabled={index === 0}
+                          className="text-slate-300 hover:text-slate-700 disabled:opacity-20 cursor-pointer"
+                          title="Move Up"
+                        >
+                          <ChevronUp className="w-3 h-3" />
+                        </button>
+                        <span className="text-slate-700 text-[11px] font-mono font-bold">{index + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleMoveItem(index, "down")}
+                          disabled={index === filteredRoutineItems.length - 1}
+                          className="text-slate-300 hover:text-slate-700 disabled:opacity-20 cursor-pointer"
+                          title="Move Down"
+                        >
+                          <ChevronDown className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ),
+                  },
+                  {
+                    id: "date",
+                    label: "Date & Day",
+                    sortable: false,
+                    render: (item) => (
+                      <>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {formatDateBnEn(item.date)}
+                        </Typography>
+                        <span className="inline-block mt-0.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                          {item.day || getDayNameFromDate(item.date)}
+                        </span>
+                      </>
+                    ),
+                  },
+                  {
+                    id: "startTime",
+                    label: "Time Slot",
+                    sortable: false,
+                    render: (item) => (
+                      <div className="flex items-center space-x-1.5 text-slate-800 font-medium">
+                        <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span>
+                          {item.startTime} — {item.endTime}
+                        </span>
+                      </div>
+                    ),
+                  },
+                  {
+                    id: "subjectName",
+                    label: "Subject Code & Title",
+                    sortable: false,
+                    render: (item) => (
+                      <>
+                        <div className="flex items-center space-x-2">
+                          {item.subjectCode && (
+                            <span className="font-mono font-bold text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                              {item.subjectCode}
                             </span>
-                          </div>
-                        </td>
-
-                        {/* Subject Code & Name */}
-                        <td className="py-3 px-3">
-                          <div className="flex items-center space-x-2">
-                            {item.subjectCode && (
-                              <span className="font-mono font-bold text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
-                                {item.subjectCode}
-                              </span>
-                            )}
-                            <span className="font-bold text-slate-900">{item.subjectName}</span>
-                          </div>
-                          {item.remarks && (
-                            <p className="text-[10px] text-slate-500 mt-0.5 italic">
-                              {item.remarks}
-                            </p>
                           )}
-                        </td>
-
-                        {/* Paper Format */}
-                        <td className="py-3 px-3">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                            {item.paperType}
-                          </span>
-                        </td>
-
-                        {/* Group / Shift */}
-                        <td className="py-3 px-3 whitespace-nowrap">
-                          <div className="font-medium text-slate-800">{item.group}</div>
-                          <div className="text-[10px] text-slate-500">{item.shift} Shift</div>
-                        </td>
-
-                        {/* Room & Invigilator */}
-                        <td className="py-3 px-3">
-                          <div className="font-semibold text-slate-800 flex items-center space-x-1">
-                            <School className="w-3 h-3 text-slate-400" />
-                            <span>{item.roomNo || "Main Hall"}</span>
+                          <span className="font-bold text-slate-900">{item.subjectName}</span>
+                        </div>
+                        {item.remarks ? (
+                          <p className="text-[10px] text-slate-500 mt-0.5 italic">{item.remarks}</p>
+                        ) : null}
+                      </>
+                    ),
+                  },
+                  {
+                    id: "paperType",
+                    label: "Paper / Format",
+                    sortable: false,
+                    render: (item) => (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        {item.paperType}
+                      </span>
+                    ),
+                  },
+                  {
+                    id: "group",
+                    label: "Group / Shift",
+                    sortable: false,
+                    render: (item) => (
+                      <>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {item.group}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {item.shift} Shift
+                        </Typography>
+                      </>
+                    ),
+                  },
+                  {
+                    id: "roomNo",
+                    label: "Room & Invigilator",
+                    sortable: false,
+                    render: (item) => (
+                      <>
+                        <div className="font-semibold text-slate-800 flex items-center space-x-1">
+                          <School className="w-3 h-3 text-slate-400" />
+                          <span>{item.roomNo || "Main Hall"}</span>
+                        </div>
+                        {item.invigilator ? (
+                          <div className="text-[10px] text-slate-500 mt-0.5 truncate max-w-[150px]">
+                            {item.invigilator}
                           </div>
-                          {item.invigilator && (
-                            <div className="text-[10px] text-slate-500 mt-0.5 truncate max-w-[150px]">
-                              {item.invigilator}
-                            </div>
-                          )}
-                        </td>
-
-                        {/* Actions */}
-                        <td className="py-3 px-3 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end space-x-1.5">
-                            <button
-                              type="button"
-                              onClick={() => handleOpenEditItem(item)}
-                              className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                              title="Edit Slot"
-                            >
-                              <Pencil className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteItem(item.id)}
-                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                              title="Delete Slot"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </Box>
+                        ) : null}
+                      </>
+                    ),
+                  },
+                  {
+                    id: "actions",
+                    label: "Actions",
+                    align: "right",
+                    sortable: false,
+                    render: (item) => (
+                      <div className="flex items-center justify-end space-x-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditItem(item)}
+                          className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                          title="Edit Slot"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteItem(item.id)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                          title="Delete Slot"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ),
+                  },
+                ]}
+              />
+              </TableFilterBar>
             )}
           </RulesSection>
         </Box>

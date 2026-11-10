@@ -17,12 +17,6 @@ import {
   Snackbar,
   Stack,
   Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Tooltip,
   Typography,
   useMediaQuery,
@@ -38,9 +32,7 @@ import { DatePicker } from "@/components/date-picker/date-picker";
 import { AppSelect } from "@/components/select/app-select";
 import { LoadingScreen } from "@/components/loading-screen/loading-screen";
 import { NoDataFound } from "@/components/table/no-data-found";
-import { TableNoData } from "@/components/table/table-no-data";
-import { Label } from "@/components/label/label";
-import { Scrollbar } from "@/components/scrollbar/scrollbar";
+import { AppTable, Label, TableFilterBar } from "@/components";
 import { academicService } from "@/api/services";
 import { getStoredSchoolInfo, saveStoredSchoolInfo } from "@/utils/settings-store";
 import { AppTabs } from "@/components/ui/tabs-component";
@@ -412,7 +404,7 @@ function SessionControlContent() {
         }
       />
 
-      <Grid container spacing={{ xs: 1.5, md: 2 }} sx={{ mb: 3 }}>
+      <Grid container spacing={{ xs: 1.5, md: 2 }}>
         {kpis.map((kpi) => (
           <Grid size={{ xs: 6, lg: 3 }} key={kpi.label}>
             <AppCard
@@ -453,35 +445,7 @@ function SessionControlContent() {
       </Grid>
 
       <AppCard>
-        <Stack spacing={2} sx={{ mb: 2 }}>
-          <Stack
-            direction={{ xs: "column", md: "row" }}
-            spacing={1.5}
-            sx={{ alignItems: { md: "center" }, justifyContent: "space-between" }}
-          >
-            <Box sx={{ width: { xs: 1, md: 320 }, minWidth: 0 }}>
-              <AppTextField
-                placeholder="Search by year or institution"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                startIcon={<SearchIcon fontSize="small" />}
-              />
-            </Box>
-            <AppTabs
-              value={statusFilter}
-              onValueChange={(value) =>
-                setStatusFilter(value as "ALL" | "ACTIVE" | "ARCHIVED")
-              }
-              listClassName={isMobile ? "w-full" : undefined}
-              triggerClassName={isMobile ? "flex-1 justify-center" : undefined}
-              items={[
-                { value: "ALL", label: `All (${sessions.length})` },
-                { value: "ACTIVE", label: `Active (${activeCount})` },
-                { value: "ARCHIVED", label: `Archived (${archivedCount})` },
-              ]}
-            />
-          </Stack>
-
+        <Stack spacing={2}>
           <Stack
             direction={{ xs: "column", md: "row" }}
             spacing={1.5}
@@ -518,151 +482,183 @@ function SessionControlContent() {
             />
           </Stack>
 
-          {!loading && sessions.length > 0 && (
-            <Typography variant="caption" color="text.secondary">
-              Showing {filteredSessions.length} of {sessions.length} sessions
-            </Typography>
-          )}
-        </Stack>
-
-              {loading ? (
-          <LoadingScreen label="Loading sessions..." />
-              ) : (
-          <>
-            <Stack spacing={1.25} sx={{ display: { xs: "flex", md: "none" } }}>
-              {filteredSessions.length === 0 ? (
-                <NoDataFound />
-              ) : (
-              filteredSessions.map((session) => (
-                <Box
+          {loading ? (
+            <LoadingScreen label="Loading sessions..." />
+          ) : (
+            <TableFilterBar
+              tabs={[
+                { value: "ALL", label: `All (${sessions.length})` },
+                { value: "ACTIVE", label: `Active (${activeCount})` },
+                { value: "ARCHIVED", label: `Archived (${archivedCount})` },
+              ]}
+              tabValue={statusFilter}
+              onTabChange={(value) => setStatusFilter(value as "ALL" | "ACTIVE" | "ARCHIVED")}
+              searchValue={searchTerm}
+              onSearchChange={setSearchTerm}
+              searchPlaceholder="Search by year or institution"
+              endAdornment={
+                sessions.length > 0 ? (
+                  <Typography variant="caption" color="text.secondary">
+                    Showing {filteredSessions.length} of {sessions.length} sessions
+                  </Typography>
+                ) : null
+              }
+            >
+              <Stack spacing={1.25} sx={{ display: { xs: "flex", md: "none" } }}>
+                {filteredSessions.length === 0 ? (
+                  <NoDataFound />
+                ) : (
+                  filteredSessions.map((session) => (
+                    <Box
                       key={session.id}
-                  sx={{
-                    p: 1.5,
-                    border: 1,
-                    borderColor: session.isCurrent ? "primary.main" : "divider",
-                    borderRadius: 2,
-                    bgcolor: session.isCurrent ? "action.selected" : "background.paper",
-                  }}
-                >
-                  <Stack direction="row" spacing={1.25} sx={{ alignItems: "flex-start" }}>
-                    <Avatar
                       sx={{
-                        bgcolor: session.isCurrent ? "primary.main" : "grey.200",
-                        color: session.isCurrent ? "white" : "text.primary",
-                        width: 40,
-                        height: 40,
-                        fontSize: 13,
-                        flexShrink: 0,
+                        p: 1.5,
+                        border: 1,
+                        borderColor: session.isCurrent ? "primary.main" : "divider",
+                        borderRadius: 2,
+                        bgcolor: session.isCurrent ? "action.selected" : "background.paper",
                       }}
+                    >
+                      <Stack direction="row" spacing={1.25} sx={{ alignItems: "flex-start" }}>
+                        <Avatar
+                          sx={{
+                            bgcolor: session.isCurrent ? "primary.main" : "grey.200",
+                            color: session.isCurrent ? "white" : "text.primary",
+                            width: 40,
+                            height: 40,
+                            fontSize: 13,
+                            flexShrink: 0,
+                          }}
+                        >
+                          {session.yearName.slice(-2)}
+                        </Avatar>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between" }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
+                              Session {session.yearName}
+                            </Typography>
+                            <Label color={session.isCurrent ? "success" : "default"} variant="soft">
+                              {session.isCurrent ? "Active" : "Archived"}
+                            </Label>
+                          </Stack>
+                          <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
+                            {session.institution?.name || "Institution"}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+                            {formatDate(session.startDate)} → {formatDate(session.endDate)}
+                          </Typography>
+                          <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", mt: 1 }}>
+                            <Label variant="soft">EIIN {session.institution?.code || "108254"}</Label>
+                            <Label variant="soft">{session._count?.enrollments || 0} enrolled</Label>
+                            <Label variant="soft">{session._count?.exams || 0} exams</Label>
+                          </Stack>
+                          <Box sx={{ mt: 1.25 }}>{renderSessionActions(session)}</Box>
+                        </Box>
+                      </Stack>
+                    </Box>
+                  ))
+                )}
+              </Stack>
+
+              <Box sx={{ display: { xs: "none", md: "block" }, minWidth: 0 }}>
+                <AppTable<AcademicYearItem>
+                  embedded
+                  rows={filteredSessions}
+                  rowKey={(row) => row.id}
+                  defaultOrderBy="yearName"
+                  minWidth={760}
+                  columns={[
+                    {
+                      id: "yearName",
+                      label: "Session",
+                      render: (session) => (
+                        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                          <Avatar
+                            sx={{
+                              bgcolor: session.isCurrent ? "primary.main" : "grey.200",
+                              color: session.isCurrent ? "white" : "text.primary",
+                              width: 36,
+                              height: 36,
+                              fontSize: 13,
+                            }}
                           >
                             {session.yearName.slice(-2)}
-                    </Avatar>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between" }}>
-                        <Typography variant="subtitle2" noWrap>
-                          Session {session.yearName}
-                        </Typography>
+                          </Avatar>
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
+                              Session {session.yearName}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" noWrap>
+                              {session.institution?.name || "Institution"}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      ),
+                    },
+                    {
+                      id: "isCurrent",
+                      label: "Status",
+                      render: (session) => (
                         <Label color={session.isCurrent ? "success" : "default"} variant="soft">
                           {session.isCurrent ? "Active" : "Archived"}
                         </Label>
-                      </Stack>
-                      <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
-                        {session.institution?.name || "Institution"}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-                        {formatDate(session.startDate)} → {formatDate(session.endDate)}
-                      </Typography>
-                      <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", mt: 1 }}>
-                        <Label variant="soft">EIIN {session.institution?.code || "108254"}</Label>
-                        <Label variant="soft">{session._count?.enrollments || 0} enrolled</Label>
-                        <Label variant="soft">{session._count?.exams || 0} exams</Label>
-                      </Stack>
-                      <Box sx={{ mt: 1.25 }}>{renderSessionActions(session)}</Box>
-                    </Box>
-                  </Stack>
-                </Box>
-              ))
-              )}
-            </Stack>
-
-            <Box sx={{ display: { xs: "none", md: "block" }, minWidth: 0 }}>
-              <TableContainer>
-                <Scrollbar sx={{ width: 1, overflowX: "auto" }}>
-                <Table sx={{ minWidth: 760 }}>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Session</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell>Period</TableCell>
-                      <TableCell sx={{ display: { xs: "none", lg: "table-cell" } }}>EIIN</TableCell>
-                      <TableCell align="center">Enrollments</TableCell>
-                      <TableCell align="center" sx={{ display: { xs: "none", lg: "table-cell" } }}>
-                        Exams
-                      </TableCell>
-                      <TableCell align="right" sx={{ whiteSpace: "nowrap", minWidth: 148 }}>
-                        Actions
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {filteredSessions.length === 0 ? (
-                      <TableNoData colSpan={7} />
-                    ) : (
-                    filteredSessions.map((session) => (
-                      <TableRow key={session.id} hover selected={session.isCurrent}>
-                        <TableCell>
-                          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-                            <Avatar
-                              sx={{
-                                bgcolor: session.isCurrent ? "primary.main" : "grey.200",
-                                color: session.isCurrent ? "white" : "text.primary",
-                                width: 36,
-                                height: 36,
-                                fontSize: 13,
-                              }}
-                            >
-                              {session.yearName.slice(-2)}
-                            </Avatar>
-                            <Box sx={{ minWidth: 0 }}>
-                              <Typography variant="subtitle2" noWrap>
-                                Session {session.yearName}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary" noWrap>
-                                {session.institution?.name || "Institution"}
-                              </Typography>
-                            </Box>
-                          </Stack>
-                        </TableCell>
-                        <TableCell>
-                          <Label color={session.isCurrent ? "success" : "default"} variant="soft">
-                            {session.isCurrent ? "Active" : "Archived"}
-                          </Label>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="caption" sx={{ whiteSpace: "nowrap" }}>
-                            {formatDate(session.startDate)} → {formatDate(session.endDate)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ display: { xs: "none", lg: "table-cell" } }}>
-                          <Chip size="small" variant="outlined" label={session.institution?.code || "108254"} />
-                        </TableCell>
-                        <TableCell align="center">{session._count?.enrollments || 0}</TableCell>
-                        <TableCell align="center" sx={{ display: { xs: "none", lg: "table-cell" } }}>
+                      ),
+                    },
+                    {
+                      id: "startDate",
+                      label: "Period",
+                      render: (session) => (
+                        <Typography variant="caption" sx={{ whiteSpace: "nowrap" }}>
+                          {formatDate(session.startDate)} → {formatDate(session.endDate)}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      id: "eiin",
+                      label: "EIIN",
+                      sortable: false,
+                      render: (session) => (
+                        <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                          {session.institution?.code || "108254"}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      id: "enrollments",
+                      label: "Enrollments",
+                      align: "center",
+                      sortable: false,
+                      render: (session) => (
+                        <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                          {session._count?.enrollments || 0}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      id: "exams",
+                      label: "Exams",
+                      align: "center",
+                      sortable: false,
+                      render: (session) => (
+                        <Typography variant="caption" sx={{ fontWeight: 700 }}>
                           {session._count?.exams || 0}
-                        </TableCell>
-                        <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                          {renderSessionActions(session, true)}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                    )}
-                  </TableBody>
-                </Table>
-                </Scrollbar>
-              </TableContainer>
-            </Box>
-                            </>
-                          )}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      id: "actions",
+                      label: "Actions",
+                      align: "right",
+                      sortable: false,
+                      minWidth: 148,
+                      render: (session) => renderSessionActions(session, true),
+                    },
+                  ]}
+                />
+              </Box>
+            </TableFilterBar>
+          )}
+        </Stack>
       </AppCard>
 
       <Dialog

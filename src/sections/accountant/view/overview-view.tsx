@@ -21,6 +21,9 @@ import {
   Scale,
 } from "@/components/iconify/lucide";
 import { AccountantNavHeader } from "@/sections/accountant/component/accountant-nav-header";
+import { AppTable, AppCard, TableFilterBar } from "@/components";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import {
   getStoredIncomes,
   getStoredExpenses,
@@ -282,67 +285,84 @@ export default function AccountantPage() {
         </div>
       </div>
 
-      {/* Recent Ledger Vouchers Summary */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 bg-slate-50/70 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Receipt className="w-4 h-4 text-emerald-600" />
-            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              Recent Institutional Vouchers (Income & Expense)
-            </h3>
-          </div>
-          <span className="text-[11px] text-slate-500">Live verified entries</span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-50 text-[11px] font-semibold text-slate-600 uppercase tracking-wider border-b border-slate-200">
-              <tr>
-                <th className="py-2.5 px-3">Voucher #</th>
-                <th className="py-2.5 px-3">Date</th>
-                <th className="py-2.5 px-4">Particulars</th>
-                <th className="py-2.5 px-3">Type</th>
-                <th className="py-2.5 px-3">Payment Channel</th>
-                <th className="py-2.5 px-3 text-right">Amount (৳)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {incomes.slice(0, 3).map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/70">
-                  <td className="py-2.5 px-3 font-mono font-bold text-slate-800">{item.voucherNo}</td>
-                  <td className="py-2.5 px-3 font-mono text-slate-500">{item.date}</td>
-                  <td className="py-2.5 px-4 font-semibold text-slate-900">{item.title}</td>
-                  <td className="py-2.5 px-3">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                      Income / Credit
-                    </span>
-                  </td>
-                  <td className="py-2.5 px-3 text-slate-600">{item.paymentMethod}</td>
-                  <td className="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">
-                    +৳ {item.amount.toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-              {expenses.slice(0, 3).map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/70">
-                  <td className="py-2.5 px-3 font-mono font-bold text-slate-800">{item.voucherNo}</td>
-                  <td className="py-2.5 px-3 font-mono text-slate-500">{item.date}</td>
-                  <td className="py-2.5 px-4 font-semibold text-slate-900">{item.title}</td>
-                  <td className="py-2.5 px-3">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
-                      Expense / Debit
-                    </span>
-                  </td>
-                  <td className="py-2.5 px-3 text-slate-600">{item.paymentMethod}</td>
-                  <td className="py-2.5 px-3 text-right font-mono font-bold text-rose-600">
-                    -৳ {item.amount.toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<any>
+        embedded
+        rows={[
+          ...incomes.slice(0, 3).map((item) => ({ ...item, _kind: "INCOME" as const })),
+          ...expenses.slice(0, 3).map((item) => ({ ...item, _kind: "EXPENSE" as const })),
+        ]}
+        rowKey={(row) => `${row._kind}-${row.id}`}
+        defaultOrderBy="date"
+        minWidth={900}
+        columns={[
+          {
+            id: "voucherNo",
+            label: "Voucher #",
+            render: (item) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                {item.voucherNo}
+              </Typography>
+            ),
+          },
+          {
+            id: "date",
+            label: "Date",
+            render: (item) => (
+              <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>
+                {item.date}
+              </Typography>
+            ),
+          },
+          {
+            id: "title",
+            label: "Particulars",
+            render: (item) => (
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {item.title}
+              </Typography>
+            ),
+          },
+          {
+            id: "_kind",
+            label: "Type",
+            render: (item) =>
+              item._kind === "INCOME" ? (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  Income / Credit
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
+                  Expense / Debit
+                </span>
+              ),
+          },
+          {
+            id: "paymentMethod",
+            label: "Payment Channel",
+          },
+          {
+            id: "amount",
+            label: "Amount (৳)",
+            align: "right",
+            render: (item) => (
+              <Typography
+                variant="body2"
+                sx={{
+                  fontFamily: "monospace",
+                  fontWeight: 700,
+                  color: item._kind === "INCOME" ? "success.dark" : "error.main",
+                }}
+              >
+                {item._kind === "INCOME" ? "+" : "-"}৳ {item.amount.toLocaleString()}
+              </Typography>
+            ),
+          },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
     </div>
   );
 }

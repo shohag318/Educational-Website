@@ -49,11 +49,11 @@ import { StudentAdminPageShell } from "@/sections/student/component/admin-page-s
 import { SessionSelect } from "@/components/SessionSelect";
 import { DatePicker, DateRangePicker } from "@/components/date-picker/date-picker";
 import { AppButton } from "@/components/button/app-button";
-import { AppCard } from "@/components/card/app-card";
+import { AppCard, AppTable, TableFilterBar } from "@/components";
 import { AppSelect } from "@/components/select/app-select";
 import { AppTextField } from "@/components/text-field/app-text-field";
 import { StudentPageHeader } from "@/sections/student/component/student-page-header";
-import { Box, Grid, Stack } from "@mui/material";
+import { Box, Grid, Stack, Typography } from "@mui/material";
 import { SearchIcon } from "@/components/iconify/mui-icons";
 import { getScopedStorageKey, getActiveTenantCode, TENANT_SWITCH_EVENT } from "@/lib/clientTenant";
 import { AppTabs } from "@/components/ui/tabs-component";
@@ -1296,7 +1296,7 @@ export default function StudentAttendancePage() {
         />
       </Box>
 
-      <AppCard sx={{ mb: 3 }}>
+      <AppCard>
         <Grid container spacing={1.5}>
           <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
             <SessionSelect value={selectedSession} onChange={(val) => setSelectedSession(val)} label="Session" />
@@ -1553,169 +1553,191 @@ export default function StudentAttendancePage() {
               ) : students.length === 0 ? (
                 <NoDataFound />
               ) : (
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
-                      <th className="py-3 px-4 w-16 text-center">Roll</th>
-                      <th className="py-3 px-4">Student Name & ID</th>
-                      <th className="py-3 px-4">Section / Group</th>
-                      <th className="py-3 px-4">Guardian Contact</th>
-                      <th className="py-3 px-4 text-center w-60">Attendance Status</th>
-                      <th className="py-3 px-4 w-48">Remarks / Reason</th>
-                      <th className="py-3 px-3 text-center w-14">SMS</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-xs">
-                    {students.map((st) => {
-                      const entry = attendance[st.id] || { status: "PRESENT", remarks: "" };
-                      const isPresent = entry.status === "PRESENT";
-                      const isAbsent = entry.status === "ABSENT";
-                      const isLate = entry.status === "LATE";
-                      const isExcused = entry.status === "EXCUSED";
-
-                      return (
-                        <tr
-                          key={st.id}
-                          className={`hover:bg-slate-50/80 transition-colors ${
-                            isAbsent ? "bg-rose-50/20" : ""
-                          }`}
-                        >
-                          {/* Roll */}
-                          <td className="py-3 px-4 text-center font-mono font-bold text-slate-900">
-                            {st.classRoll}
-                          </td>
-
-                          {/* Name & ID */}
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-[10px] text-slate-600">
-                                {st.student.firstName[0]}
-                                {st.student.lastName[0]}
-                              </div>
-                              <div>
-                                <div className="font-semibold text-slate-900">
-                                  {st.student.firstName} {st.student.lastName}
-                                </div>
-                                <div className="text-[10px] text-slate-400 font-mono">
-                                  ID: {st.student.studentIdNo}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Section / Group */}
-                          <td className="py-3 px-4">
-                            <span className="font-medium text-slate-700">{st.section?.name}</span>
-                            <div className="text-[10px] text-slate-400 capitalize">
-                              {st.groupType.toLowerCase().replace("_", " ")}
-                            </div>
-                          </td>
-
-                          {/* Guardian */}
-                          <td className="py-3 px-4">
-                            <div className="text-slate-700 font-medium">{st.student.guardianName}</div>
-                            <div className="text-[10px] text-slate-500 font-mono flex items-center gap-1">
-                              <Smartphone className="w-2.5 h-2.5 text-slate-400" />
-                              {st.student.guardianPhone || "No Phone"}
-                            </div>
-                          </td>
-
-                          {/* Quick Status Buttons */}
-                          <td className="py-3 px-4 text-center">
-                            <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 gap-0.5 shadow-2xs">
-                              {/* Present Button */}
-                              <button
-                                type="button"
-                                onClick={() => handleSetStatus(st.id, "PRESENT")}
-                                className={`px-3 py-1.5 rounded-md font-bold text-[11px] transition-all flex items-center gap-1 ${
-                                  isPresent
-                                    ? "bg-emerald-600 text-white shadow-xs"
-                                    : "text-slate-600 hover:text-emerald-700 hover:bg-emerald-50"
-                                }`}
-                                title="Mark Present"
-                              >
-                                <Check className="w-3 h-3" />
-                                P
-                              </button>
-
-                              {/* Absent Button */}
-                              <button
-                                type="button"
-                                onClick={() => handleSetStatus(st.id, "ABSENT")}
-                                className={`px-3 py-1.5 rounded-md font-bold text-[11px] transition-all flex items-center gap-1 ${
-                                  isAbsent
-                                    ? "bg-rose-600 text-white shadow-xs"
-                                    : "text-slate-600 hover:text-rose-700 hover:bg-rose-50"
-                                }`}
-                                title="Mark Absent"
-                              >
-                                <XCircle className="w-3 h-3" />
-                                A
-                              </button>
-
-                              {/* Late Button */}
-                              <button
-                                type="button"
-                                onClick={() => handleSetStatus(st.id, "LATE")}
-                                className={`px-3 py-1.5 rounded-md font-bold text-[11px] transition-all flex items-center gap-1 ${
-                                  isLate
-                                    ? "bg-amber-500 text-white shadow-xs"
-                                    : "text-slate-600 hover:text-amber-700 hover:bg-amber-50"
-                                }`}
-                                title="Mark Late"
-                              >
-                                <Clock className="w-3 h-3" />
-                                L
-                              </button>
-
-                              {/* Excused Button */}
-                              <button
-                                type="button"
-                                onClick={() => handleSetStatus(st.id, "EXCUSED")}
-                                className={`px-2.5 py-1.5 rounded-md font-bold text-[11px] transition-all flex items-center gap-1 ${
-                                  isExcused
-                                    ? "bg-sky-600 text-white shadow-xs"
-                                    : "text-slate-600 hover:text-sky-700 hover:bg-sky-50"
-                                }`}
-                                title="Mark Excused"
-                              >
-                                E
-                              </button>
-                            </div>
-                          </td>
-
-                          {/* Remarks */}
-                          <td className="py-3 px-4">
-                            <input
-                              type="text"
-                              placeholder={isAbsent ? "Reason for absence..." : "Optional remark..."}
-                              value={entry.remarks || ""}
-                              onChange={(e) => handleSetRemarks(st.id, e.target.value)}
-                              className="w-full text-[11px] bg-slate-50 border border-slate-200 rounded px-2 py-1 text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                            />
-                          </td>
-
-                          {/* Direct Individual SMS Trigger */}
-                          <td className="py-3 px-3 text-center">
+                <TableFilterBar showSearch={false}>
+          <AppTable<any>
+        embedded
+                  rows={students}
+                  rowKey={(row) => row.id}
+                  defaultOrderBy="classRoll"
+                  minWidth={1000}
+                  columns={[
+                    {
+                      id: "classRoll",
+                      label: "Roll",
+                      align: "center",
+                      render: (st) => (
+                        <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                          {st.classRoll}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      id: "student",
+                      label: "Student Name & ID",
+                      sortable: false,
+                      render: (st) => (
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-[10px] text-slate-600">
+                            {st.student.firstName[0]}
+                            {st.student.lastName[0]}
+                          </div>
+                          <div>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {st.student.firstName} {st.student.lastName}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+                              ID: {st.student.studentIdNo}
+                            </Typography>
+                          </div>
+                        </div>
+                      ),
+                    },
+                    {
+                      id: "section",
+                      label: "Section / Group",
+                      sortable: false,
+                      render: (st) => (
+                        <>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {st.section?.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ textTransform: "capitalize" }}>
+                            {st.groupType.toLowerCase().replace("_", " ")}
+                          </Typography>
+                        </>
+                      ),
+                    },
+                    {
+                      id: "guardian",
+                      label: "Guardian Contact",
+                      sortable: false,
+                      render: (st) => (
+                        <>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {st.student.guardianName}
+                          </Typography>
+                          <div className="text-[10px] text-slate-500 font-mono flex items-center gap-1">
+                            <Smartphone className="w-2.5 h-2.5 text-slate-400" />
+                            {st.student.guardianPhone || "No Phone"}
+                          </div>
+                        </>
+                      ),
+                    },
+                    {
+                      id: "status",
+                      label: "Attendance Status",
+                      align: "center",
+                      sortable: false,
+                      render: (st) => {
+                        const entry = attendance[st.id] || { status: "PRESENT", remarks: "" };
+                        const isPresent = entry.status === "PRESENT";
+                        const isAbsent = entry.status === "ABSENT";
+                        const isLate = entry.status === "LATE";
+                        const isExcused = entry.status === "EXCUSED";
+                        return (
+                          <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 gap-0.5 shadow-2xs">
                             <button
                               type="button"
-                              onClick={() =>
-                                handleOpenSmsModal(
-                                  isAbsent ? "DAILY_ABSENT" : isLate ? "DAILY_LATE" : "CUSTOM_NOTICE",
-                                  st.id
-                                )
-                              }
-                              className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition"
-                              title={`Send direct SMS to ${st.student.guardianName}`}
+                              onClick={() => handleSetStatus(st.id, "PRESENT")}
+                              className={`px-3 py-1.5 rounded-md font-bold text-[11px] transition-all flex items-center gap-1 ${
+                                isPresent
+                                  ? "bg-emerald-600 text-white shadow-xs"
+                                  : "text-slate-600 hover:text-emerald-700 hover:bg-emerald-50"
+                              }`}
+                              title="Mark Present"
                             >
-                              <MessageSquare className="w-3.5 h-3.5" />
+                              <Check className="w-3 h-3" />
+                              P
                             </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                            <button
+                              type="button"
+                              onClick={() => handleSetStatus(st.id, "ABSENT")}
+                              className={`px-3 py-1.5 rounded-md font-bold text-[11px] transition-all flex items-center gap-1 ${
+                                isAbsent
+                                  ? "bg-rose-600 text-white shadow-xs"
+                                  : "text-slate-600 hover:text-rose-700 hover:bg-rose-50"
+                              }`}
+                              title="Mark Absent"
+                            >
+                              <XCircle className="w-3 h-3" />
+                              A
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSetStatus(st.id, "LATE")}
+                              className={`px-3 py-1.5 rounded-md font-bold text-[11px] transition-all flex items-center gap-1 ${
+                                isLate
+                                  ? "bg-amber-500 text-white shadow-xs"
+                                  : "text-slate-600 hover:text-amber-700 hover:bg-amber-50"
+                              }`}
+                              title="Mark Late"
+                            >
+                              <Clock className="w-3 h-3" />
+                              L
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSetStatus(st.id, "EXCUSED")}
+                              className={`px-2.5 py-1.5 rounded-md font-bold text-[11px] transition-all flex items-center gap-1 ${
+                                isExcused
+                                  ? "bg-sky-600 text-white shadow-xs"
+                                  : "text-slate-600 hover:text-sky-700 hover:bg-sky-50"
+                              }`}
+                              title="Mark Excused"
+                            >
+                              E
+                            </button>
+                          </div>
+                        );
+                      },
+                    },
+                    {
+                      id: "remarks",
+                      label: "Remarks / Reason",
+                      sortable: false,
+                      render: (st) => {
+                        const entry = attendance[st.id] || { status: "PRESENT", remarks: "" };
+                        const isAbsent = entry.status === "ABSENT";
+                        return (
+                          <input
+                            type="text"
+                            placeholder={isAbsent ? "Reason for absence..." : "Optional remark..."}
+                            value={entry.remarks || ""}
+                            onChange={(e) => handleSetRemarks(st.id, e.target.value)}
+                            className="w-full text-[11px] bg-slate-50 border border-slate-200 rounded px-2 py-1 text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                          />
+                        );
+                      },
+                    },
+                    {
+                      id: "sms",
+                      label: "SMS",
+                      align: "center",
+                      sortable: false,
+                      render: (st) => {
+                        const entry = attendance[st.id] || { status: "PRESENT", remarks: "" };
+                        const isAbsent = entry.status === "ABSENT";
+                        const isLate = entry.status === "LATE";
+                        return (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleOpenSmsModal(
+                                isAbsent ? "DAILY_ABSENT" : isLate ? "DAILY_LATE" : "CUSTOM_NOTICE",
+                                st.id
+                              )
+                            }
+                            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition"
+                            title={`Send direct SMS to ${st.student.guardianName}`}
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                          </button>
+                        );
+                      },
+                    },
+                  ]}
+                />
+        </TableFilterBar>
               )}
             </div>
 
@@ -2424,102 +2446,157 @@ export default function StudentAttendancePage() {
               ) : students.length === 0 ? (
                 <NoDataFound />
               ) : (
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
-                      <th className="py-3 px-3 w-16 text-center">Roll</th>
-                      <th className="py-3 px-4">Student Name & ID</th>
-                      <th className="py-3 px-3">Section</th>
-                      <th className="py-3 px-3 text-center">Present (P)</th>
-                      <th className="py-3 px-3 text-center">Absent (A)</th>
-                      <th className="py-3 px-3 text-center">Late (L)</th>
-                      <th className="py-3 px-3 text-center">Excused (E)</th>
-                      <th className="py-3 px-3 text-center">Evaluated Days</th>
-                      <th className="py-3 px-3 text-center">Attendance %</th>
-                      <th className="py-3 px-3 text-center">Performance Status</th>
-                      <th className="py-3 px-2 text-center w-12">SMS</th>
-                      <th className="py-3 px-2 text-center w-12">Detail</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {rangeStudentStats.map(
-                      ({
-                        student: st,
-                        present,
-                        absent,
-                        late,
-                        excused,
-                        totalMarked,
-                        rate,
-                        category,
-                        badgeColor,
-                      }) => (
-                        <tr key={st.id} className="hover:bg-slate-50/80 transition-colors">
-                          <td className="py-3 px-3 text-center font-mono font-bold text-slate-900">
-                            {st.classRoll}
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="font-semibold text-slate-900">
-                              {st.student.firstName} {st.student.lastName}
-                            </div>
-                            <div className="text-[10px] text-slate-400 font-mono">
-                              ID: {st.student.studentIdNo} • {st.student.guardianPhone}
-                            </div>
-                          </td>
-                          <td className="py-3 px-3">
-                            <span className="font-medium text-slate-700">{st.section?.name}</span>
-                          </td>
-                          <td className="py-3 px-3 text-center font-bold text-emerald-600 bg-emerald-50/20">
-                            {present}
-                          </td>
-                          <td className="py-3 px-3 text-center font-bold text-rose-600 bg-rose-50/20">
-                            {absent}
-                          </td>
-                          <td className="py-3 px-3 text-center font-bold text-amber-600 bg-amber-50/20">
-                            {late}
-                          </td>
-                          <td className="py-3 px-3 text-center font-bold text-sky-600 bg-sky-50/20">
-                            {excused}
-                          </td>
-                          <td className="py-3 px-3 text-center font-bold text-slate-800">{totalMarked}</td>
-                          <td className="py-3 px-3 text-center font-bold">
-                            <div className="flex items-center justify-center gap-1.5">
-                              <span className="text-xs">{rate}%</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-3 text-center">
-                            <span
-                              className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${badgeColor}`}
-                            >
-                              {category}
-                            </span>
-                          </td>
-                          {/* Direct Range SMS Button */}
-                          <td className="py-3 px-2 text-center">
-                            <button
-                              type="button"
-                              onClick={() => handleOpenSmsModal("RANGE_SUMMARY", st.id)}
-                              className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition"
-                              title={`Send range attendance SMS to ${st.student.guardianName}`}
-                            >
-                              <MessageSquare className="w-3.5 h-3.5" />
-                            </button>
-                          </td>
-                          <td className="py-3 px-2 text-center">
-                            <AppButton
-                              type="button"
-                              size="small"
-                              variant="soft"
-                              onClick={() => setTimelineStudent(st)}
-                            >
-                              Log
-                            </AppButton>
-                          </td>
-                        </tr>
-                      )
-                    )}
-                  </tbody>
-                </table>
+                <TableFilterBar showSearch={false}>
+          <AppTable<any>
+        embedded
+                  rows={rangeStudentStats}
+                  rowKey={(row) => row.student.id}
+                  defaultOrderBy="rate"
+                  minWidth={1100}
+                  columns={[
+                    {
+                      id: "classRoll",
+                      label: "Roll",
+                      align: "center",
+                      render: (row) => (
+                        <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                          {row.student.classRoll}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      id: "student",
+                      label: "Student Name & ID",
+                      sortable: false,
+                      render: ({ student: st }) => (
+                        <>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {st.student.firstName} {st.student.lastName}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+                            ID: {st.student.studentIdNo} • {st.student.guardianPhone}
+                          </Typography>
+                        </>
+                      ),
+                    },
+                    {
+                      id: "section",
+                      label: "Section",
+                      sortable: false,
+                      render: ({ student: st }) => (
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {st.section?.name}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      id: "present",
+                      label: "Present (P)",
+                      align: "center",
+                      render: (row) => (
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: "success.main" }}>
+                          {row.present}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      id: "absent",
+                      label: "Absent (A)",
+                      align: "center",
+                      render: (row) => (
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: "error.main" }}>
+                          {row.absent}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      id: "late",
+                      label: "Late (L)",
+                      align: "center",
+                      render: (row) => (
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: "warning.main" }}>
+                          {row.late}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      id: "excused",
+                      label: "Excused (E)",
+                      align: "center",
+                      render: (row) => (
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: "info.main" }}>
+                          {row.excused}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      id: "totalMarked",
+                      label: "Evaluated Days",
+                      align: "center",
+                      render: (row) => (
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {row.totalMarked}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      id: "rate",
+                      label: "Attendance %",
+                      align: "center",
+                      render: (row) => (
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {row.rate}%
+                        </Typography>
+                      ),
+                    },
+                    {
+                      id: "category",
+                      label: "Performance Status",
+                      align: "center",
+                      sortable: false,
+                      render: (row) => (
+                        <span
+                          className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${row.badgeColor}`}
+                        >
+                          {row.category}
+                        </span>
+                      ),
+                    },
+                    {
+                      id: "sms",
+                      label: "SMS",
+                      align: "center",
+                      sortable: false,
+                      render: ({ student: st }) => (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenSmsModal("RANGE_SUMMARY", st.id)}
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition"
+                          title={`Send range attendance SMS to ${st.student.guardianName}`}
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                        </button>
+                      ),
+                    },
+                    {
+                      id: "detail",
+                      label: "Detail",
+                      align: "center",
+                      sortable: false,
+                      render: ({ student: st }) => (
+                        <AppButton
+                          type="button"
+                          size="small"
+                          variant="soft"
+                          onClick={() => setTimelineStudent(st)}
+                        >
+                          Log
+                        </AppButton>
+                      ),
+                    },
+                  ]}
+                />
+        </TableFilterBar>
               )}
             </div>
 

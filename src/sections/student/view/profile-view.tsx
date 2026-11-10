@@ -1031,7 +1031,7 @@ export default function StudentProfilePage() {
         }
       />
 
-      <AppCard sx={{ mb: 2.5 }} className="no-print">
+      <AppCard className="no-print">
         <Stack spacing={2}>
           <Box>
             <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
@@ -1183,7 +1183,7 @@ export default function StudentProfilePage() {
         </AppCard>
       ) : (
         <>
-          <AppCard sx={{ mb: 2.5, overflow: "hidden" }}>
+          <AppCard sx={{ overflow: "hidden" }}>
             <Stack spacing={2.5}>
               <Stack
                 direction={{ xs: "column", md: "row" }}

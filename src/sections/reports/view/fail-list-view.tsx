@@ -4,13 +4,12 @@ import { useEffect, useState } from "react";
 import { Chip, Stack, Typography } from "@mui/material";
 import { PhoneIcon, PrintIcon } from "@/components/iconify/mui-icons";
 import { AppButton } from "@/components/button/app-button";
-import { AppSelect, AppTable, Label } from "@/components";
+import { AppCard, AppSelect, AppTable, Label, TableFilterBar } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import {
   ResultsPageShell,
   ResultsPageHeader,
   ResultsFilterCard,
-  ResultsTableCard,
 } from "@/sections/results/component/result-page-ui";
 import {
   examOptionLabel,
@@ -336,107 +335,126 @@ export default function FailListPage() {
         />
       </ResultsFilterCard>
 
-      <ResultsTableCard
-        title="Failed subject records"
-        count={loading ? "…" : filteredList.length}
-        badge={
-          <Chip
-            size="small"
-            color="error"
-            variant="outlined"
-            label="Remedial action needed"
-            sx={{ height: 24, fontWeight: 700 }}
+      <AppCard>
+        <TableFilterBar
+          showSearch={false}
+          endAdornment={
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                Failed subject records{" "}
+                <Typography component="span" variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                  ({loading ? "…" : filteredList.length})
+                </Typography>
+              </Typography>
+              <Chip
+                size="small"
+                color="error"
+                variant="outlined"
+                label="Remedial action needed"
+                sx={{ height: 24, fontWeight: 700 }}
+              />
+            </Stack>
+          }
+        >
+          <AppTable<FailRow>
+            embedded
+            rows={loading ? [] : filteredList}
+            rowKey={(row, index) => `${row.roll}-${row.subjectCode}-${index}`}
+            loading={loading}
+            defaultOrderBy="roll"
+            columns={[
+              {
+                id: "roll",
+                label: "Roll",
+                width: 72,
+                render: (row) => (
+                  <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                    #{row.roll}
+                  </Typography>
+                ),
+              },
+              {
+                id: "studentName",
+                label: "Student",
+                render: (row) => (
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {row.studentName}
+                  </Typography>
+                ),
+              },
+              {
+                id: "class",
+                label: "Class & Section",
+                sortable: false,
+                render: (row) => (
+                  <Typography variant="body2" color="text.secondary">
+                    {row.className} · {row.sectionName}
+                  </Typography>
+                ),
+              },
+              {
+                id: "group",
+                label: "Group",
+                sortable: false,
+                render: (row) => (
+                  <Label color="default" variant="soft">
+                    {row.groupType || "GENERAL"}
+                  </Label>
+                ),
+              },
+              {
+                id: "subject",
+                label: "Failed Subject",
+                sortable: false,
+                render: (row) => (
+                  <Stack spacing={0.25}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {row.subjectName}
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontWeight: 700 }} color="text.secondary">
+                      {row.subjectCode}
+                    </Typography>
+                  </Stack>
+                ),
+              },
+              {
+                id: "marks",
+                label: "Marks",
+                align: "center",
+                width: 88,
+                render: (row) => (
+                  <Typography variant="caption" color="error.main" sx={{ fontWeight: 700 }}>
+                    {row.marks}
+                  </Typography>
+                ),
+              },
+              {
+                id: "reason",
+                label: "Failure Reason",
+                sortable: false,
+                render: (row) => (
+                  <Label color="error" variant="soft">
+                    {row.failureReason || "—"}
+                  </Label>
+                ),
+              },
+              {
+                id: "phone",
+                label: "Guardian",
+                sortable: false,
+                render: (row) => (
+                  <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                    <PhoneIcon sx={{ fontSize: 14, color: "text.disabled" }} />
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      {row.phone || "N/A"}
+                    </Typography>
+                  </Stack>
+                ),
+              },
+            ]}
           />
-        }
-      >
-        <AppTable<FailRow>
-          rows={loading ? [] : filteredList}
-          rowKey={(row, index) => `${row.roll}-${row.subjectCode}-${index}`}
-          columns={[
-            {
-              id: "roll",
-              label: "Roll",
-              width: 72,
-              render: (row) => (
-                <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 700 }}>
-                  #{row.roll}
-                </Typography>
-              ),
-            },
-            {
-              id: "studentName",
-              label: "Student",
-              render: (row) => (
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {row.studentName}
-                </Typography>
-              ),
-            },
-            {
-              id: "class",
-              label: "Class & Section",
-              render: (row) => (
-                <Typography variant="body2" color="text.secondary">
-                  {row.className} · {row.sectionName}
-                </Typography>
-              ),
-            },
-            {
-              id: "group",
-              label: "Group",
-              render: (row) => (
-                <Label color="default" variant="soft">
-                  {row.groupType || "GENERAL"}
-                </Label>
-              ),
-            },
-            {
-              id: "subject",
-              label: "Failed Subject",
-              render: (row) => (
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {row.subjectName}{" "}
-                  <Typography component="span" variant="caption" color="text.secondary">
-                    ({row.subjectCode})
-                  </Typography>
-                </Typography>
-              ),
-            },
-            {
-              id: "marks",
-              label: "Marks",
-              align: "center",
-              width: 88,
-              render: (row) => (
-                <Typography variant="body2" color="error.main" sx={{ fontFamily: "monospace", fontWeight: 800 }}>
-                  {row.marks}
-                </Typography>
-              ),
-            },
-            {
-              id: "reason",
-              label: "Failure Reason",
-              render: (row) => (
-                <Label color="error" variant="soft">
-                  {row.failureReason || "—"}
-                </Label>
-              ),
-            },
-            {
-              id: "phone",
-              label: "Guardian",
-              render: (row) => (
-                <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
-                  <PhoneIcon sx={{ fontSize: 14, color: "text.disabled" }} />
-                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: "monospace" }}>
-                    {row.phone || "N/A"}
-                  </Typography>
-                </Stack>
-              ),
-            },
-          ]}
-        />
-      </ResultsTableCard>
+        </TableFilterBar>
+      </AppCard>
     </ResultsPageShell>
   );
 }

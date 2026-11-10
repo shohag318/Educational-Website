@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AutoAwesomeIcon, ContentCopyIcon, AddIcon, SearchIcon, DeleteOutlineIcon, SyncIcon, PeopleIcon, ArrowForwardIcon } from "@/components/iconify/mui-icons";
+import { AutoAwesomeIcon, ContentCopyIcon, AddIcon, DeleteOutlineIcon, SyncIcon, PeopleIcon, ArrowForwardIcon } from "@/components/iconify/mui-icons";
 import { AdminPageShell } from "@/sections/session/component/admin-page-shell";
 import { SessionPageHeader } from "@/sections/session/component/session-page-header";
 import {
@@ -16,12 +16,6 @@ import {
   IconButton,
   Snackbar,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Tooltip,
   Typography,
 } from "@/components/mui";
@@ -30,16 +24,16 @@ import {
   AppCard,
   AppChip,
   AppSelect,
+  AppTable,
   AppTextField,
   ConfirmDialog,
   EmptyContent,
   Label,
   LoadingScreen,
-  Scrollbar,
+  TableFilterBar,
 } from "@/components";
 import { setupService } from "@/api/services";
 import { PATHS } from "@/config-global";
-import { AppTabs } from "@/components/ui/tabs-component";
 
 interface Subject {
   id: string;
@@ -443,74 +437,79 @@ export default function ClassSubjectMappingPage() {
   );
 
   const mappedTable = (
-    <TableContainer>
-      <Scrollbar sx={{ overflowX: "auto" }}>
-      <Table sx={{ minWidth: 720 }}>
-        <TableHead>
-          <TableRow>
-            <TableCell padding="checkbox">
-              <Checkbox
-                checked={filteredMappings.length > 0 && selectedMappingIds.length === filteredMappings.length}
-                onChange={(e) => setSelectedMappingIds(e.target.checked ? filteredMappings.map((m) => m.subjectId) : [])}
-              />
-            </TableCell>
-            <TableCell>Code</TableCell>
-            <TableCell>Subject</TableCell>
-            <TableCell sx={{ display: { xs: "none", lg: "table-cell" } }}>Group</TableCell>
-            <TableCell sx={{ width: 200 }}>Role</TableCell>
-            <TableCell align="center" sx={{ display: { xs: "none", md: "table-cell" } }}>
-              Credit
-            </TableCell>
-            <TableCell align="right">Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filteredMappings.map((item) => (
-            <TableRow key={item.id} hover selected={selectedMappingIds.includes(item.subjectId)}>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={selectedMappingIds.includes(item.subjectId)}
-                  onChange={(e) =>
-                                setSelectedMappingIds(
-                      e.target.checked ? [...selectedMappingIds, item.subjectId] : selectedMappingIds.filter((id) => id !== item.subjectId)
-                    )
-                              }
-                          />
-              </TableCell>
-              <TableCell>
-                <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                          {item.subject.subjectCode || "—"}
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {item.subject.name}
-                </Typography>
-              </TableCell>
-              <TableCell sx={{ display: { xs: "none", lg: "table-cell" } }}>
-                <Label variant="soft">{GROUP_LABELS[item.groupType] || item.groupType}</Label>
-              </TableCell>
-              <TableCell>
-                <AppSelect value={item.subjectType} onChange={(value) => handleUpdateType(item.subjectId, value)} options={ROLE_OPTIONS} />
-              </TableCell>
-              <TableCell align="center" sx={{ display: { xs: "none", md: "table-cell" } }}>
-                <Label color={roleChipColor(item.subjectType)} variant="soft">
-                          {item.creditWeight.toFixed(2)}
-                </Label>
-              </TableCell>
-              <TableCell align="right">
-                <Tooltip title="Remove">
-                  <IconButton color="error" size="small" onClick={() => handleRemoveMapping(item.subjectId, item.subject.name)}>
-                    <DeleteOutlineIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      </Scrollbar>
-    </TableContainer>
+    <AppTable<ClassSubjectMapping>
+      rows={filteredMappings}
+      rowKey={(row) => row.subjectId}
+      defaultOrderBy="subject"
+      minWidth={720}
+      embedded
+      showCheckbox
+      selected={selectedMappingIds}
+      onSelectRow={(id) =>
+        setSelectedMappingIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+      }
+      onSelectAllRows={(checked) =>
+        setSelectedMappingIds(checked ? filteredMappings.map((m) => m.subjectId) : [])
+      }
+      columns={[
+        {
+          id: "code",
+          label: "Code",
+          sortable: false,
+          render: (item) => (
+            <Typography variant="caption" sx={{ fontWeight: 700 }}>
+              {item.subject.subjectCode || "—"}
+            </Typography>
+          ),
+        },
+        {
+          id: "subject",
+          label: "Subject",
+          sortable: false,
+          render: (item) => (
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {item.subject.name}
+            </Typography>
+          ),
+        },
+        {
+          id: "groupType",
+          label: "Group",
+          render: (item) => <Label variant="soft">{GROUP_LABELS[item.groupType] || item.groupType}</Label>,
+        },
+        {
+          id: "subjectType",
+          label: "Role",
+          width: 200,
+          render: (item) => (
+            <AppSelect value={item.subjectType} onChange={(value) => handleUpdateType(item.subjectId, value)} options={ROLE_OPTIONS} />
+          ),
+        },
+        {
+          id: "creditWeight",
+          label: "Credit",
+          align: "center",
+          render: (item) => (
+            <Label color={roleChipColor(item.subjectType)} variant="soft">
+              {item.creditWeight.toFixed(2)}
+            </Label>
+          ),
+        },
+        {
+          id: "actions",
+          label: "Actions",
+          align: "right",
+          sortable: false,
+          render: (item) => (
+            <Tooltip title="Remove">
+              <IconButton color="error" size="small" onClick={() => handleRemoveMapping(item.subjectId, item.subject.name)}>
+                <DeleteOutlineIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          ),
+        },
+      ]}
+    />
   );
 
   const catalogCards = (
@@ -572,67 +571,63 @@ export default function ClassSubjectMappingPage() {
   );
 
   const catalogTable = (
-    <TableContainer>
-      <Scrollbar sx={{ overflowX: "auto" }}>
-      <Table sx={{ minWidth: 640 }}>
-        <TableHead>
-          <TableRow>
-            <TableCell padding="checkbox">
-              <Checkbox
-                checked={filteredUnmapped.length > 0 && selectedCatalogSubjectIds.length === filteredUnmapped.length}
-                onChange={(e) => setSelectedCatalogSubjectIds(e.target.checked ? filteredUnmapped.map((s) => s.id) : [])}
-              />
-            </TableCell>
-            <TableCell>Code</TableCell>
-            <TableCell>Subject</TableCell>
-            <TableCell align="right">Quick map</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filteredUnmapped.map((sub) => (
-            <TableRow key={sub.id} hover selected={selectedCatalogSubjectIds.includes(sub.id)}>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={selectedCatalogSubjectIds.includes(sub.id)}
-                  onChange={(e) =>
-                    setSelectedCatalogSubjectIds(
-                      e.target.checked ? [...selectedCatalogSubjectIds, sub.id] : selectedCatalogSubjectIds.filter((id) => id !== sub.id)
-                    )
-                  }
-                />
-              </TableCell>
-              <TableCell>
-                <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                  {sub.subjectCode || "—"}
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {sub.name}
-                </Typography>
-              </TableCell>
-              <TableCell align="right">
-                <Stack direction="row" spacing={0.75} useFlexGap sx={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
-                  <AppButton size="small" variant="soft" onClick={() => handleAddFromCatalog(sub.id, "MANDATORY")}>
-                    Mandatory
-                  </AppButton>
-                  <AppButton size="small" variant="soft" onClick={() => handleAddFromCatalog(sub.id, "GROUP_ELECTIVE")}>
-                    Elective
-                  </AppButton>
-                  <AppButton size="small" variant="soft" onClick={() => handleAddFromCatalog(sub.id, "OPTIONAL_4TH")}>
-                    4th
-                  </AppButton>
-                  <IconButton size="small" color="error" onClick={() => handleDeleteFromCatalog(sub)}>
-                    <DeleteOutlineIcon fontSize="small" />
-                  </IconButton>
-                </Stack>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      </Scrollbar>
-    </TableContainer>
+    <AppTable<Subject>
+      rows={filteredUnmapped}
+      rowKey={(row) => row.id}
+      defaultOrderBy="name"
+      minWidth={640}
+      embedded
+      showCheckbox
+      selected={selectedCatalogSubjectIds}
+      onSelectRow={(id) =>
+        setSelectedCatalogSubjectIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+      }
+      onSelectAllRows={(checked) =>
+        setSelectedCatalogSubjectIds(checked ? filteredUnmapped.map((s) => s.id) : [])
+      }
+      columns={[
+        {
+          id: "subjectCode",
+          label: "Code",
+          render: (sub) => (
+            <Typography variant="caption" sx={{ fontWeight: 700 }}>
+              {sub.subjectCode || "—"}
+            </Typography>
+          ),
+        },
+        {
+          id: "name",
+          label: "Subject",
+          render: (sub) => (
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {sub.name}
+            </Typography>
+          ),
+        },
+        {
+          id: "actions",
+          label: "Quick map",
+          align: "right",
+          sortable: false,
+          render: (sub) => (
+            <Stack direction="row" spacing={0.75} useFlexGap sx={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
+              <AppButton size="small" variant="soft" onClick={() => handleAddFromCatalog(sub.id, "MANDATORY")}>
+                Mandatory
+              </AppButton>
+              <AppButton size="small" variant="soft" onClick={() => handleAddFromCatalog(sub.id, "GROUP_ELECTIVE")}>
+                Elective
+              </AppButton>
+              <AppButton size="small" variant="soft" onClick={() => handleAddFromCatalog(sub.id, "OPTIONAL_4TH")}>
+                4th
+              </AppButton>
+              <IconButton size="small" color="error" onClick={() => handleDeleteFromCatalog(sub)}>
+                <DeleteOutlineIcon fontSize="small" />
+              </IconButton>
+            </Stack>
+          ),
+        },
+      ]}
+    />
   );
 
   return (
@@ -667,7 +662,6 @@ export default function ClassSubjectMappingPage() {
         sx={{
           display: "grid",
           gap: 2,
-          mb: 2.5,
           gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr)) minmax(220px, 1.6fr)" },
         }}
       >
@@ -721,108 +715,96 @@ export default function ClassSubjectMappingPage() {
       </Box>
 
       <AppCard>
-        <Stack spacing={2}>
-          <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ alignItems: { md: "center" } }}>
-            {selectedClassId && (
-              <Box sx={{ width: { xs: 1, md: 280 }, flexShrink: 0 }}>
-                <AppSelect
-                  label="Target class"
-                  value={selectedClassId}
-                  onChange={handleClassChange}
-                  options={classes.map((c) => ({ value: c.id, label: c.name }))}
-                />
-              </Box>
-            )}
-            <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", flex: 1 }}>
-              {groupOptions.map((grp) => (
-                <AppChip
-                  key={grp}
-                  clickable
-                  color={selectedGroup === grp ? "primary" : "default"}
-                  variant={selectedGroup === grp ? "filled" : "soft"}
-                  label={GROUP_LABELS[grp] || grp.replace("_", " ")}
-                  onClick={() => setSelectedGroup(grp)}
-                />
-              ))}
-            </Stack>
-          </Stack>
-
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={1.5}
-            sx={{ alignItems: { sm: "center" }, justifyContent: "space-between", borderBottom: 1, borderColor: "divider", pb: 0.5 }}
-          >
-            <AppTabs
-              value={activeTab}
-              onValueChange={(value) => setActiveTab(value as "mapped" | "catalog")}
-              items={[
-                { value: "mapped", label: `Mapped (${mappings.length})` },
-                { value: "catalog", label: `Catalog (${unmappedSubjects.length})` },
-              ]}
-            />
-            <AppTextField
-              placeholder="Search subject name or code"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              startIcon={<SearchIcon fontSize="small" />}
-              sx={{ width: { xs: 1, sm: 280 } }}
-            />
-          </Stack>
-
-          {activeTab === "mapped" && selectedMappingIds.length > 0 && (
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1}
-              useFlexGap
-              sx={{ p: 1.5, bgcolor: "primary.lighter", borderRadius: 2, alignItems: { sm: "center" }, flexWrap: "wrap" }}
-            >
-              <Typography variant="caption" sx={{ fontWeight: 700, mr: { sm: 1 } }}>
-                {selectedMappingIds.length} selected
-              </Typography>
-              <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
-                <AppButton size="small" onClick={() => handleBatchUpdateMapped("MANDATORY")}>
-                  Mandatory
-                </AppButton>
-                <AppButton size="small" onClick={() => handleBatchUpdateMapped("GROUP_ELECTIVE")}>
-                  Elective
-                </AppButton>
-                <AppButton size="small" onClick={() => handleBatchUpdateMapped("OPTIONAL_4TH")}>
-                  4th subject
-                </AppButton>
-                <AppButton size="small" color="error" onClick={handleBatchRemoveMapped}>
-                  Remove
-                </AppButton>
+        <TableFilterBar
+          filters={
+            <>
+              {selectedClassId ? (
+                <Box sx={{ width: { xs: 1, md: 280 }, flexShrink: 0 }}>
+                  <AppSelect
+                    label="Target class"
+                    value={selectedClassId}
+                    onChange={handleClassChange}
+                    options={classes.map((c) => ({ value: c.id, label: c.name }))}
+                  />
+                </Box>
+              ) : null}
+              <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", flex: 1 }}>
+                {groupOptions.map((grp) => (
+                  <AppChip
+                    key={grp}
+                    clickable
+                    color={selectedGroup === grp ? "primary" : "default"}
+                    variant={selectedGroup === grp ? "filled" : "soft"}
+                    label={GROUP_LABELS[grp] || grp.replace("_", " ")}
+                    onClick={() => setSelectedGroup(grp)}
+                  />
+                ))}
               </Stack>
-            </Stack>
-          )}
-
-          {activeTab === "catalog" && selectedCatalogSubjectIds.length > 0 && (
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1}
-              useFlexGap
-              sx={{ p: 1.5, bgcolor: "primary.lighter", borderRadius: 2, alignItems: { sm: "center" }, flexWrap: "wrap" }}
-            >
-              <Typography variant="caption" sx={{ fontWeight: 700, mr: { sm: 1 } }}>
-                {selectedCatalogSubjectIds.length} selected
-              </Typography>
-              <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
-                <AppButton size="small" onClick={() => handleBatchAssignFromCatalog("MANDATORY")}>
-                  + Mandatory
-                </AppButton>
-                <AppButton size="small" onClick={() => handleBatchAssignFromCatalog("GROUP_ELECTIVE")}>
-                  + Elective
-                </AppButton>
-                <AppButton size="small" onClick={() => handleBatchAssignFromCatalog("OPTIONAL_4TH")}>
-                  + 4th
-                </AppButton>
-                <AppButton size="small" color="error" onClick={handleBatchDeleteFromCatalog}>
-                  Remove from catalog
-                </AppButton>
+            </>
+          }
+          tabs={[
+            { value: "mapped", label: `Mapped (${mappings.length})` },
+            { value: "catalog", label: `Catalog (${unmappedSubjects.length})` },
+          ]}
+          tabValue={activeTab}
+          onTabChange={(value) => setActiveTab(value as "mapped" | "catalog")}
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Search subject name or code"
+          selectionBar={
+            activeTab === "mapped" && selectedMappingIds.length > 0 ? (
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1}
+                useFlexGap
+                sx={{ p: 1.5, bgcolor: "primary.lighter", borderRadius: 2, alignItems: { sm: "center" }, flexWrap: "wrap" }}
+              >
+                <Typography variant="caption" sx={{ fontWeight: 700, mr: { sm: 1 } }}>
+                  {selectedMappingIds.length} selected
+                </Typography>
+                <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+                  <AppButton size="small" onClick={() => handleBatchUpdateMapped("MANDATORY")}>
+                    Mandatory
+                  </AppButton>
+                  <AppButton size="small" onClick={() => handleBatchUpdateMapped("GROUP_ELECTIVE")}>
+                    Elective
+                  </AppButton>
+                  <AppButton size="small" onClick={() => handleBatchUpdateMapped("OPTIONAL_4TH")}>
+                    4th subject
+                  </AppButton>
+                  <AppButton size="small" color="error" onClick={handleBatchRemoveMapped}>
+                    Remove
+                  </AppButton>
+                </Stack>
               </Stack>
-            </Stack>
-          )}
-
+            ) : activeTab === "catalog" && selectedCatalogSubjectIds.length > 0 ? (
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1}
+                useFlexGap
+                sx={{ p: 1.5, bgcolor: "primary.lighter", borderRadius: 2, alignItems: { sm: "center" }, flexWrap: "wrap" }}
+              >
+                <Typography variant="caption" sx={{ fontWeight: 700, mr: { sm: 1 } }}>
+                  {selectedCatalogSubjectIds.length} selected
+                </Typography>
+                <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+                  <AppButton size="small" onClick={() => handleBatchAssignFromCatalog("MANDATORY")}>
+                    + Mandatory
+                  </AppButton>
+                  <AppButton size="small" onClick={() => handleBatchAssignFromCatalog("GROUP_ELECTIVE")}>
+                    + Elective
+                  </AppButton>
+                  <AppButton size="small" onClick={() => handleBatchAssignFromCatalog("OPTIONAL_4TH")}>
+                    + 4th
+                  </AppButton>
+                  <AppButton size="small" color="error" onClick={handleBatchDeleteFromCatalog}>
+                    Remove from catalog
+                  </AppButton>
+                </Stack>
+              </Stack>
+            ) : null
+          }
+        >
           {loading ? (
             <LoadingScreen label="Loading mappings..." />
           ) : activeTab === "mapped" ? (
@@ -842,7 +824,7 @@ export default function ClassSubjectMappingPage() {
               <Box sx={{ display: { xs: "block", md: "none" } }}>{catalogCards}</Box>
             </>
           )}
-        </Stack>
+        </TableFilterBar>
       </AppCard>
 
       <Stack

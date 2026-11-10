@@ -23,7 +23,7 @@ import {
   Search,
   ArrowRight,
 } from "@/components/iconify/lucide";
-import { AppSelect, AppTextField } from "@/components";
+import { AppSelect, AppTextField, AppTable, TableFilterBar } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
 import { templateOptionLabel } from "@/sections/results/utils/select-options";
@@ -1145,7 +1145,7 @@ export default function ExamsPage() {
             />
           </Stack>
 
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {filteredExams.map((exam) => {
             const isExpanded = expandedExamId === exam.id;
             const subjectCount = exam.subjectConfigs?.length || 0;
@@ -1466,138 +1466,139 @@ export default function ExamsPage() {
 
                     {/* Subjects Table */}
                     {subjectCount > 0 ? (
-                      <div className="bg-white rounded-lg border border-slate-200 overflow-x-auto shadow-sm">
-                        <table className="w-full text-left text-xs">
-                          <thead className="bg-slate-100/75 border-b border-slate-200 text-slate-600 font-semibold text-[11px]">
-                            <tr>
-                              <th className="py-2.5 px-3 w-10 text-center">
-                                <input
-                                  type="checkbox"
-                                  checked={isAllSelected}
-                                  onChange={() => handleToggleSelectAll(filteredConfigs)}
-                                  className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer"
-                                  title="Select/Deselect all visible subjects"
-                                />
-                              </th>
-                              <th className="py-2.5 px-3">Code</th>
-                              <th className="py-2.5 px-3">Subject Name</th>
-                              <th className="py-2.5 px-3">Group</th>
-                              <th className="py-2.5 px-3">Full Marks</th>
-                              <th className="py-2.5 px-3">Pass Rule</th>
-                              <th className="py-2.5 px-3">Assessment Components</th>
-                              <th className="py-2.5 px-3 text-right">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100 text-slate-700">
-                            {filteredConfigs.map((cfg) => {
-                              const isChecked = selectedConfigIds.includes(cfg.id);
-                              return (
-                                <tr
-                                  key={cfg.id}
-                                  className={`transition-colors ${
-                                    isChecked
-                                      ? "bg-red-50/50 hover:bg-red-50/80"
-                                      : "hover:bg-slate-50/75"
-                                  }`}
-                                >
-                                  <td className="py-2.5 px-3 text-center">
-                                    <input
-                                      type="checkbox"
-                                      checked={isChecked}
-                                      onChange={() => handleToggleSelectConfig(cfg.id)}
-                                      className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer"
-                                    />
-                                  </td>
-                                  <td className="py-2.5 px-3 font-mono font-bold text-slate-800">
-                                    {cfg.subject.subjectCode}
-                                  </td>
-                                  <td className="py-2.5 px-3 font-semibold text-slate-900">
-                                    {cfg.subject.name}
-                                  </td>
-                                  <td className="py-2.5 px-3">
+                      <TableFilterBar showSearch={false}>
+                        <AppTable<any>
+                          embedded
+                          rows={filteredConfigs}
+                        rowKey={(row) => row.id}
+                        defaultOrderBy="subject"
+                        minWidth={1000}
+                        showCheckbox
+                        selected={selectedConfigIds}
+                        onSelectRow={handleToggleSelectConfig}
+                        onSelectAllRows={(checked) => {
+                          const ids = filteredConfigs.map((c: any) => c.id);
+                          if (checked) {
+                            setSelectedConfigIds((prev: string[]) => Array.from(new Set([...prev, ...ids])));
+                          } else {
+                            setSelectedConfigIds((prev: string[]) => prev.filter((id) => !ids.includes(id)));
+                          }
+                        }}
+                        columns={[
+                          {
+                            id: "subjectCode",
+                            label: "Code",
+                            sortable: false,
+                            render: (cfg) => (
+                              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                                {cfg.subject.subjectCode}
+                              </Typography>
+                            ),
+                          },
+                          {
+                            id: "subjectName",
+                            label: "Subject Name",
+                            sortable: false,
+                            render: (cfg) => (
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                {cfg.subject.name}
+                              </Typography>
+                            ),
+                          },
+                          {
+                            id: "groupType",
+                            label: "Group",
+                            render: (cfg) => (
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                  cfg.groupType === "SCIENCE"
+                                    ? "bg-blue-50 text-blue-700 border border-blue-200"
+                                    : cfg.groupType === "HUMANITIES"
+                                    ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                    : cfg.groupType === "BUSINESS_STUDIES"
+                                    ? "bg-purple-50 text-purple-700 border border-purple-200"
+                                    : "bg-slate-100 text-slate-700 border border-slate-200"
+                                }`}
+                              >
+                                {cfg.groupType}
+                              </span>
+                            ),
+                          },
+                          {
+                            id: "totalFullMarks",
+                            label: "Full Marks",
+                            render: (cfg) => (
+                              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                                {cfg.totalFullMarks}
+                              </Typography>
+                            ),
+                          },
+                          {
+                            id: "passMode",
+                            label: "Pass Rule",
+                            sortable: false,
+                            render: (cfg) => (
+                              <div className="text-[11px]">
+                                <span className="font-medium text-slate-700">
+                                  {cfg.passMode === "COMPONENT_WISE"
+                                    ? "Component-wise"
+                                    : cfg.passMode === "AGGREGATE_ONLY"
+                                    ? "Aggregate"
+                                    : "Both"}
+                                </span>
+                                <span className="text-slate-400 ml-1">(Min: {cfg.aggregatePassMark})</span>
+                              </div>
+                            ),
+                          },
+                          {
+                            id: "components",
+                            label: "Assessment Components",
+                            sortable: false,
+                            render: (cfg) => (
+                              <div className="flex flex-wrap gap-1">
+                                {cfg.components && cfg.components.length > 0 ? (
+                                  cfg.components.map((comp: any, idx: number) => (
                                     <span
-                                      className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                        cfg.groupType === "SCIENCE"
-                                          ? "bg-blue-50 text-blue-700 border border-blue-200"
-                                          : cfg.groupType === "HUMANITIES"
-                                          ? "bg-amber-50 text-amber-700 border border-amber-200"
-                                          : cfg.groupType === "BUSINESS_STUDIES"
-                                          ? "bg-purple-50 text-purple-700 border border-purple-200"
-                                          : "bg-slate-100 text-slate-700 border border-slate-200"
-                                      }`}
+                                      key={idx}
+                                      className="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-700 border border-slate-200 font-mono"
                                     >
-                                      {cfg.groupType}
+                                      <strong>{comp.componentName}</strong>: {comp.fullMarks}
+                                      <span className="text-slate-400">/{comp.passMarks}</span>
                                     </span>
-                                  </td>
-                                  <td className="py-2.5 px-3 font-mono font-bold text-slate-800">
-                                    {cfg.totalFullMarks}
-                                  </td>
-                                  <td className="py-2.5 px-3">
-                                    <div className="text-[11px]">
-                                      <span className="font-medium text-slate-700">
-                                        {cfg.passMode === "COMPONENT_WISE"
-                                          ? "Component-wise"
-                                          : cfg.passMode === "AGGREGATE_ONLY"
-                                          ? "Aggregate"
-                                          : "Both"}
-                                      </span>
-                                      <span className="text-slate-400 ml-1">
-                                        (Min: {cfg.aggregatePassMark})
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td className="py-2.5 px-3">
-                                    <div className="flex flex-wrap gap-1">
-                                      {cfg.components && cfg.components.length > 0 ? (
-                                        cfg.components.map((comp, idx) => (
-                                          <span
-                                            key={idx}
-                                            className="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-700 border border-slate-200 font-mono"
-                                          >
-                                            <strong>{comp.componentName}</strong>: {comp.fullMarks}
-                                            <span className="text-slate-400">/{comp.passMarks}</span>
-                                          </span>
-                                        ))
-                                      ) : (
-                                        <span className="text-[10px] text-slate-400 italic">
-                                          No components configured
-                                        </span>
-                                      )}
-                                    </div>
-                                  </td>
-                                  <td className="py-2.5 px-3 text-right">
-                                    <div className="flex items-center justify-end space-x-1">
-                                      <button
-                                        onClick={() => handleOpenEditModal(exam, cfg)}
-                                        className="p-1 hover:bg-slate-200 rounded text-slate-600 hover:text-blue-700 transition-colors"
-                                        title="Edit Marks & Components"
-                                      >
-                                        <Pencil className="w-3.5 h-3.5" />
-                                      </button>
-                                      <button
-                                        onClick={() =>
-                                          handleRemoveSubjectConfig(cfg.id, cfg.subject.name)
-                                        }
-                                        className="p-1 hover:bg-rose-100 rounded text-slate-400 hover:text-rose-600 transition-colors"
-                                        title="Unassign from Exam"
-                                      >
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                      </button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                            {filteredConfigs.length === 0 && (
-                              <tr>
-                                <td colSpan={8} className="p-0">
-                                  <NoDataFound />
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
+                                  ))
+                                ) : (
+                                  <span className="text-[10px] text-slate-400 italic">No components configured</span>
+                                )}
+                              </div>
+                            ),
+                          },
+                          {
+                            id: "actions",
+                            label: "Actions",
+                            align: "right",
+                            sortable: false,
+                            render: (cfg) => (
+                              <div className="flex items-center justify-end space-x-1">
+                                <button
+                                  onClick={() => handleOpenEditModal(exam, cfg)}
+                                  className="p-1 hover:bg-slate-200 rounded text-slate-600 hover:text-blue-700 transition-colors"
+                                  title="Edit Marks & Components"
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => handleRemoveSubjectConfig(cfg.id, cfg.subject.name)}
+                                  className="p-1 hover:bg-rose-100 rounded text-slate-400 hover:text-rose-600 transition-colors"
+                                  title="Unassign from Exam"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ),
+                          },
+                        ]}
+                      />
+                      </TableFilterBar>
                     ) : (
                       <Box
                         sx={{

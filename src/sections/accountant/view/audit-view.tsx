@@ -31,6 +31,10 @@ import {
 } from "@/sections/accountant/schema/accountant-store";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
+import { AppTable, AppCard, TableFilterBar } from "@/components";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 export default function InstitutionalAuditPage() {
   const [auditLogs, setAuditLogs] = useState<AuditRecord[]>([]);
@@ -254,161 +258,168 @@ export default function InstitutionalAuditPage() {
         </div>
       </div>
 
-      {/* Double-Entry Trial Balance Summary */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 bg-slate-50/70 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Scale className="w-4 h-4 text-emerald-600" />
-            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              Official Double-Entry General Ledger Trial Balance (October 2026)
-            </h3>
-          </div>
-          <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">
-            Audit Approved
-          </span>
-        </div>
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<(typeof trialBalanceAccounts)[number]>
+        embedded
+        rows={trialBalanceAccounts}
+        rowKey={(row) => row.code}
+        defaultOrderBy="code"
+        minWidth={900}
+        columns={[
+          {
+            id: "code",
+            label: "GL Code",
+            render: (ac) => (
+              <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>
+                {ac.code}
+              </Typography>
+            ),
+          },
+          {
+            id: "name",
+            label: "Account Head Name",
+            render: (ac) => (
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {ac.name}
+              </Typography>
+            ),
+          },
+          {
+            id: "type",
+            label: "Classification",
+            render: (ac) => (
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                {ac.type}
+              </span>
+            ),
+          },
+          {
+            id: "debit",
+            label: "Debit Balance (৳)",
+            align: "right",
+            render: (ac) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                {ac.debit > 0 ? `৳ ${ac.debit.toLocaleString()}` : "—"}
+              </Typography>
+            ),
+          },
+          {
+            id: "credit",
+            label: "Credit Balance (৳)",
+            align: "right",
+            render: (ac) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                {ac.credit > 0 ? `৳ ${ac.credit.toLocaleString()}` : "—"}
+              </Typography>
+            ),
+          },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-50 text-[11px] font-semibold text-slate-600 uppercase tracking-wider border-b border-slate-200">
-              <tr>
-                <th className="py-2.5 px-3">GL Code</th>
-                <th className="py-2.5 px-4">Account Head Name</th>
-                <th className="py-2.5 px-3">Classification</th>
-                <th className="py-2.5 px-3 text-right">Debit Balance (৳)</th>
-                <th className="py-2.5 px-3 text-right">Credit Balance (৳)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {trialBalanceAccounts.map((ac) => (
-                <tr key={ac.code} className="hover:bg-slate-50/70 transition">
-                  <td className="py-2.5 px-3 font-mono font-bold text-slate-700">{ac.code}</td>
-                  <td className="py-2.5 px-4 font-semibold text-slate-900">{ac.name}</td>
-                  <td className="py-2.5 px-3">
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                      {ac.type}
-                    </span>
-                  </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-800">
-                    {ac.debit > 0 ? `৳ ${ac.debit.toLocaleString()}` : "—"}
-                  </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-800">
-                    {ac.credit > 0 ? `৳ ${ac.credit.toLocaleString()}` : "—"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot className="bg-slate-100/80 font-bold border-t-2 border-slate-300">
-              <tr>
-                <td colSpan={3} className="py-3 px-4 text-right text-slate-900 uppercase">
-                  Total Trial Balance:
-                </td>
-                <td className="py-3 px-3 text-right font-mono text-emerald-700 text-sm">
-                  ৳ {totalTrialDebit.toLocaleString()}
-                </td>
-                <td className="py-3 px-3 text-right font-mono text-emerald-700 text-sm">
-                  ৳ {totalTrialCredit.toLocaleString()}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
-
-      {/* Audit Inspection Trail Log */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 bg-slate-50/70 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <ShieldCheck className="w-4 h-4 text-amber-500" />
-            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              Institutional Inspection & Verification Trail
-            </h3>
-            <span className="text-[11px] font-semibold text-slate-500">
-              ({filteredAuditLogs.length} audit logs)
-            </span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <SessionSelect
-              value={selectedSession}
-              onChange={(val) => setSelectedSession(val)}
-              label="Session:"
-              labelClassName="text-xs font-semibold text-slate-600 whitespace-nowrap"
-              selectClassName="text-xs bg-white border border-slate-300 rounded-lg p-1.5 font-medium text-slate-800"
-            />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="text-xs bg-white border border-slate-300 rounded-lg p-1.5 font-medium text-slate-800"
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="VERIFIED">Verified Only</option>
-              <option value="FLAGGED">Flagged for Review</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-50 text-[11px] font-semibold text-slate-600 uppercase tracking-wider border-b border-slate-200">
-              <tr>
-                <th className="py-3 px-3">Timestamp</th>
-                <th className="py-3 px-3">Voucher #</th>
-                <th className="py-3 px-3">Category</th>
-                <th className="py-3 px-4">Audit Inspection Description</th>
-                <th className="py-3 px-3">Auditor / Authority</th>
-                <th className="py-3 px-3 text-right">Debit (৳)</th>
-                <th className="py-3 px-3 text-right">Credit (৳)</th>
-                <th className="py-3 px-3 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredAuditLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-50/70 transition">
-                  <td className="py-3 px-3 font-mono text-slate-500 text-[11px]">
-                    {log.timestamp}
-                  </td>
-                  <td className="py-3 px-3 font-mono font-bold text-slate-800">
-                    {log.voucherNo}
-                  </td>
-                  <td className="py-3 px-3">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                      {log.category.replace(/_/g, " ")}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="font-semibold text-slate-900">{log.description}</div>
-                    {log.notes && (
-                      <div className="text-[11px] text-slate-500 mt-0.5 italic">{log.notes}</div>
-                    )}
-                  </td>
-                  <td className="py-3 px-3 text-slate-700 font-medium">
-                    {log.auditor}
-                  </td>
-                  <td className="py-3 px-3 text-right font-mono text-slate-700">
-                    {log.debit > 0 ? `৳ ${log.debit.toLocaleString()}` : "—"}
-                  </td>
-                  <td className="py-3 px-3 text-right font-mono text-slate-700">
-                    {log.credit > 0 ? `৳ ${log.credit.toLocaleString()}` : "—"}
-                  </td>
-                  <td className="py-3 px-3 text-center">
-                    {log.verificationStatus === "VERIFIED" ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                        <Check className="w-3 h-3 stroke-[3]" /> Verified
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
-                        <AlertTriangle className="w-3 h-3" /> Flagged
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<AuditRecord>
+        embedded
+        rows={filteredAuditLogs}
+        rowKey={(row) => row.id}
+        defaultOrderBy="timestamp"
+        minWidth={1100}
+        columns={[
+          {
+            id: "timestamp",
+            label: "Timestamp",
+            render: (log) => (
+              <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>
+                {log.timestamp}
+              </Typography>
+            ),
+          },
+          {
+            id: "voucherNo",
+            label: "Voucher #",
+            render: (log) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                {log.voucherNo}
+              </Typography>
+            ),
+          },
+          {
+            id: "category",
+            label: "Category",
+            render: (log) => (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                {log.category.replace(/_/g, " ")}
+              </span>
+            ),
+          },
+          {
+            id: "description",
+            label: "Audit Inspection Description",
+            sortable: false,
+            render: (log) => (
+              <>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {log.description}
+                </Typography>
+                {log.notes ? (
+                  <Typography variant="caption" color="text.secondary" sx={{ fontStyle: "italic" }}>
+                    {log.notes}
+                  </Typography>
+                ) : null}
+              </>
+            ),
+          },
+          {
+            id: "auditor",
+            label: "Auditor / Authority",
+            render: (log) => (
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {log.auditor}
+              </Typography>
+            ),
+          },
+          {
+            id: "debit",
+            label: "Debit (৳)",
+            align: "right",
+            render: (log) => (
+              <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+                {log.debit > 0 ? `৳ ${log.debit.toLocaleString()}` : "—"}
+              </Typography>
+            ),
+          },
+          {
+            id: "credit",
+            label: "Credit (৳)",
+            align: "right",
+            render: (log) => (
+              <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+                {log.credit > 0 ? `৳ ${log.credit.toLocaleString()}` : "—"}
+              </Typography>
+            ),
+          },
+          {
+            id: "verificationStatus",
+            label: "Status",
+            align: "center",
+            render: (log) =>
+              log.verificationStatus === "VERIFIED" ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                  <Check className="w-3 h-3 stroke-[3]" /> Verified
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                  <AlertTriangle className="w-3 h-3" /> Flagged
+                </span>
+              ),
+          },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
       {/* Add Audit Log Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">

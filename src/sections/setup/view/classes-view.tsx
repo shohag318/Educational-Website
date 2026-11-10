@@ -247,7 +247,7 @@ export default function ClassesPage() {
         }
       />
 
-      <Grid container spacing={1.5} sx={{ mb: 2.5 }}>
+      <Grid container spacing={1.5}>
         {[
           { label: "Classes", value: stats.classes, icon: <SchoolOutlinedIcon sx={{ fontSize: 20 }} />, color: "success.main", bg: "success.lighter" },
           { label: "Sections", value: stats.sections, icon: <ClassOutlinedIcon sx={{ fontSize: 20 }} />, color: "info.main", bg: "info.lighter" },
@@ -283,7 +283,7 @@ export default function ClassesPage() {
         ))}
       </Grid>
 
-      <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
+      <Grid container spacing={2.5}>
         <Grid size={{ xs: 12, md: 5 }}>
           <AppCard
             title="Add class"

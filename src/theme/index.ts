@@ -41,6 +41,7 @@ declare module "@mui/material/Alert" {
 }
 
 const baseTheme = createTheme({
+  cssVariables: true,
   palette,
   typography,
   shape: { borderRadius: 12 },

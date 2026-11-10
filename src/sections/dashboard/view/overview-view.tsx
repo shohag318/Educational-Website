@@ -72,10 +72,9 @@ const financeAndAdmin = [
 
 export default function DashboardOverviewPage() {
   return (
-    <Box sx={{ maxWidth: 1200, mx: "auto" }}>
+    <Stack spacing={2.5} sx={{ maxWidth: 1200, mx: "auto", width: 1 }}>
       <Card
         sx={{
-          mb: 3,
           p: 3,
           color: "#fff",
           background: "linear-gradient(90deg, #0f172a 0%, #1e293b 55%, #064e3b 100%)",
@@ -114,7 +113,7 @@ export default function DashboardOverviewPage() {
         </Stack>
       </Card>
 
-      <Card sx={{ p: 2.5, mb: 3 }}>
+      <Card sx={{ p: 2.5 }}>
         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="overline">Academic Sessions</Typography>
           <AppButton component={Link} href={PATHS.session.manager} size="small" endIcon={<ArrowForwardIcon />}>
@@ -155,7 +154,7 @@ export default function DashboardOverviewPage() {
         </Grid>
       </Card>
 
-      <Card sx={{ p: 2.5, mb: 3 }}>
+      <Card sx={{ p: 2.5 }}>
         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="overline">Student Management</Typography>
           <AppButton component={Link} href={PATHS.setup.students} size="small" endIcon={<ArrowForwardIcon />}>
@@ -183,7 +182,7 @@ export default function DashboardOverviewPage() {
         </Grid>
       </Card>
 
-      <Box sx={{ mb: 3 }}>
+      <Box>
         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="overline">Result Workflow</Typography>
           <Typography variant="caption" color="text.secondary">
@@ -230,7 +229,7 @@ export default function DashboardOverviewPage() {
         </Grid>
       </Box>
 
-      <Card sx={{ p: 2.5, mb: 3 }}>
+      <Card sx={{ p: 2.5 }}>
         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="overline">Downloads & Forms</Typography>
           <AppButton component={Link} href={PATHS.download.root} size="small" endIcon={<ArrowForwardIcon />}>
@@ -282,6 +281,6 @@ export default function DashboardOverviewPage() {
           })}
         </Grid>
       </Box>
-    </Box>
+    </Stack>
   );
 }

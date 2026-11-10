@@ -89,24 +89,9 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
       sx={{
         zIndex: 20,
         color: "text.primary",
-        bgcolor: "rgba(255,255,255,0.92)",
-        backdropFilter: "blur(12px)",
+        bgcolor: "background.paper",
         borderBottom: "1px solid",
         borderColor: "divider",
-        backgroundImage:
-          "linear-gradient(180deg, rgba(248,250,252,0.95) 0%, rgba(255,255,255,0.88) 100%)",
-        "&::after": {
-          content: '""',
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 2,
-          background:
-            "linear-gradient(90deg, rgba(16,185,129,0.55), rgba(14,165,233,0.35), transparent 70%)",
-          opacity: 0.85,
-          pointerEvents: "none",
-        },
       }}
     >
       <Toolbar

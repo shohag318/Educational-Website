@@ -1,7 +1,6 @@
 // src/app/user-role/delegation/page.tsx
 "use client";
 
-import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -23,6 +22,9 @@ import {
 import { UserRoleNavHeader } from "@/sections/user-role/component/user-role-nav-header";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
+import { AppTable, AppCard, TableFilterBar } from "@/components";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import {
   TeacherDelegation,
   UserAccount,
@@ -387,141 +389,155 @@ export default function TeacherDelegationPage() {
         </div>
       </div>
 
-      {/* Table Container */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
-        {/* Filter bar */}
-        <div className="p-4 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50/50">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search by teacher name, subject, class..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <SessionSelect
-              value={selectedSession}
-              onChange={(val) => setSelectedSession(val)}
-              label="Session:"
-              includeAll={true}
-              allLabel="All Sessions"
-              activeOnly={false}
-              labelClassName="text-xs font-semibold text-slate-600 whitespace-nowrap"
-              selectClassName="px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs text-slate-700 font-medium"
-            />
-            <select
-              value={classFilter}
-              onChange={(e) => setClassFilter(e.target.value)}
-              className="px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs text-slate-700 font-medium"
-            >
-              <option value="ALL">All Classes</option>
-              {availableClasses.map((cls) => (
-                <option key={cls} value={cls}>
-                  {cls}
-                </option>
-              ))}
-            </select>
-          </div>
+      {/* Filter bar */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+          <input
+            type="text"
+            placeholder="Search by teacher name, subject, class..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+          />
         </div>
 
-        {/* Delegations Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
-              <tr>
-                <th className="px-4 py-3">Faculty / Teacher</th>
-                <th className="px-4 py-3">Assigned Class & Section</th>
-                <th className="px-4 py-3">Subject Scope</th>
-                <th className="px-4 py-3 text-center">Access Permission</th>
-                <th className="px-4 py-3 text-center">Assigned Date</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredDelegations.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-0">
-                    <NoDataFound />
-                  </td>
-                </tr>
-              ) : (
-                filteredDelegations.map((del) => {
-                  return (
-                    <tr key={del.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="font-bold text-slate-900">{del.userName}</div>
-                        <div className="text-[11px] text-slate-500">{del.designation}</div>
-                      </td>
-
-                      <td className="px-4 py-3">
-                        <div className="flex items-center space-x-1.5">
-                          <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded text-xs">
-                            {del.className}
-                          </span>
-                          <span className="text-slate-500 text-xs">({del.sectionName})</span>
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-3">
-                        <div className="font-semibold text-slate-800 flex items-center gap-1.5">
-                          <BookOpen className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                          <span>{del.subjectName}</span>
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-3 text-center">
-                        <AppButton
-                          onClick={() => toggleAccessLevel(del)}
-                          size="small"
-                          variant="soft"
-                          color={del.accessLevel === "MARK_ENTRY" ? "success" : "info"}
-                          startIcon={
-                            del.accessLevel === "MARK_ENTRY" ? (
-                              <FileEdit className="w-3 h-3" />
-                            ) : (
-                              <Eye className="w-3 h-3" />
-                            )
-                          }
-                          title="Click to toggle access mode"
-                        >
-                          {del.accessLevel === "MARK_ENTRY" ? "Mark Entry Allowed" : "View Only"}
-                        </AppButton>
-                      </td>
-
-                      <td className="px-4 py-3 text-center text-slate-500 text-[11px]">
-                        {del.assignedDate}
-                      </td>
-
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end space-x-1">
-                          <button
-                            onClick={() => openEditModal(del)}
-                            title="Edit Delegation"
-                            className="p-1 rounded text-slate-400 hover:text-amber-600 hover:bg-slate-100 transition cursor-pointer"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleRevokeDelegation(del)}
-                            title="Revoke Delegation"
-                            className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-slate-100 transition cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+        <div className="flex flex-wrap items-center gap-2">
+          <SessionSelect
+            value={selectedSession}
+            onChange={(val) => setSelectedSession(val)}
+            label="Session:"
+            includeAll={true}
+            allLabel="All Sessions"
+            activeOnly={false}
+            labelClassName="text-xs font-semibold text-slate-600 whitespace-nowrap"
+            selectClassName="px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs text-slate-700 font-medium"
+          />
+          <select
+            value={classFilter}
+            onChange={(e) => setClassFilter(e.target.value)}
+            className="px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs text-slate-700 font-medium"
+          >
+            <option value="ALL">All Classes</option>
+            {availableClasses.map((cls) => (
+              <option key={cls} value={cls}>
+                {cls}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
+
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<TeacherDelegation>
+        embedded
+          rows={filteredDelegations}
+          rowKey={(row) => row.id}
+          defaultOrderBy="assignedDate"
+          minWidth={900}
+          columns={[
+            {
+              id: "userName",
+              label: "Faculty / Teacher",
+              render: (del) => (
+                <>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {del.userName}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {del.designation}
+                  </Typography>
+                </>
+              ),
+            },
+            {
+              id: "className",
+              label: "Assigned Class & Section",
+              render: (del) => (
+                <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                  <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded text-xs">
+                    {del.className}
+                  </span>
+                  <Typography variant="caption" color="text.secondary">
+                    ({del.sectionName})
+                  </Typography>
+                </Stack>
+              ),
+            },
+            {
+              id: "subjectName",
+              label: "Subject Scope",
+              render: (del) => (
+                <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                  <BookOpen className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {del.subjectName}
+                  </Typography>
+                </Stack>
+              ),
+            },
+            {
+              id: "accessLevel",
+              label: "Access Permission",
+              align: "center",
+              render: (del) => (
+                <AppButton
+                  onClick={() => toggleAccessLevel(del)}
+                  size="small"
+                  variant="soft"
+                  color={del.accessLevel === "MARK_ENTRY" ? "success" : "info"}
+                  startIcon={
+                    del.accessLevel === "MARK_ENTRY" ? (
+                      <FileEdit className="w-3 h-3" />
+                    ) : (
+                      <Eye className="w-3 h-3" />
+                    )
+                  }
+                  title="Click to toggle access mode"
+                >
+                  {del.accessLevel === "MARK_ENTRY" ? "Mark Entry Allowed" : "View Only"}
+                </AppButton>
+              ),
+            },
+            {
+              id: "assignedDate",
+              label: "Assigned Date",
+              align: "center",
+              render: (del) => (
+                <Typography variant="caption" color="text.secondary">
+                  {del.assignedDate}
+                </Typography>
+              ),
+            },
+            {
+              id: "actions",
+              label: "Actions",
+              align: "right",
+              sortable: false,
+              render: (del) => (
+                <Stack direction="row" spacing={0.5} sx={{ justifyContent: "flex-end" }}>
+                  <button
+                    onClick={() => openEditModal(del)}
+                    title="Edit Delegation"
+                    className="p-1 rounded text-slate-400 hover:text-amber-600 hover:bg-slate-100 transition cursor-pointer"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleRevokeDelegation(del)}
+                    title="Revoke Delegation"
+                    className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-slate-100 transition cursor-pointer"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </Stack>
+              ),
+            },
+          ]}
+        />
+        </TableFilterBar>
+      </AppCard>
 
       {/* Modal: Assign New Scope */}
       {isModalOpen && (

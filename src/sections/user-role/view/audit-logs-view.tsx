@@ -1,27 +1,23 @@
 // src/app/user-role/audit-logs/page.tsx
 "use client";
 
-import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   ShieldAlert,
-  Search,
   Download,
-  Filter,
-  AlertTriangle,
-  Info,
-  CheckCircle2,
   Clock,
   User,
-  Activity,
-  Trash2,
   RotateCcw,
   Sparkles,
 } from "@/components/iconify/lucide";
 import { UserRoleNavHeader } from "@/sections/user-role/component/user-role-nav-header";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
+import { AppCard, AppSelect, AppTable, Label, TableFilterBar } from "@/components";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 import {
   AuditLogEntry,
   getStoredAuditLogs,
@@ -201,137 +197,151 @@ export default function SecurityAuditLogsPage() {
         </div>
       </div>
 
-      {/* Audit Log Table Container */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
-        {/* Filter Bar */}
-        <div className="p-4 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50/50">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search by action, actor, IP address, details..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 shadow-2xs"
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <SessionSelect
-              value={selectedSession}
-              onChange={(val) => setSelectedSession(val)}
-              label="Session:"
-              includeAll={true}
-              allLabel="All Sessions"
-              activeOnly={false}
-              labelClassName="text-xs font-semibold text-slate-600 whitespace-nowrap"
-              selectClassName="px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 shadow-2xs text-slate-700 font-medium"
-            />
-            <select
-              value={severityFilter}
-              onChange={(e) => setSeverityFilter(e.target.value)}
-              className="px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 shadow-2xs text-slate-700 font-medium"
-            >
-              <option value="ALL">All Severities</option>
-              <option value="INFO">Info</option>
-              <option value="WARNING">Warning</option>
-              <option value="CRITICAL">Critical</option>
-            </select>
-
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 shadow-2xs text-slate-700 font-medium"
-            >
-              <option value="ALL">All Categories</option>
-              <option value="SECURITY">Security</option>
-              <option value="USER_MANAGEMENT">User Management</option>
-              <option value="PERMISSION">Permission Matrix</option>
-              <option value="DELEGATION">Delegation</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
-              <tr>
-                <th className="px-4 py-3">Timestamp</th>
-                <th className="px-4 py-3">Actor / User</th>
-                <th className="px-4 py-3">Action Event</th>
-                <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3 text-center">Severity</th>
-                <th className="px-4 py-3">Details & Context</th>
-                <th className="px-4 py-3 font-mono">IP Address</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredLogs.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-0">
-                    <NoDataFound />
-                  </td>
-                </tr>
-              ) : (
-                filteredLogs.map((log) => {
-                  return (
-                    <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap text-slate-500 font-mono text-[11px]">
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{log.timestamp}</span>
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-3 font-bold text-slate-900 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <User className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{log.userName}</span>
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <code className="text-purple-700 bg-purple-50 px-2 py-0.5 rounded font-mono text-[10px] font-bold border border-purple-200">
-                          {log.action}
-                        </code>
-                      </td>
-
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
-                          {log.category}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3 text-center whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            log.severity === "CRITICAL"
-                              ? "bg-rose-100 text-rose-800 border border-rose-200"
-                              : log.severity === "WARNING"
-                              ? "bg-amber-100 text-amber-800 border border-amber-200"
-                              : "bg-blue-100 text-blue-800 border border-blue-200"
-                          }`}
-                        >
-                          {log.severity}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3 text-slate-700 max-w-md">
-                        <p className="line-clamp-2">{log.details}</p>
-                      </td>
-
-                      <td className="px-4 py-3 text-slate-500 font-mono text-[11px] whitespace-nowrap">
-                        {log.ipAddress}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <AppCard>
+        <TableFilterBar
+          filters={
+            <>
+              <Box sx={{ width: { xs: 1, sm: 200 } }}>
+                <SessionSelect
+                  value={selectedSession}
+                  onChange={(val) => setSelectedSession(val)}
+                  label="Session"
+                  includeAll
+                  allLabel="All Sessions"
+                  activeOnly={false}
+                  fullWidth
+                />
+              </Box>
+              <Box sx={{ width: { xs: 1, sm: 180 } }}>
+                <AppSelect
+                  label="Severity"
+                  value={severityFilter}
+                  onChange={setSeverityFilter}
+                  options={[
+                    { value: "ALL", label: "All Severities" },
+                    { value: "INFO", label: "Info" },
+                    { value: "WARNING", label: "Warning" },
+                    { value: "CRITICAL", label: "Critical" },
+                  ]}
+                />
+              </Box>
+              <Box sx={{ width: { xs: 1, sm: 200 } }}>
+                <AppSelect
+                  label="Category"
+                  value={categoryFilter}
+                  onChange={setCategoryFilter}
+                  options={[
+                    { value: "ALL", label: "All Categories" },
+                    { value: "SECURITY", label: "Security" },
+                    { value: "USER_MANAGEMENT", label: "User Management" },
+                    { value: "PERMISSION", label: "Permission Matrix" },
+                    { value: "DELEGATION", label: "Delegation" },
+                  ]}
+                />
+              </Box>
+            </>
+          }
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Search by action, actor, IP address, details..."
+        >
+          <AppTable<AuditLogEntry>
+            embedded
+            rows={filteredLogs}
+            rowKey={(row) => row.id}
+            defaultOrderBy="timestamp"
+            minWidth={960}
+            columns={[
+          {
+            id: "timestamp",
+            label: "Timestamp",
+            render: (log) => (
+              <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", whiteSpace: "nowrap" }}>
+                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                <Typography variant="caption" sx={{ fontWeight: 700 }} color="text.secondary">
+                  {log.timestamp}
+                </Typography>
+              </Stack>
+            ),
+          },
+          {
+            id: "userName",
+            label: "Actor / User",
+            render: (log) => (
+              <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", whiteSpace: "nowrap" }}>
+                <User className="w-3.5 h-3.5 text-slate-400" />
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {log.userName}
+                </Typography>
+              </Stack>
+            ),
+          },
+          {
+            id: "action",
+            label: "Action Event",
+            render: (log) => (
+              <Box
+                component="code"
+                sx={{
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: 1,
+                  bgcolor: "secondary.lighter",
+                  color: "secondary.dark",
+                  fontFamily: "monospace",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  border: 1,
+                  borderColor: "secondary.light",
+                }}
+              >
+                {log.action}
+              </Box>
+            ),
+          },
+          {
+            id: "category",
+            label: "Category",
+            render: (log) => (
+              <Label variant="soft">{log.category}</Label>
+            ),
+          },
+          {
+            id: "severity",
+            label: "Severity",
+            align: "center",
+            render: (log) => (
+              <Label
+                color={log.severity === "CRITICAL" ? "error" : log.severity === "WARNING" ? "warning" : "info"}
+                variant="soft"
+              >
+                {log.severity}
+              </Label>
+            ),
+          },
+          {
+            id: "details",
+            label: "Details & Context",
+            sortable: false,
+            render: (log) => (
+              <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 360 }} noWrap title={log.details}>
+                {log.details}
+              </Typography>
+            ),
+          },
+          {
+            id: "ipAddress",
+            label: "IP Address",
+            render: (log) => (
+              <Typography variant="caption" sx={{ fontFamily: "monospace", color: "text.secondary", whiteSpace: "nowrap" }}>
+                {log.ipAddress}
+              </Typography>
+            ),
+          },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
     </div>
   );
 }

@@ -26,7 +26,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </Box>
       ) : (
-        <Box sx={{ display: "flex", height: "100vh", overflow: "hidden", bgcolor: "background.default", width: "100%" }}>
+        <Box
+          sx={{
+            display: "flex",
+            height: "100vh",
+            overflow: "hidden",
+            bgcolor: "grey.100",
+            width: "100%",
+          }}
+        >
           <Box sx={{ display: { xs: "none", md: "block" }, flexShrink: 0 }}>
             <Sidebar />
           </Box>
@@ -41,11 +49,55 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             <Sidebar />
           </Drawer>
-          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, height: "100vh", overflow: "hidden" }}>
+
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              minWidth: 0,
+              height: "100vh",
+              overflow: "hidden",
+              bgcolor: "grey.100",
+            }}
+          >
             <Header onMenuClick={() => setNavOpen(true)} />
             <RecentlyVisitedBar />
-            <Box component="main" sx={{ flex: 1, p: { xs: 1.5, sm: 2, md: 3 }, overflowY: "auto", minWidth: 0 }}>
-              {children}
+
+            {/* Depth gutter between header/sidebar and content card */}
+            <Box
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                overflow: "hidden",
+                p: { xs: 1.25, sm: 1.5, md: 2 },
+                pt: { xs: 1.25, md: 1.5 },
+                bgcolor: "grey.100",
+              }}
+            >
+              <Box
+                component="main"
+                className="app-content-surface"
+                sx={{
+                  height: "100%",
+                  overflowY: "auto",
+                  minWidth: 0,
+                  // Soft grey canvas so white section cards show clear gaps between them
+                  bgcolor: "grey.50",
+                  borderRadius: { xs: 2, md: 2.5 },
+                  border: "1px solid",
+                  borderColor: "divider",
+                  boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06)",
+                  px: { xs: 1.5, sm: 2, md: 2.5 },
+                  py: { xs: 1.5, sm: 2, md: 2.25 },
+                  // Default vertical rhythm between top-level page blocks/cards
+                  "& > .MuiContainer-root > .MuiStack-root": {
+                    gap: "20px",
+                  },
+                }}
+              >
+                {children}
+              </Box>
             </Box>
           </Box>
         </Box>

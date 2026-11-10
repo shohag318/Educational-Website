@@ -11,10 +11,8 @@ import { AppSelect } from "@/components/select/app-select";
 import { AppTextField } from "@/components/text-field/app-text-field";
 import { StudentPageHeader } from "@/sections/student/component/student-page-header";
 import { NoDataFound } from "@/components/table/no-data-found";
-import { TableNoData } from "@/components/table/table-no-data";
 import { LoadingScreen } from "@/components/loading-screen/loading-screen";
-import { Label } from "@/components/label/label";
-import { Scrollbar } from "@/components/scrollbar/scrollbar";
+import { AppTable, Label, TableFilterBar } from "@/components";
 import {
   Box,
   Checkbox,
@@ -28,17 +26,11 @@ import {
   Select,
   Snackbar,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Typography,
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { PeopleIcon, CheckCircleIcon, ScheduleIcon, WarningAmberIcon, SwapHorizIcon, FavoriteBorderIcon, SearchIcon, CloseIcon, EditOutlinedIcon, DescriptionOutlinedIcon, RestartAltIcon, FileDownloadOutlinedIcon, PrintOutlinedIcon } from "@/components/iconify/mui-icons";
+import { PeopleIcon, CheckCircleIcon, ScheduleIcon, WarningAmberIcon, SwapHorizIcon, FavoriteBorderIcon, CloseIcon, EditOutlinedIcon, DescriptionOutlinedIcon, RestartAltIcon, FileDownloadOutlinedIcon, PrintOutlinedIcon } from "@/components/iconify/mui-icons";
 import { getStoredSchoolInfo } from "@/lib/settingsStore";
 
 export type StudentStatusType = "ACTIVE" | "INACTIVE" | "DROPOUT" | "TRANSFER" | "DEATH";
@@ -877,7 +869,7 @@ export default function StudentStatusPage() {
         }
       />
 
-      <Grid container spacing={{ xs: 1, sm: 1.5, md: 2 }} sx={{ mb: 2.5 }} className="no-print">
+      <Grid container spacing={{ xs: 1, sm: 1.5, md: 2 }} className="no-print">
         {kpiItems.map((kpi) => {
           const active = statusFilter === kpi.key;
           return (
@@ -925,7 +917,7 @@ export default function StudentStatusPage() {
         })}
       </Grid>
 
-      <AppCard sx={{ mb: 2.5 }} className="no-print">
+      <AppCard className="no-print">
         <Stack spacing={1.5}>
           <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1 }}>
             <Typography variant="subtitle2">Find students</Typography>
@@ -1021,121 +1013,135 @@ export default function StudentStatusPage() {
 
       <AppCard>
         <Stack spacing={2}>
-          <Stack
-            direction={{ xs: "column", md: "row" }}
-            spacing={1.5}
-            sx={{ alignItems: { md: "center" }, justifyContent: "space-between" }}
-            className="no-print"
-          >
-            <Box sx={{ width: { xs: 1, md: 360 }, minWidth: 0 }}>
-              <AppTextField
-                placeholder="Search name, roll, ID, or phone"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                startIcon={<SearchIcon fontSize="small" />}
-                endIcon={
-                  searchQuery ? (
-                    <IconButton size="small" onClick={() => setSearchQuery("")} aria-label="Clear search">
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  ) : undefined
-                }
-              />
-            </Box>
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between" }}>
-              <Typography variant="caption" color="text.secondary">
-                Showing {filteredStudents.length} of {students.length} students
-              </Typography>
-              {filteredStudents.length > 0 && (
-                <AppButton size="small" variant="outlined" onClick={toggleSelectAll}>
-                  {allFilteredSelected ? "Unselect all" : "Select all"}
-                </AppButton>
-              )}
-            </Stack>
-          </Stack>
-
           {!isMobile && batchActions}
 
-        {loading ? (
+          {loading ? (
             <LoadingScreen label="Loading student records..." />
-        ) : isMobile ? (
-            filteredStudents.length === 0 ? (
-              <NoDataFound />
-            ) : (
-              <Stack spacing={1.25} className="no-print">
-                {filteredStudents.map(renderStudentCard)}
-              </Stack>
-            )
           ) : (
-            <Box sx={{ minWidth: 0, "@media print": { display: "block" } }}>
-              <TableContainer>
-                <Scrollbar sx={{ width: 1, overflowX: "auto" }}>
-                  <Table sx={{ minWidth: 920 }}>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell padding="checkbox" className="no-print">
-                          <Checkbox size="small" checked={allFilteredSelected} onChange={toggleSelectAll} />
-                        </TableCell>
-                        <TableCell align="center">Roll</TableCell>
-                        <TableCell>Student ID</TableCell>
-                        <TableCell>Student</TableCell>
-                        <TableCell>Class / Section</TableCell>
-                        <TableCell>Guardian</TableCell>
-                        <TableCell sx={{ minWidth: 140 }}>Status</TableCell>
-                        <TableCell>Reason / Details</TableCell>
-                        <TableCell align="right" className="no-print">
-                          Actions
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                {filteredStudents.length === 0 && <TableNoData colSpan={9} />}
-                {filteredStudents.map((enr) => {
-                  const isChecked = selectedIds.has(enr.studentId);
-                  const parsed = parseStudentStatus(enr.student);
-                  return (
-                          <TableRow key={enr.id} hover selected={isChecked}>
-                            <TableCell padding="checkbox" className="no-print">
-                              <Checkbox size="small" checked={isChecked} onChange={() => toggleSelectStudent(enr.studentId)} />
-                            </TableCell>
-                            <TableCell align="center">
-                              <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 700 }}>
-                        #{enr.classRoll}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography variant="caption" sx={{ fontFamily: "monospace" }}>
-                        {enr.student.studentIdNo}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography variant="subtitle2">
-                          {enr.student.firstName} {enr.student.lastName || ""}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary" sx={{ textTransform: "capitalize" }}>
-                          {enr.student.gender?.toLowerCase() || "Not specified"}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography variant="body2">
-                          {enr.class?.name || classes.find((c) => c.id === selectedClassId)?.name}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {enr.section?.name ? `Sec ${enr.section.name}` : "General"}
-                                {enr.section?.shift ? ` · ${enr.section.shift}` : ""}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography variant="body2">{enr.student.guardianName || "—"}</Typography>
-                              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
-                                {enr.student.guardianPhone || "—"}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>{renderStatusSelect(enr)}</TableCell>
-                            <TableCell>
-                        {parsed.reason ? (
+            <TableFilterBar
+              searchValue={searchQuery}
+              onSearchChange={setSearchQuery}
+              searchPlaceholder="Search name, roll, ID, or phone"
+              endAdornment={
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Showing {filteredStudents.length} of {students.length} students
+                  </Typography>
+                  {filteredStudents.length > 0 && (
+                    <AppButton size="small" variant="outlined" onClick={toggleSelectAll}>
+                      {allFilteredSelected ? "Unselect all" : "Select all"}
+                    </AppButton>
+                  )}
+                </Stack>
+              }
+            >
+              {isMobile ? (
+                <Stack spacing={1.25} className="no-print">
+                  {filteredStudents.length === 0 ? <NoDataFound /> : filteredStudents.map(renderStudentCard)}
+                </Stack>
+              ) : (
+                <Box sx={{ minWidth: 0, "@media print": { display: "block" } }} className="no-print-toolbar-ok">
+                  <AppTable<StudentEnrollmentItem>
+                    embedded
+                    rows={filteredStudents}
+                    rowKey={(row) => row.studentId}
+                    defaultOrderBy="classRoll"
+                    minWidth={920}
+                    showCheckbox
+                    selected={Array.from(selectedIds)}
+                    onSelectRow={toggleSelectStudent}
+                    onSelectAllRows={(checked) => {
+                      if (checked) {
+                        setSelectedIds(new Set(filteredStudents.map((enr) => enr.studentId)));
+                      } else {
+                        setSelectedIds(new Set());
+                      }
+                    }}
+                    columns={[
+                      {
+                        id: "classRoll",
+                        label: "Roll",
+                        align: "center",
+                        render: (enr) => (
+                          <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                            #{enr.classRoll}
+                          </Typography>
+                        ),
+                      },
+                      {
+                        id: "studentIdNo",
+                        label: "Student ID",
+                        sortable: false,
+                        render: (enr) => (
+                          <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                            {enr.student.studentIdNo}
+                          </Typography>
+                        ),
+                      },
+                      {
+                        id: "student",
+                        label: "Student",
+                        sortable: false,
+                        render: (enr) => (
+                          <>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {enr.student.firstName} {enr.student.lastName || ""}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ textTransform: "capitalize" }}>
+                              {enr.student.gender?.toLowerCase() || "Not specified"}
+                            </Typography>
+                          </>
+                        ),
+                      },
+                      {
+                        id: "class",
+                        label: "Class / Section",
+                        sortable: false,
+                        render: (enr) => (
+                          <>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {enr.class?.name || classes.find((c) => c.id === selectedClassId)?.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {enr.section?.name ? `Sec ${enr.section.name}` : "General"}
+                              {enr.section?.shift ? ` · ${enr.section.shift}` : ""}
+                            </Typography>
+                          </>
+                        ),
+                      },
+                      {
+                        id: "guardian",
+                        label: "Guardian",
+                        sortable: false,
+                        render: (enr) => (
+                          <>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {enr.student.guardianName || "—"}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                              {enr.student.guardianPhone || "—"}
+                            </Typography>
+                          </>
+                        ),
+                      },
+                      {
+                        id: "status",
+                        label: "Status",
+                        sortable: false,
+                        minWidth: 140,
+                        render: (enr) => renderStatusSelect(enr),
+                      },
+                      {
+                        id: "reason",
+                        label: "Reason / Details",
+                        sortable: false,
+                        render: (enr) => {
+                          const parsed = parseStudentStatus(enr.student);
+                          return (
+                            <>
+                              {parsed.reason ? (
                                 <Typography variant="body2" noWrap title={parsed.reason} sx={{ maxWidth: 180 }}>
-                            {parsed.reason}
+                                  {parsed.reason}
                                 </Typography>
                               ) : (
                                 <Typography variant="caption" color="text.secondary">
@@ -1146,25 +1152,31 @@ export default function StudentStatusPage() {
                                 {parsed.date ? `Eff. ${parsed.date}` : ""}
                                 {parsed.tcNumber ? ` · TC ${parsed.tcNumber}` : ""}
                               </Typography>
-                            </TableCell>
-                            <TableCell align="right" className="no-print">
-                              <AppButton
-                                size="small"
-                                variant="outlined"
-                          onClick={() => openSingleModal(enr)}
-                                startIcon={<EditOutlinedIcon sx={{ fontSize: 16 }} />}
-                              >
-                                Edit
-                              </AppButton>
-                            </TableCell>
-                          </TableRow>
-                  );
-                })}
-                    </TableBody>
-                  </Table>
-                </Scrollbar>
-              </TableContainer>
-              </Box>
+                            </>
+                          );
+                        },
+                      },
+                      {
+                        id: "actions",
+                        label: "Actions",
+                        align: "right",
+                        sortable: false,
+                        render: (enr) => (
+                          <AppButton
+                            size="small"
+                            variant="outlined"
+                            onClick={() => openSingleModal(enr)}
+                            startIcon={<EditOutlinedIcon sx={{ fontSize: 16 }} />}
+                          >
+                            Edit
+                          </AppButton>
+                        ),
+                      },
+                    ]}
+                  />
+                </Box>
+              )}
+            </TableFilterBar>
           )}
         </Stack>
       </AppCard>

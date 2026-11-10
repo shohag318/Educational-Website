@@ -1,7 +1,11 @@
 "use client";
 
-import { NoDataFound } from "@/components/table/no-data-found";
 import { useEffect, useState, useMemo } from "react";
+import { AppTable, Label, type AppTableColumn, AppCard, TableFilterBar } from "@/components";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -554,6 +558,322 @@ export default function SuperAdminDashboardPage() {
     );
   }
 
+
+  const institutionColumns = useMemo(() => {
+    const cols: AppTableColumn<InstitutionItem>[] = [
+      {
+        id: "name",
+        label: "Institution Name & EIIN",
+        render: (inst) => (
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {inst.name}
+            </Typography>
+            {inst.nameBn ? (
+              <Typography variant="caption" color="text.secondary">
+                {inst.nameBn}
+              </Typography>
+            ) : null}
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center", mt: 0.5 }}>
+              <Label variant="soft">EIIN: {inst.code}</Label>
+              {inst.stats ? (
+                <Typography variant="caption" color="text.secondary">
+                  {inst.stats.students} Students • {inst.stats.classes} Classes
+                </Typography>
+              ) : null}
+            </Stack>
+          </Box>
+        ),
+      },
+      {
+        id: "contact",
+        label: "Contact Info",
+        sortable: false,
+        render: (inst) => (
+          <Stack spacing={0.25}>
+            {inst.address ? (
+              <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                <Typography variant="caption" noWrap sx={{ maxWidth: 160 }}>
+                  {inst.address}
+                </Typography>
+              </Stack>
+            ) : null}
+            {inst.contactEmail ? (
+              <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                <Mail className="w-3 h-3 text-slate-400 shrink-0" />
+                <Typography variant="caption" noWrap sx={{ maxWidth: 160 }}>
+                  {inst.contactEmail}
+                </Typography>
+              </Stack>
+            ) : null}
+            {inst.contactPhone ? (
+              <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                <Phone className="w-3 h-3 text-slate-400 shrink-0" />
+                <Typography variant="caption">{inst.contactPhone}</Typography>
+              </Stack>
+            ) : null}
+          </Stack>
+        ),
+      },
+      {
+        id: "modules",
+        label: "Which Module are Access By Institution",
+        sortable: false,
+        minWidth: 210,
+        render: (inst) => {
+          const instModules =
+            inst.accessibleModules && inst.accessibleModules.length > 0
+              ? inst.accessibleModules
+              : [...ALL_INSTITUTION_MODULE_KEYS];
+          const isDropdownOpen = activeTableDropdownInstId === inst.id;
+          const isSavingThis = savingModuleInstId === inst.id;
+          return (
+            <Box sx={{ position: "relative" }}>
+              <AppButton
+                type="button"
+                size="small"
+                variant="soft"
+                color={
+                  instModules.length === 0
+                    ? "error"
+                    : instModules.length === ALL_INSTITUTION_MODULE_KEYS.length
+                    ? "primary"
+                    : "inherit"
+                }
+                startIcon={<Layers className="w-3.5 h-3.5" />}
+                endIcon={
+                  isSavingThis ? (
+                    <RefreshCw className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+                  )
+                }
+                onClick={() => setActiveTableDropdownInstId((prev) => (prev === inst.id ? null : inst.id))}
+                title={`Configure modules accessible by ${inst.name}`}
+              >
+                {instModules.length === 0
+                  ? "No Modules (0)"
+                  : instModules.length === ALL_INSTITUTION_MODULE_KEYS.length
+                  ? "All 8 Modules"
+                  : `${instModules.length} Modules`}
+              </AppButton>
+              {isDropdownOpen ? (
+                <>
+                  <Box className="fixed inset-0 z-30" onClick={() => setActiveTableDropdownInstId(null)} />
+                  <Box className="absolute left-0 mt-1.5 w-80 bg-white rounded-xl shadow-2xl border border-slate-200 z-40 p-3 text-left animate-in fade-in zoom-in-95">
+                    <Box className="pb-2.5 mb-2 border-b border-slate-100 flex items-center justify-between">
+                      <Box className="min-w-0 pr-2">
+                        <Typography variant="caption" sx={{ fontWeight: 700 }} className="flex items-center gap-1.5">
+                          <span className="truncate">Access: {inst.name}</span>
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" className="flex items-center gap-1.5 mt-0.5">
+                          <span className="font-mono bg-slate-100 px-1 rounded text-slate-600 border border-slate-200">
+                            EIIN: {inst.code}
+                          </span>
+                          <span>•</span>
+                          <span className="font-semibold text-indigo-600">
+                            {instModules.length}/{ALL_INSTITUTION_MODULE_KEYS.length} accessible
+                          </span>
+                        </Typography>
+                      </Box>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTableDropdownInstId(null)}
+                        className="text-slate-400 hover:text-slate-600 font-bold text-sm p-1 rounded hover:bg-slate-100 cursor-pointer shrink-0"
+                        title="Close dropdown"
+                      >
+                        ✕
+                      </button>
+                    </Box>
+                    <Box className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 text-[10px]">
+                      <AppButton type="button" variant="link" size="small" onClick={() => handleToggleAllModulesForInst(inst, true)}>
+                        Select All
+                      </AppButton>
+                      <span className="text-slate-200">|</span>
+                      <AppButton type="button" variant="link" color="error" size="small" onClick={() => handleToggleAllModulesForInst(inst, false)}>
+                        Clear All
+                      </AppButton>
+                      <span className="text-slate-200">|</span>
+                      <span className="text-slate-400 text-[9px] italic">{isSavingThis ? "Saving..." : "Auto-saved"}</span>
+                    </Box>
+                    <Box className="space-y-1.5 max-h-60 overflow-y-auto pr-1">
+                      {INSTITUTION_MODULES.map((mod) => {
+                        const isChecked = instModules.includes(mod.key);
+                        return (
+                          <label
+                            key={mod.key}
+                            className={`flex items-start gap-2 p-1.5 rounded-lg text-xs cursor-pointer transition-colors ${
+                              isChecked ? "bg-indigo-50/80 text-indigo-950 font-semibold" : "hover:bg-slate-50 text-slate-600 font-normal"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => handleToggleModuleForInst(inst, mod.key)}
+                              className="mt-0.5 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer"
+                            />
+                            <Box className="min-w-0 flex-1">
+                              <Box className="flex items-center justify-between gap-1">
+                                <span className="truncate text-[11px] leading-tight">{mod.name}</span>
+                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-medium shrink-0">
+                                  {mod.badge}
+                                </span>
+                              </Box>
+                              <Box className="text-[10px] text-slate-400 font-normal leading-tight line-clamp-1 mt-0.5">{mod.desc}</Box>
+                            </Box>
+                          </label>
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                </>
+              ) : null}
+            </Box>
+          );
+        },
+      },
+      {
+        id: "adminId",
+        label: "Assigned Admin ID",
+        sortable: false,
+        render: (inst) => {
+          const isCopiedCreds = copiedId === inst.id;
+          return (
+            <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+              <Label color="primary" variant="soft">
+                {inst.adminId || `admin_${inst.code}`}
+              </Label>
+              <IconButton
+                size="small"
+                onClick={() => copyToClipboard(inst.adminId || `admin_${inst.code}`, "creds", inst.id)}
+                title="Copy Admin ID"
+              >
+                {isCopiedCreds ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              </IconButton>
+            </Stack>
+          );
+        },
+      },
+      {
+        id: "adminPassword",
+        label: "Assigned Password",
+        sortable: false,
+        render: (inst) => {
+          const isPwdVisible = !!visiblePasswords[inst.id];
+          return (
+            <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+              <Typography
+                variant="caption"
+                sx={{ fontFamily: "monospace", px: 1, py: 0.5, bgcolor: "action.hover", borderRadius: 1, border: 1, borderColor: "divider" }}
+              >
+                {isPwdVisible ? inst.adminPassword || `SmartAdmin@${inst.code}` : "••••••••••••"}
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={() => togglePasswordVisibility(inst.id)}
+                title={isPwdVisible ? "Hide password" : "Show password"}
+              >
+                {isPwdVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={() =>
+                  copyToClipboard(inst.adminPassword || `SmartAdmin@${inst.code}`, "creds", inst.id + "_pwd")
+                }
+                title="Copy Password"
+              >
+                <Copy className="w-3.5 h-3.5" />
+              </IconButton>
+            </Stack>
+          );
+        },
+      },
+      {
+        id: "loginLink",
+        label: "Dedicated Login Link",
+        sortable: false,
+        render: (inst) => {
+          const loginUrl = getLoginLink(inst.code);
+          const isCopiedLink = copiedLink === inst.id;
+          return (
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+              <Typography
+                variant="caption"
+                noWrap
+                sx={{ maxWidth: 200, fontFamily: "monospace", px: 1, py: 0.5, bgcolor: "action.hover", borderRadius: 1, border: 1, borderColor: "divider" }}
+              >
+                {`/portal-login?inst=${inst.code}`}
+              </Typography>
+              <AppButton
+                type="button"
+                size="small"
+                variant="soft"
+                color={isCopiedLink ? "success" : "primary"}
+                startIcon={isCopiedLink ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                onClick={() => copyToClipboard(loginUrl, "link", inst.id)}
+                title="Copy full direct login link to clipboard"
+              >
+                {isCopiedLink ? "Copied!" : "Copy Link"}
+              </AppButton>
+              <Link
+                href={`/portal-login?inst=${encodeURIComponent(inst.code)}`}
+                target="_blank"
+                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-colors"
+                title="Open login page in new tab"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+            </Stack>
+          );
+        },
+      },
+      {
+        id: "status",
+        label: "Status",
+        align: "center",
+        render: (inst) => (
+          <Label
+            color={inst.status === "ACTIVE" ? "success" : inst.status === "SUSPENDED" ? "error" : "default"}
+            variant="soft"
+          >
+            {inst.status}
+          </Label>
+        ),
+      },
+      {
+        id: "actions",
+        label: "Actions",
+        align: "right",
+        sortable: false,
+        render: (inst) => (
+          <Stack direction="row" spacing={0.5} sx={{ justifyContent: "flex-end" }}>
+            <IconButton size="small" onClick={() => handleOpenAssignModal(inst)} title="Assign or Change Admin ID & Password">
+              <KeyRound className="w-3.5 h-3.5" />
+            </IconButton>
+            <IconButton size="small" color="success" onClick={() => handleLaunchInstitution(inst)} title="Switch to this institution dashboard">
+              <LogIn className="w-3.5 h-3.5" />
+            </IconButton>
+            <IconButton size="small" color="primary" onClick={() => handleOpenEditModal(inst)} title="Edit Institution Profile">
+              <Edit3 className="w-3.5 h-3.5" />
+            </IconButton>
+            <IconButton size="small" color="error" onClick={() => handleDeleteInstitution(inst.id, inst.name)} title="Delete Institution">
+              <Trash2 className="w-3.5 h-3.5" />
+            </IconButton>
+          </Stack>
+        ),
+      },
+    ];
+    return cols;
+  }, [
+    activeTableDropdownInstId,
+    savingModuleInstId,
+    copiedId,
+    copiedLink,
+    visiblePasswords,
+  ]);
+
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* Top Breadcrumb & Brand Banner */}
@@ -727,411 +1047,19 @@ export default function SuperAdminDashboardPage() {
         </div>
       </div>
 
-      {/* Main Institutions Data Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <div>
-            <h2 className="text-sm font-bold text-slate-800">Institutions Directory & Access Portals</h2>
-            <p className="text-xs text-slate-500">
-              Showing {filteredInstitutions.length} of {institutions.length} institutions
-            </p>
-          </div>
-          <span className="text-xs text-slate-500">
-            Each institution has an assigned Admin ID, Password, and dedicated Portal Link.
-          </span>
-        </div>
-
-        {loading ? (
-          <div className="p-12 text-center text-slate-500 space-y-3">
-            <RefreshCw className="w-6 h-6 animate-spin text-indigo-600 mx-auto" />
-            <p className="text-xs">Loading institutions directory...</p>
-          </div>
-        ) : filteredInstitutions.length === 0 ? (
-          <NoDataFound />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
-                  <th className="py-3 px-4">Institution Name & EIIN</th>
-                  <th className="py-3 px-4">Contact Info</th>
-                  <th className="py-3 px-4 min-w-[210px]">Which Module are Access By Institution</th>
-                  <th className="py-3 px-4">Assigned Admin ID</th>
-                  <th className="py-3 px-4">Assigned Password</th>
-                  <th className="py-3 px-4">Dedicated Login Link</th>
-                  <th className="py-3 px-4 text-center">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-sans">
-                {filteredInstitutions.map((inst) => {
-                  const loginUrl = getLoginLink(inst.code);
-                  const isCopiedLink = copiedLink === inst.id;
-                  const isCopiedCreds = copiedId === inst.id;
-                  const isPwdVisible = !!visiblePasswords[inst.id];
-
-                  return (
-                    <tr key={inst.id} className="hover:bg-indigo-50/30 transition-colors group">
-                      {/* Name & EIIN */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-slate-900 group-hover:text-indigo-900">
-                            {inst.name}
-                          </span>
-                          {inst.nameBn && (
-                            <span className="text-[11px] text-slate-500">{inst.nameBn}</span>
-                          )}
-                          <div className="flex items-center space-x-2 mt-1">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                              EIIN: {inst.code}
-                            </span>
-                            {inst.stats && (
-                              <span className="text-[10px] text-slate-500">
-                                {inst.stats.students} Students • {inst.stats.classes} Classes
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Contact Info */}
-                      <td className="py-3.5 px-4 text-slate-600">
-                        <div className="space-y-0.5">
-                          {inst.address && (
-                            <div className="flex items-center space-x-1.5 text-[11px] text-slate-600">
-                              <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                              <span className="truncate max-w-[160px]">{inst.address}</span>
-                            </div>
-                          )}
-                          {inst.contactEmail && (
-                            <div className="flex items-center space-x-1.5 text-[11px] text-slate-600">
-                              <Mail className="w-3 h-3 text-slate-400 shrink-0" />
-                              <span className="truncate max-w-[160px]">{inst.contactEmail}</span>
-                            </div>
-                          )}
-                          {inst.contactPhone && (
-                            <div className="flex items-center space-x-1.5 text-[11px] text-slate-600">
-                              <Phone className="w-3 h-3 text-slate-400 shrink-0" />
-                              <span>{inst.contactPhone}</span>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Which Module are Access By Institution - Dropdown Menu with Checkboxes */}
-                      <td className="py-3.5 px-4">
-                        <div className="relative">
-                          {(() => {
-                            const instModules =
-                              inst.accessibleModules && inst.accessibleModules.length > 0
-                                ? inst.accessibleModules
-                                : [...ALL_INSTITUTION_MODULE_KEYS];
-                            const isDropdownOpen = activeTableDropdownInstId === inst.id;
-                            const isSavingThis = savingModuleInstId === inst.id;
-
-                            return (
-                              <>
-                                <AppButton
-                                  type="button"
-                                  size="small"
-                                  variant="soft"
-                                  color={
-                                    instModules.length === 0
-                                      ? "error"
-                                      : instModules.length === ALL_INSTITUTION_MODULE_KEYS.length
-                                      ? "primary"
-                                      : "inherit"
-                                  }
-                                  startIcon={<Layers className="w-3.5 h-3.5" />}
-                                  endIcon={
-                                    isSavingThis ? (
-                                      <RefreshCw className="w-3 h-3 animate-spin" />
-                                    ) : (
-                                      <ChevronDown
-                                        className={`w-3.5 h-3.5 transition-transform ${
-                                          isDropdownOpen ? "rotate-180" : ""
-                                        }`}
-                                      />
-                                    )
-                                  }
-                                  onClick={() =>
-                                    setActiveTableDropdownInstId((prev) =>
-                                      prev === inst.id ? null : inst.id
-                                    )
-                                  }
-                                  title={`Configure modules accessible by ${inst.name}`}
-                                >
-                                  {instModules.length === 0
-                                    ? "No Modules (0)"
-                                    : instModules.length === ALL_INSTITUTION_MODULE_KEYS.length
-                                    ? "All 8 Modules"
-                                    : `${instModules.length} Modules`}
-                                </AppButton>
-
-                                {isDropdownOpen && (
-                                  <>
-                                    <div
-                                      className="fixed inset-0 z-30"
-                                      onClick={() => setActiveTableDropdownInstId(null)}
-                                    />
-                                    <div className="absolute left-0 mt-1.5 w-80 bg-white rounded-xl shadow-2xl border border-slate-200 z-40 p-3 text-left animate-in fade-in zoom-in-95">
-                                      <div className="pb-2.5 mb-2 border-b border-slate-100 flex items-center justify-between">
-                                        <div className="min-w-0 pr-2">
-                                          <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5">
-                                            <span className="truncate">Access: {inst.name}</span>
-                                          </div>
-                                          <div className="text-[10px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                                            <span className="font-mono bg-slate-100 px-1 rounded text-slate-600 border border-slate-200">
-                                              EIIN: {inst.code}
-                                            </span>
-                                            <span>•</span>
-                                            <span className="font-semibold text-indigo-600">
-                                              {instModules.length}/{ALL_INSTITUTION_MODULE_KEYS.length} accessible
-                                            </span>
-                                          </div>
-                                        </div>
-                                        <button
-                                          type="button"
-                                          onClick={() => setActiveTableDropdownInstId(null)}
-                                          className="text-slate-400 hover:text-slate-600 font-bold text-sm p-1 rounded hover:bg-slate-100 cursor-pointer shrink-0"
-                                          title="Close dropdown"
-                                        >
-                                          ✕
-                                        </button>
-                                      </div>
-
-                                      {/* Quick Select Buttons */}
-                                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 text-[10px]">
-                                        <AppButton
-                                          type="button"
-                                          variant="link"
-                                          size="small"
-                                          onClick={() => handleToggleAllModulesForInst(inst, true)}
-                                        >
-                                          Select All
-                                        </AppButton>
-                                        <span className="text-slate-200">|</span>
-                                        <AppButton
-                                          type="button"
-                                          variant="link"
-                                          color="error"
-                                          size="small"
-                                          onClick={() => handleToggleAllModulesForInst(inst, false)}
-                                        >
-                                          Clear All
-                                        </AppButton>
-                                        <span className="text-slate-200">|</span>
-                                        <span className="text-slate-400 text-[9px] italic">
-                                          {isSavingThis ? "Saving..." : "Auto-saved"}
-                                        </span>
-                                      </div>
-
-                                      {/* Checkboxes List */}
-                                      <div className="space-y-1.5 max-h-60 overflow-y-auto pr-1">
-                                        {INSTITUTION_MODULES.map((mod) => {
-                                          const isChecked = instModules.includes(mod.key);
-
-                                          return (
-                                            <label
-                                              key={mod.key}
-                                              className={`flex items-start gap-2 p-1.5 rounded-lg text-xs cursor-pointer transition-colors ${
-                                                isChecked
-                                                  ? "bg-indigo-50/80 text-indigo-950 font-semibold"
-                                                  : "hover:bg-slate-50 text-slate-600 font-normal"
-                                              }`}
-                                            >
-                                              <input
-                                                type="checkbox"
-                                                checked={isChecked}
-                                                onChange={() => handleToggleModuleForInst(inst, mod.key)}
-                                                className="mt-0.5 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer"
-                                              />
-                                              <div className="min-w-0 flex-1">
-                                                <div className="flex items-center justify-between gap-1">
-                                                  <span className="truncate text-[11px] leading-tight">
-                                                    {mod.name}
-                                                  </span>
-                                                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-medium shrink-0">
-                                                    {mod.badge}
-                                                  </span>
-                                                </div>
-                                                <div className="text-[10px] text-slate-400 font-normal leading-tight line-clamp-1 mt-0.5">
-                                                  {mod.desc}
-                                                </div>
-                                              </div>
-                                            </label>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
-                                  </>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </div>
-                      </td>
-
-                      {/* Assigned Admin ID */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center space-x-1.5">
-                          <span className="px-2.5 py-1 rounded-md font-mono text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                            {inst.adminId || `admin_${inst.code}`}
-                          </span>
-                          <button
-                            onClick={() =>
-                              copyToClipboard(inst.adminId || `admin_${inst.code}`, "creds", inst.id)
-                            }
-                            className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
-                            title="Copy Admin ID"
-                          >
-                            {isCopiedCreds ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-600" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                        </div>
-                      </td>
-
-                      {/* Assigned Password */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center space-x-1.5">
-                          <span className="font-mono text-xs px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-800 tracking-wide">
-                            {isPwdVisible
-                              ? inst.adminPassword || `SmartAdmin@${inst.code}`
-                              : "••••••••••••"}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => togglePasswordVisibility(inst.id)}
-                            className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700"
-                            title={isPwdVisible ? "Hide password" : "Show password"}
-                          >
-                            {isPwdVisible ? (
-                              <EyeOff className="w-3.5 h-3.5" />
-                            ) : (
-                              <Eye className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              copyToClipboard(
-                                inst.adminPassword || `SmartAdmin@${inst.code}`,
-                                "creds",
-                                inst.id + "_pwd"
-                              )
-                            }
-                            className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700"
-                            title="Copy Password"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-
-                      {/* Dedicated Login Link */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center space-x-2">
-                          <div className="max-w-[200px] truncate font-mono text-[11px] text-slate-600 bg-slate-50 px-2 py-1 rounded border border-slate-200">
-                            {`/portal-login?inst=${inst.code}`}
-                          </div>
-
-                          {/* One click copy link */}
-                          <AppButton
-                            type="button"
-                            size="small"
-                            variant="soft"
-                            color={isCopiedLink ? "success" : "primary"}
-                            startIcon={
-                              isCopiedLink ? (
-                                <Check className="w-3 h-3" />
-                              ) : (
-                                <Copy className="w-3 h-3" />
-                              )
-                            }
-                            onClick={() => copyToClipboard(loginUrl, "link", inst.id)}
-                            title="Copy full direct login link to clipboard"
-                          >
-                            {isCopiedLink ? "Copied!" : "Copy Link"}
-                          </AppButton>
-
-                          {/* Open login page */}
-                          <Link
-                            href={`/portal-login?inst=${encodeURIComponent(inst.code)}`}
-                            target="_blank"
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-colors"
-                            title="Open login page in new tab"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </Link>
-                        </div>
-                      </td>
-
-                      {/* Status */}
-                      <td className="py-3.5 px-4 text-center">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            inst.status === "ACTIVE"
-                              ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                              : inst.status === "SUSPENDED"
-                              ? "bg-rose-100 text-rose-800 border border-rose-200"
-                              : "bg-slate-100 text-slate-700 border border-slate-200"
-                          }`}
-                        >
-                          {inst.status}
-                        </span>
-                      </td>
-
-                      {/* Actions */}
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end space-x-1.5">
-                          {/* Assign/Reset Credentials */}
-                          <button
-                            onClick={() => handleOpenAssignModal(inst)}
-                            className="p-1.5 rounded-lg text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all"
-                            title="Assign or Change Admin ID & Password"
-                          >
-                            <KeyRound className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Launch/Impersonate */}
-                          <button
-                            onClick={() => handleLaunchInstitution(inst)}
-                            className="p-1.5 rounded-lg text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 border border-transparent hover:border-emerald-200 transition-all"
-                            title="Switch to this institution dashboard"
-                          >
-                            <LogIn className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Edit Details */}
-                          <button
-                            onClick={() => handleOpenEditModal(inst)}
-                            className="p-1.5 rounded-lg text-slate-600 hover:text-blue-700 hover:bg-blue-50 border border-transparent hover:border-blue-200 transition-all"
-                            title="Edit Institution Profile"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Delete */}
-                          <button
-                            onClick={() => handleDeleteInstitution(inst.id, inst.name)}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-700 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all"
-                            title="Delete Institution"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<InstitutionItem>
+        embedded
+        rows={filteredInstitutions}
+        rowKey={(row) => row.id}
+        loading={loading}
+        defaultOrderBy="name"
+        minWidth={1200}
+        columns={institutionColumns}
+      />
+        </TableFilterBar>
+      </AppCard>
 
       {/* =========================================================================
           MODAL 1: CREATE NEW INSTITUTION

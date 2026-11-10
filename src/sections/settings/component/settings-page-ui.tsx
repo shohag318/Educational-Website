@@ -18,13 +18,11 @@ import { ResultsNotice } from "@/sections/results/component/result-page-ui";
 /** Shared frame for every Settings page. */
 export function SettingsPageShell({ children }: { children: ReactNode }) {
   return (
-    <Container maxWidth="xl" sx={{ py: { xs: 2, md: 3 }, pb: 10 }}>
-      <Box className="no-print" sx={{ mb: 3 }}>
+    <Container maxWidth="xl" disableGutters sx={{ py: 0, pb: { xs: 4, md: 6 } }}>
+      <Box className="no-print" sx={{ mb: 2.5 }}>
         <SettingNavHeader />
       </Box>
-      <RulesAtmosphere>
-        <Stack spacing={2.5}>{children}</Stack>
-      </RulesAtmosphere>
+      <RulesAtmosphere>{children}</RulesAtmosphere>
     </Container>
   );
 }

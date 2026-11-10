@@ -60,16 +60,16 @@ export function Label({
     <Box
       component="span"
       sx={{
-        height: 24,
+        height: 26,
         minWidth: 24,
         lineHeight: 0,
-        borderRadius: 0.75,
+        borderRadius: 1,
         cursor: "default",
         alignItems: "center",
         whiteSpace: "nowrap",
         display: "inline-flex",
         justifyContent: "center",
-        px: 0.75,
+        px: 1,
         fontSize: 12,
         fontWeight: 700,
         gap: 0.5,

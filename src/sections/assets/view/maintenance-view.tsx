@@ -1,6 +1,5 @@
 "use client";
 
-import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Wrench,
@@ -29,6 +28,9 @@ import {
 } from "@/sections/assets/schema/asset-store";
 import { TENANT_SWITCH_EVENT } from "@/lib/clientTenant";
 import { AppButton } from "@/components/button/app-button";
+import { AppTable, Label, AppCard, TableFilterBar } from "@/components";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 export default function AssetMaintenancePage() {
   const [logs, setLogs] = useState<MaintenanceRecord[]>([]);
@@ -293,100 +295,109 @@ export default function AssetMaintenancePage() {
         </div>
       </div>
 
-      {/* Maintenance Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
-        <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Wrench className="w-4 h-4 text-amber-600" />
-            <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wide">
-              Equipment Repairs &amp; Maintenance Log
-            </h3>
-            <span className="text-[10px] font-bold bg-white text-slate-700 px-2 py-0.5 rounded border border-slate-200">
-              {filteredLogs.length} Records
-            </span>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left border-collapse">
-            <thead className="bg-slate-100/80 text-[10px] font-bold text-slate-700 uppercase border-b border-slate-200 tracking-wider">
-              <tr>
-                <th className="py-2.5 px-3">Asset Code</th>
-                <th className="py-2.5 px-3">Equipment / Hardware</th>
-                <th className="py-2.5 px-2">Service Date</th>
-                <th className="py-2.5 px-3">Defect / Issue Reported</th>
-                <th className="py-2.5 px-3">Service Vendor</th>
-                <th className="py-2.5 px-3 text-right">Cost (৳)</th>
-                <th className="py-2.5 px-2 text-center">Status</th>
-                <th className="py-2.5 px-3 text-center no-print">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredLogs.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="p-0">
-                    <NoDataFound />
-                  </td>
-                </tr>
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<MaintenanceRecord>
+        embedded
+        rows={filteredLogs}
+        rowKey={(row) => row.id}
+        defaultOrderBy="serviceDate"
+        minWidth={1000}
+        columns={[
+          {
+            id: "assetCode",
+            label: "Asset Code",
+            render: (log) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                {log.assetCode}
+              </Typography>
+            ),
+          },
+          {
+            id: "assetName",
+            label: "Equipment / Hardware",
+            render: (log) => (
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {log.assetName}
+              </Typography>
+            ),
+          },
+          {
+            id: "serviceDate",
+            label: "Service Date",
+            render: (log) => (
+              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "nowrap" }}>
+                {log.serviceDate}
+              </Typography>
+            ),
+          },
+          {
+            id: "issueDescription",
+            label: "Defect / Issue Reported",
+            sortable: false,
+            render: (log) => (
+              <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 280 }}>
+                {log.issueDescription}
+              </Typography>
+            ),
+          },
+          {
+            id: "vendorName",
+            label: "Service Vendor",
+            render: (log) => (
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {log.vendorName}
+              </Typography>
+            ),
+          },
+          {
+            id: "cost",
+            label: "Cost (৳)",
+            align: "right",
+            render: (log) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                ৳{log.cost.toLocaleString()}
+              </Typography>
+            ),
+          },
+          {
+            id: "status",
+            label: "Status",
+            align: "center",
+            render: (log) =>
+              log.status === "COMPLETED" ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  <Check className="w-3 h-3" /> Completed
+                </span>
               ) : (
-                filteredLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50/80 transition">
-                    <td className="py-2.5 px-3 font-mono font-bold text-slate-900">
-                      {log.assetCode}
-                    </td>
-
-                    <td className="py-2.5 px-3 font-semibold text-slate-900">
-                      {log.assetName}
-                    </td>
-
-                    <td className="py-2.5 px-2 text-slate-600 whitespace-nowrap">
-                      {log.serviceDate}
-                    </td>
-
-                    <td className="py-2.5 px-3 text-slate-700 max-w-xs">
-                      {log.issueDescription}
-                    </td>
-
-                    <td className="py-2.5 px-3 text-slate-800 font-medium">
-                      {log.vendorName}
-                    </td>
-
-                    <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
-                      ৳{log.cost.toLocaleString()}
-                    </td>
-
-                    <td className="py-2.5 px-2 text-center whitespace-nowrap">
-                      {log.status === "COMPLETED" ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                          <Check className="w-3 h-3" /> Completed
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
-                          <Clock className="w-3 h-3" /> In Progress
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="py-2.5 px-3 text-center no-print">
-                      {log.status !== "COMPLETED" && (
-                        <AppButton
-                          type="button"
-                          size="small"
-                          onClick={() => handleMarkCompleted(log)}
-                          variant="contained"
-                          color="success"
-                        >
-                          Mark Completed
-                        </AppButton>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                  <Clock className="w-3 h-3" /> In Progress
+                </span>
+              ),
+          },
+          {
+            id: "actions",
+            label: "Action",
+            align: "center",
+            sortable: false,
+            render: (log) =>
+              log.status !== "COMPLETED" ? (
+                <AppButton
+                  type="button"
+                  size="small"
+                  onClick={() => handleMarkCompleted(log)}
+                  variant="contained"
+                  color="success"
+                  className="no-print"
+                >
+                  Mark Completed
+                </AppButton>
+              ) : null,
+          },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
 
       {/* Create Work Order Modal */}
       {isModalOpen && (

@@ -1,9 +1,22 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { History, X, ChevronLeft, ChevronRight } from "@/components/iconify/lucide";
+import {
+  Box,
+  Chip,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import {
+  History,
+  X,
+  ChevronLeft,
+  ChevronRight,
+} from "@/components/iconify/lucide";
 
 interface RecentPageItem {
   path: string;
@@ -13,10 +26,7 @@ interface RecentPageItem {
   visitedAt: number;
 }
 
-const ROUTE_DIRECTORY: Record<
-  string,
-  { title: string; module: string; color: string }
-> = {
+const ROUTE_DIRECTORY: Record<string, { title: string; module: string; color: string }> = {
   "/": { title: "Overview", module: "Core", color: "emerald" },
   "/academic/rules": { title: "Grading Rules", module: "Results", color: "indigo" },
   "/academic/subject-mapping": { title: "Subject Allocation", module: "Students", color: "emerald" },
@@ -74,17 +84,21 @@ const ROUTE_DIRECTORY: Record<
 const STORAGE_KEY = "nctb_recently_visited_pages_v1";
 const MAX_RECENT_PAGES = 10;
 
+const DOT_COLOR: Record<string, string> = {
+  emerald: "#10B981",
+  amber: "#F59E0B",
+  indigo: "#6366F1",
+  purple: "#A855F7",
+  violet: "#8B5CF6",
+  cyan: "#06B6D4",
+  slate: "#94A3B8",
+};
+
 function resolvePageDetails(path: string): { title: string; module: string; color: string } {
-  if (ROUTE_DIRECTORY[path]) {
-    return ROUTE_DIRECTORY[path];
-  }
-  // Try matching prefix if dynamic subroutes exist
+  if (ROUTE_DIRECTORY[path]) return ROUTE_DIRECTORY[path];
   for (const [key, val] of Object.entries(ROUTE_DIRECTORY)) {
-    if (key !== "/" && path.startsWith(key)) {
-      return val;
-    }
+    if (key !== "/" && path.startsWith(key)) return val;
   }
-  // Fallback to title-casing the last segment
   const segment = path.split("?")[0].split("/").filter(Boolean).pop() || "Home";
   const title = segment
     .split("-")
@@ -98,25 +112,20 @@ export function RecentlyVisitedBar() {
   const [recentPages, setRecentPages] = useState<RecentPageItem[]>([]);
   const [mounted, setMounted] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
-  const [, startTransition] = useTransition();
 
-  // Load initial history from localStorage
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setRecentPages(parsed);
-        }
+        if (Array.isArray(parsed)) setRecentPages(parsed);
       }
     } catch {
-      // ignore JSON error
+      // ignore
     }
     setMounted(true);
   }, []);
 
-  // Track page visits
   useEffect(() => {
     if (!pathname || pathname.startsWith("/api/")) return;
 
@@ -130,21 +139,17 @@ export function RecentlyVisitedBar() {
     };
 
     setRecentPages((prev) => {
-      // Remove existing occurrence of this path
       const filtered = prev.filter((item) => item.path !== pathname);
-      // Append the new one at the end (or maintain MRU)
       const updated = [...filtered, newItem].slice(-MAX_RECENT_PAGES);
-
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       } catch {
-        // ignore storage error
+        // ignore
       }
       return updated;
     });
   }, [pathname]);
 
-  // Auto-scroll active item into view
   useEffect(() => {
     if (!trackRef.current) return;
     const activeEl = trackRef.current.querySelector('[data-active="true"]');
@@ -156,7 +161,6 @@ export function RecentlyVisitedBar() {
   const handleRemove = (e: React.MouseEvent, pathToRemove: string) => {
     e.preventDefault();
     e.stopPropagation();
-
     setRecentPages((prev) => {
       const updated = prev.filter((item) => item.path !== pathToRemove);
       try {
@@ -168,8 +172,7 @@ export function RecentlyVisitedBar() {
     });
   };
 
-  const handleClearAll = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleClearAll = () => {
     setRecentPages([]);
     try {
       localStorage.removeItem(STORAGE_KEY);
@@ -178,139 +181,267 @@ export function RecentlyVisitedBar() {
     }
   };
 
-  const scrollLeft = () => {
-    if (trackRef.current) {
-      trackRef.current.scrollBy({ left: -200, behavior: "smooth" });
-    }
-  };
-
-  const scrollRight = () => {
-    if (trackRef.current) {
-      trackRef.current.scrollBy({ left: 200, behavior: "smooth" });
-    }
-  };
+  const scrollLeft = () => trackRef.current?.scrollBy({ left: -220, behavior: "smooth" });
+  const scrollRight = () => trackRef.current?.scrollBy({ left: 220, behavior: "smooth" });
 
   if (!mounted) {
     return (
-      <div className="h-9.5 bg-slate-100/70 border-b border-slate-200/80 px-4 sm:px-6 flex items-center justify-between no-print sticky top-0 z-20" />
+      <Box
+        className="no-print"
+        sx={{
+          height: 48,
+          bgcolor: "grey.100",
+          borderBottom: "1px solid",
+          borderColor: "divider",
+        }}
+      />
     );
   }
 
   return (
-    <div className="h-9.5 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-3 sm:px-6 flex items-center justify-between gap-2 text-xs no-print sticky top-0 z-20 shadow-2xs select-none">
-      {/* Left Label */}
-      <div className="flex items-center gap-1.5 shrink-0 text-slate-500 font-medium">
-        <span className="p-1 rounded bg-slate-100 text-slate-600 flex items-center justify-center">
-          <History className="w-3.5 h-3.5" />
-        </span>
-        <span className="hidden md:inline text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
-          Recently Visited
-        </span>
-      </div>
-
-      {/* Scrollable Recent Items */}
-      <div className="flex-1 flex items-center gap-1 min-w-0 relative">
-        <button
-          onClick={scrollLeft}
-          title="Scroll Left"
-          className="hidden sm:flex items-center justify-center w-5 h-5 rounded hover:bg-slate-200/70 text-slate-400 hover:text-slate-700 shrink-0 transition"
+    <Box
+      className="no-print"
+      sx={{
+        bgcolor: "grey.100",
+        borderBottom: "1px solid",
+        borderColor: "divider",
+        px: { xs: 1.25, sm: 2, md: 2.5 },
+        py: 0.75,
+        zIndex: 19,
+      }}
+    >
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          alignItems: "center",
+          minHeight: 40,
+          px: 1,
+          py: 0.5,
+          borderRadius: 2,
+          bgcolor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
+          boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
+        }}
+      >
+        <Stack
+          direction="row"
+          spacing={0.75}
+          sx={{
+            alignItems: "center",
+            flexShrink: 0,
+            pl: 0.5,
+            pr: 0.75,
+            borderRight: "1px solid",
+            borderColor: "divider",
+            mr: 0.25,
+            minHeight: 28,
+          }}
         >
-          <ChevronLeft className="w-3.5 h-3.5" />
-        </button>
+          <Box
+            sx={{
+              width: 26,
+              height: 26,
+              borderRadius: 1.25,
+              display: "grid",
+              placeItems: "center",
+              bgcolor: "grey.100",
+              color: "text.secondary",
+            }}
+          >
+            <History className="w-3.5 h-3.5" />
+          </Box>
+          <Box sx={{ display: { xs: "none", md: "block" } }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                fontWeight: 700,
+                fontSize: 11,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                color: "text.secondary",
+                lineHeight: 1.2,
+              }}
+            >
+              Recent
+            </Typography>
+          </Box>
+        </Stack>
 
-        <div
+        <IconButton
+          size="small"
+          onClick={scrollLeft}
+          aria-label="Scroll recent pages left"
+          sx={{
+            display: { xs: "none", sm: "inline-flex" },
+            width: 28,
+            height: 28,
+            borderRadius: 1.25,
+            color: "text.secondary",
+            "&:hover": { bgcolor: "grey.100" },
+          }}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </IconButton>
+
+        <Box
           ref={trackRef}
-          className="flex-1 flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-1"
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: 0.75,
+            overflowX: "auto",
+            scrollBehavior: "smooth",
+            py: 0.25,
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
         >
           {recentPages.length === 0 ? (
-            <span className="text-[11px] text-slate-400 italic px-2">
+            <Typography variant="caption" color="text.disabled" sx={{ px: 1, fontStyle: "italic" }}>
               Pages you visit will appear here for quick access
-            </span>
+            </Typography>
           ) : (
             recentPages.map((page) => {
               const isActive = pathname === page.path;
+              const dot = DOT_COLOR[page.color || "slate"] || DOT_COLOR.slate;
 
               return (
-                <div
+                <Box
                   key={page.path}
                   data-active={isActive ? "true" : "false"}
-                  className="group shrink-0 relative flex items-center"
+                  sx={{
+                    position: "relative",
+                    flexShrink: 0,
+                    "&:hover .recent-close": { opacity: 1 },
+                  }}
                 >
-                  <Link
+                  <Chip
+                    component={Link}
                     href={page.path}
-                    scroll={false}
-                    title={`${page.title} (${page.module})`}
-                    className={`flex items-center gap-1.5 pl-2.5 pr-6 py-1 rounded-lg text-xs font-semibold transition-all duration-150 ease-out border ${
-                      isActive
-                        ? "bg-slate-900 text-white border-slate-900 shadow-2xs"
-                        : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200/80 hover:border-slate-300"
-                    }`}
-                  >
-                    {/* Small color dot indicating module */}
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                        isActive
-                          ? "bg-emerald-400"
-                          : page.color === "emerald"
-                          ? "bg-emerald-500"
-                          : page.color === "amber"
-                          ? "bg-amber-500"
-                          : page.color === "indigo"
-                          ? "bg-indigo-500"
-                          : page.color === "purple"
-                          ? "bg-purple-500"
-                          : page.color === "violet"
-                          ? "bg-violet-500"
-                          : page.color === "cyan"
-                          ? "bg-cyan-500"
-                          : "bg-slate-400"
-                      }`}
-                    />
-                    <span className="max-w-[130px] sm:max-w-[160px] truncate leading-tight">
-                      {page.title}
-                    </span>
-                  </Link>
-
-                  {/* Close 'x' button inside pill */}
-                  <button
-                    type="button"
+                    clickable
+                    size="small"
+                    title={`${page.title} · ${page.module}`}
+                    label={
+                      <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", maxWidth: { xs: 120, sm: 160 } }}>
+                        <Box
+                          sx={{
+                            width: 7,
+                            height: 7,
+                            borderRadius: "50%",
+                            bgcolor: isActive ? "success.light" : dot,
+                            flexShrink: 0,
+                          }}
+                        />
+                        <Typography
+                          component="span"
+                          noWrap
+                          sx={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            lineHeight: 1.2,
+                            color: "inherit",
+                          }}
+                        >
+                          {page.title}
+                        </Typography>
+                      </Stack>
+                    }
+                    sx={{
+                      height: 30,
+                      borderRadius: 1.5,
+                      pr: 2.75,
+                      fontWeight: 600,
+                      border: "1px solid",
+                      ...(isActive
+                        ? {
+                            bgcolor: "grey.900",
+                            color: "common.white",
+                            borderColor: "grey.900",
+                            "&:hover": { bgcolor: "grey.800" },
+                          }
+                        : {
+                            bgcolor: "grey.50",
+                            color: "text.primary",
+                            borderColor: "divider",
+                            "&:hover": { bgcolor: "grey.100", borderColor: "grey.300" },
+                          }),
+                      "& .MuiChip-label": { px: 1.25 },
+                    }}
+                  />
+                  <IconButton
+                    className="recent-close"
+                    size="small"
                     onClick={(e) => handleRemove(e, page.path)}
-                    title={`Remove ${page.title} from history`}
-                    className={`absolute right-1.5 p-0.5 rounded-full transition-opacity ${
-                      isActive
-                        ? "text-slate-400 hover:text-white hover:bg-slate-800"
-                        : "text-slate-400 hover:text-slate-700 hover:bg-slate-200/80 opacity-0 group-hover:opacity-100"
-                    }`}
+                    aria-label={`Remove ${page.title}`}
+                    sx={{
+                      position: "absolute",
+                      right: 2,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      width: 18,
+                      height: 18,
+                      opacity: isActive ? 0.85 : 0,
+                      color: isActive ? "grey.400" : "text.disabled",
+                      "&:hover": {
+                        bgcolor: isActive ? "grey.800" : "grey.200",
+                        color: isActive ? "common.white" : "text.primary",
+                      },
+                    }}
                   >
                     <X className="w-2.5 h-2.5" />
-                  </button>
-                </div>
+                  </IconButton>
+                </Box>
               );
             })
           )}
-        </div>
+        </Box>
 
-        <button
+        <IconButton
+          size="small"
           onClick={scrollRight}
-          title="Scroll Right"
-          className="hidden sm:flex items-center justify-center w-5 h-5 rounded hover:bg-slate-200/70 text-slate-400 hover:text-slate-700 shrink-0 transition"
+          aria-label="Scroll recent pages right"
+          sx={{
+            display: { xs: "none", sm: "inline-flex" },
+            width: 28,
+            height: 28,
+            borderRadius: 1.25,
+            color: "text.secondary",
+            "&:hover": { bgcolor: "grey.100" },
+          }}
         >
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
-      </div>
+          <ChevronRight className="w-4 h-4" />
+        </IconButton>
 
-      {/* Clear All Action — same chip shape as recent pills, red accent */}
-      {recentPages.length > 0 && (
-        <button
-          type="button"
-          onClick={handleClearAll}
-          title="Clear all recently visited pages"
-          className="shrink-0 inline-flex items-center gap-1 pl-2 pr-2.5 py-1 rounded-lg text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 hover:border-rose-300 transition-all duration-150"
-        >
-          <X className="w-3 h-3 text-rose-500" />
-          <span className="leading-tight">Clear</span>
-        </button>
-      )}
-    </div>
+        {recentPages.length > 0 ? (
+          <Tooltip title="Clear recent history">
+            <Chip
+              size="small"
+              clickable
+              onClick={handleClearAll}
+              icon={<X className="w-3 h-3" />}
+              label="Clear"
+              sx={{
+                height: 28,
+                borderRadius: 1.5,
+                flexShrink: 0,
+                fontWeight: 700,
+                fontSize: 11,
+                bgcolor: "error.lighter",
+                color: "error.dark",
+                border: "1px solid",
+                borderColor: "error.light",
+                "& .MuiChip-icon": { color: "error.main", ml: 0.75 },
+                "&:hover": { bgcolor: "error.light", color: "error.darker" },
+              }}
+            />
+          </Tooltip>
+        ) : null}
+      </Stack>
+    </Box>
   );
 }

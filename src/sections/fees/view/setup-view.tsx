@@ -1,6 +1,5 @@
 "use client";
 
-import { NoDataFound } from "@/components/table/no-data-found";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -43,8 +42,11 @@ import {
   calculateStudentWaiver,
 } from "@/sections/fees/schema/waiver-store";
 import { AppButton } from "@/components/button/app-button";
+import { AppTable, AppCard, TableFilterBar } from "@/components";
 import { SessionSelect } from "@/components/SessionSelect";
 import { getScopedStorageKey, getActiveTenantCode, TENANT_SWITCH_EVENT } from "@/lib/clientTenant";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 interface FeeRecord {
   tuitionFee: number;
@@ -1008,134 +1010,180 @@ export default function StudentFeeModulePage() {
       </div>
 
       {/* Student Fee Ledger Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden no-print">
-        <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-              <Receipt className="w-4 h-4 text-emerald-600" />
-              Student Tuition & Fee Ledger
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Showing {displayedStudents.length} of {totalCount} enrolled students
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-500 font-medium">Batch Cycle:</span>
-            <span className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-2.5 py-1 rounded flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              {MONTHS.find((m) => m.key === selectedMonthKey)?.name || "October"} 2026 Cycle
-              <span className="text-[10px] text-emerald-600 font-normal">
-                ({(monthlySchedule[selectedMonthKey] || []).length} heads active)
-              </span>
-            </span>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="p-12 text-center text-slate-500 text-xs">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-emerald-600 border-t-transparent mb-2"></div>
-            <p>Loading student fee records...</p>
-          </div>
-        ) : displayedStudents.length === 0 ? (
-          <NoDataFound />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600 border-collapse">
-              <thead className="bg-slate-50 text-[11px] font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200">
-                <tr>
-                  <th className="py-3 px-3 w-14 text-center">Roll</th>
-                  <th className="py-3 px-4">Student Info</th>
-                  <th className="py-3 px-3">Class & Section</th>
-                  <th className="py-3 px-3 text-right">Tuition</th>
-                  <th className="py-3 px-3 text-right">Exam/Lab</th>
-                  <th className="py-3 px-3 text-right">Waiver</th>
-                  <th className="py-3 px-3 text-right font-bold text-slate-800">Total</th>
-                  <th className="py-3 px-3 text-right text-emerald-600 font-bold">Paid</th>
-                  <th className="py-3 px-3 text-right text-amber-600 font-bold">Due</th>
-                  <th className="py-3 px-3 text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {displayedStudents.map((enr) => {
-                  const fee = getStudentFee(enr);
-                  const student = enr.student || {};
+      <div className="no-print">
+        <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<any>
+        embedded
+          rows={displayedStudents}
+          rowKey={(row) => row.id}
+          defaultOrderBy="classRoll"
+          minWidth={1000}
+          loading={loading}
+          columns={[
+            {
+              id: "classRoll",
+              label: "Roll",
+              align: "center",
+              render: (enr) => (
+                <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                  {enr.classRoll}
+                </Typography>
+              ),
+            },
+            {
+              id: "student",
+              label: "Student Info",
+              sortable: false,
+              render: (enr) => {
+                const student = enr.student || {};
+                return (
+                  <>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {student.firstName} {student.lastName}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+                      ID: {student.studentIdNo}
+                    </Typography>
+                  </>
+                );
+              },
+            },
+            {
+              id: "class",
+              label: "Class & Section",
+              sortable: false,
+              render: (enr) => (
+                <>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {enr.class?.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {enr.section?.name} • {enr.groupType}
+                  </Typography>
+                </>
+              ),
+            },
+            {
+              id: "tuitionFee",
+              label: "Tuition",
+              align: "right",
+              sortable: false,
+              render: (enr) => (
+                <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+                  ৳ {getStudentFee(enr).tuitionFee.toLocaleString()}
+                </Typography>
+              ),
+            },
+            {
+              id: "examLab",
+              label: "Exam/Lab",
+              align: "right",
+              sortable: false,
+              render: (enr) => {
+                const fee = getStudentFee(enr);
+                return (
+                  <Typography variant="body2" sx={{ fontFamily: "monospace", color: "text.secondary" }}>
+                    ৳ {(fee.examFee + fee.labSessionFee).toLocaleString()}
+                  </Typography>
+                );
+              },
+            },
+            {
+              id: "waiver",
+              label: "Waiver",
+              align: "right",
+              sortable: false,
+              render: (enr) => {
+                const fee = getStudentFee(enr);
+                if (fee.waiverAmount <= 0) {
+                  return <span className="text-slate-400">৳ 0</span>;
+                }
+                return (
+                  <div>
+                    <span className="font-bold text-rose-600 font-mono">
+                      -৳ {fee.waiverAmount.toLocaleString()}
+                    </span>
+                    {fee.isSpecialScholarship && (
+                      <div className="mt-0.5">
+                        <span
+                          className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200"
+                          title={fee.waiverTitle}
+                        >
+                          <Sparkles className="w-2.5 h-2.5 text-amber-600" />
+                          <span className="truncate max-w-[120px]">{fee.waiverTitle}</span>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              },
+            },
+            {
+              id: "totalPayable",
+              label: "Total",
+              align: "right",
+              sortable: false,
+              render: (enr) => (
+                <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                  ৳ {getStudentFee(enr).totalPayable.toLocaleString()}
+                </Typography>
+              ),
+            },
+            {
+              id: "paidAmount",
+              label: "Paid",
+              align: "right",
+              sortable: false,
+              render: (enr) => (
+                <Typography variant="caption" sx={{ fontWeight: 700, color: "success.dark" }}>
+                  ৳ {getStudentFee(enr).paidAmount.toLocaleString()}
+                </Typography>
+              ),
+            },
+            {
+              id: "dueAmount",
+              label: "Due",
+              align: "right",
+              sortable: false,
+              render: (enr) => (
+                <Typography variant="caption" sx={{ fontWeight: 700, color: "warning.dark" }}>
+                  ৳ {getStudentFee(enr).dueAmount.toLocaleString()}
+                </Typography>
+              ),
+            },
+            {
+              id: "status",
+              label: "Status",
+              align: "center",
+              sortable: false,
+              render: (enr) => {
+                const fee = getStudentFee(enr);
+                if (fee.status === "PAID") {
                   return (
-                    <tr key={enr.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3 px-3 text-center font-bold text-slate-900 font-mono">
-                        {enr.classRoll}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="font-semibold text-slate-900">
-                          {student.firstName} {student.lastName}
-                        </div>
-                        <div className="text-[11px] text-slate-500 font-mono">
-                          ID: {student.studentIdNo}
-                        </div>
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className="font-medium text-slate-800">{enr.class?.name}</span>
-                        <div className="text-[11px] text-slate-500">
-                          {enr.section?.name} • {enr.groupType}
-                        </div>
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono">
-                        ৳ {fee.tuitionFee.toLocaleString()}
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono text-slate-500">
-                        ৳ {(fee.examFee + fee.labSessionFee).toLocaleString()}
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono">
-                        {fee.waiverAmount > 0 ? (
-                          <div>
-                            <span className="font-bold text-rose-600">-৳ {fee.waiverAmount.toLocaleString()}</span>
-                            {fee.isSpecialScholarship && (
-                              <div className="mt-0.5">
-                                <span
-                                  className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200"
-                                  title={fee.waiverTitle}
-                                >
-                                  <Sparkles className="w-2.5 h-2.5 text-amber-600" />
-                                  <span className="truncate max-w-[120px]">{fee.waiverTitle}</span>
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-slate-400">৳ 0</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono font-bold text-slate-900">
-                        ৳ {fee.totalPayable.toLocaleString()}
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono font-bold text-emerald-600">
-                        ৳ {fee.paidAmount.toLocaleString()}
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono font-bold text-amber-600">
-                        ৳ {fee.dueAmount.toLocaleString()}
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        {fee.status === "PAID" ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
-                            <Check className="w-3 h-3" /> Paid
-                          </span>
-                        ) : fee.status === "PARTIAL" ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">
-                            <Clock className="w-3 h-3" /> Partial
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800">
-                            <AlertCircle className="w-3 h-3" /> Due
-                          </span>
-                        )}
-                      </td>
-                    </tr>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
+                      <Check className="w-3 h-3" /> Paid
+                    </span>
                   );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+                }
+                if (fee.status === "PARTIAL") {
+                  return (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">
+                      <Clock className="w-3 h-3" /> Partial
+                    </span>
+                  );
+                }
+                return (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800">
+                    <AlertCircle className="w-3 h-3" /> Due
+                  </span>
+                );
+              },
+            },
+          ]}
+        />
+        </TableFilterBar>
+      </AppCard>
       </div>
 
       {/* ========================================================

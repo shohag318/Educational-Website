@@ -29,6 +29,11 @@ import {
 } from "@/sections/accountant/schema/accountant-store";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
+import { AppTable, Label, AppCard, TableFilterBar } from "@/components";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 export default function TeacherStaffPayrollPage() {
   const [payroll, setPayroll] = useState<PayrollRecord[]>([]);
@@ -369,132 +374,160 @@ export default function TeacherStaffPayrollPage() {
         </div>
       </div>
 
-      {/* Payroll Roster Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 bg-slate-50/70 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              Monthly Salary & Payroll Roster (October 2026)
-            </h3>
-            <span className="text-[11px] font-semibold text-slate-500">
-              ({filteredPayroll.length} employees)
-            </span>
-          </div>
-          <span className="text-[11px] text-slate-500">
-            Net Outflow: <strong className="font-mono text-indigo-700">৳ {filteredPayroll.reduce((s, i) => s + i.netPayable, 0).toLocaleString()}</strong>
-          </span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-50 text-[11px] font-semibold text-slate-600 uppercase tracking-wider border-b border-slate-200">
-              <tr>
-                <th className="py-3 px-3">Emp ID</th>
-                <th className="py-3 px-4">Employee Name & Designation</th>
-                <th className="py-3 px-3">Department</th>
-                <th className="py-3 px-3">Grade Scale</th>
-                <th className="py-3 px-3 text-right">Basic (৳)</th>
-                <th className="py-3 px-3 text-right">Allowances</th>
-                <th className="py-3 px-3 text-right">PF & Deduct.</th>
-                <th className="py-3 px-3 text-right">Net Payable</th>
-                <th className="py-3 px-3 text-center">Status</th>
-                <th className="py-3 px-4 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredPayroll.map((item) => {
-                const totalAllowances = item.houseRent + item.medicalAllowance + item.conveyance;
-                const totalDeductions = item.providentFundDeduction + item.welfareFundDeduction;
-
-                return (
-                  <tr key={item.id} className="hover:bg-slate-50/70 transition">
-                    <td className="py-3 px-3 font-mono font-bold text-slate-800">
-                      {item.empId}
-                    </td>
-
-                    <td className="py-3 px-4">
-                      <div className="font-semibold text-slate-900">{item.name}</div>
-                      <div className="text-[11px] text-slate-500">{item.designation}</div>
-                    </td>
-
-                    <td className="py-3 px-3">
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                        {item.department}
-                      </span>
-                    </td>
-
-                    <td className="py-3 px-3 text-[11px] text-slate-600 font-medium">
-                      {item.scaleGrade}
-                    </td>
-
-                    <td className="py-3 px-3 text-right font-mono text-slate-700 font-medium">
-                      ৳ {item.basicSalary.toLocaleString()}
-                    </td>
-
-                    <td className="py-3 px-3 text-right font-mono text-emerald-600 font-medium" title={`House: ৳${item.houseRent}, Med: ৳${item.medicalAllowance}, Conv: ৳${item.conveyance}`}>
-                      +৳ {totalAllowances.toLocaleString()}
-                    </td>
-
-                    <td className="py-3 px-3 text-right font-mono text-rose-500 font-medium" title={`PF: ৳${item.providentFundDeduction}, Welfare: ৳${item.welfareFundDeduction}`}>
-                      -৳ {totalDeductions.toLocaleString()}
-                    </td>
-
-                    <td className="py-3 px-3 text-right font-mono font-bold text-slate-900">
-                      ৳ {item.netPayable.toLocaleString()}
-                    </td>
-
-                    <td className="py-3 px-3 text-center">
-                      {item.status === "PAID" ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                          <Check className="w-3 h-3 stroke-[3]" /> Paid
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
-                          <Clock className="w-3 h-3" /> Pending
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <AppButton
-                          type="button"
-                          size="small"
-                          onClick={() => handleToggleDisbursement(item.id)}
-                          variant={item.status === "PAID" ? "soft" : "contained"}
-                          color={item.status === "PAID" ? "inherit" : "success"}
-                        >
-                          {item.status === "PAID" ? "Revert" : "Pay Now"}
-                        </AppButton>
-
-                        <AppButton
-                          type="button"
-                          size="small"
-                          onClick={() => setSelectedPaySlipRecord(item)}
-                          variant="outline"
-                          startIcon={<Printer className="w-3 h-3" />}
-                          title="Generate Official Pay Slip"
-                        >
-                          Pay Slip
-                        </AppButton>
-
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteEmployee(item.id, item.name)}
-                          className="p-1 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer"
-                          title="Remove Staff"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <AppCard>
+        <TableFilterBar showSearch={false}>
+          <AppTable<PayrollRecord>
+        embedded
+        rows={filteredPayroll}
+        rowKey={(row) => row.id}
+        defaultOrderBy="name"
+        minWidth={1100}
+        columns={[
+          {
+            id: "empId",
+            label: "Emp ID",
+            render: (item) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                {item.empId}
+              </Typography>
+            ),
+          },
+          {
+            id: "name",
+            label: "Employee Name & Designation",
+            render: (item) => (
+              <>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {item.name}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {item.designation}
+                </Typography>
+              </>
+            ),
+          },
+          {
+            id: "department",
+            label: "Department",
+            render: (item) => <Label variant="soft">{item.department}</Label>,
+          },
+          { id: "scaleGrade", label: "Grade Scale" },
+          {
+            id: "basicSalary",
+            label: "Basic (৳)",
+            align: "right",
+            render: (item) => (
+              <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+                ৳ {item.basicSalary.toLocaleString()}
+              </Typography>
+            ),
+          },
+          {
+            id: "allowances",
+            label: "Allowances",
+            align: "right",
+            sortable: false,
+            render: (item) => {
+              const totalAllowances = item.houseRent + item.medicalAllowance + item.conveyance;
+              return (
+                <Typography
+                  variant="body2"
+                  title={`House: ৳${item.houseRent}, Med: ৳${item.medicalAllowance}, Conv: ৳${item.conveyance}`}
+                  sx={{ fontFamily: "monospace", color: "success.main" }}
+                >
+                  +৳ {totalAllowances.toLocaleString()}
+                </Typography>
+              );
+            },
+          },
+          {
+            id: "deductions",
+            label: "PF & Deduct.",
+            align: "right",
+            sortable: false,
+            render: (item) => {
+              const totalDeductions = item.providentFundDeduction + item.welfareFundDeduction;
+              return (
+                <Typography
+                  variant="body2"
+                  title={`PF: ৳${item.providentFundDeduction}, Welfare: ৳${item.welfareFundDeduction}`}
+                  sx={{ fontFamily: "monospace", color: "error.main" }}
+                >
+                  -৳ {totalDeductions.toLocaleString()}
+                </Typography>
+              );
+            },
+          },
+          {
+            id: "netPayable",
+            label: "Net Payable",
+            align: "right",
+            render: (item) => (
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                ৳ {item.netPayable.toLocaleString()}
+              </Typography>
+            ),
+          },
+          {
+            id: "status",
+            label: "Status",
+            align: "center",
+            render: (item) =>
+              item.status === "PAID" ? (
+                <Label color="success" variant="soft">
+                  <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                    <Check className="w-3 h-3" /> Paid
+                  </Stack>
+                </Label>
+              ) : (
+                <Label color="warning" variant="soft">
+                  <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                    <Clock className="w-3 h-3" /> Pending
+                  </Stack>
+                </Label>
+              ),
+          },
+          {
+            id: "actions",
+            label: "Actions",
+            align: "center",
+            sortable: false,
+            render: (item) => (
+              <Stack direction="row" spacing={0.75} useFlexGap sx={{ justifyContent: "center", flexWrap: "wrap" }}>
+                <AppButton
+                  type="button"
+                  size="small"
+                  onClick={() => handleToggleDisbursement(item.id)}
+                  variant={item.status === "PAID" ? "soft" : "contained"}
+                  color={item.status === "PAID" ? "inherit" : "success"}
+                >
+                  {item.status === "PAID" ? "Revert" : "Pay Now"}
+                </AppButton>
+                <AppButton
+                  type="button"
+                  size="small"
+                  onClick={() => setSelectedPaySlipRecord(item)}
+                  variant="outline"
+                  startIcon={<Printer className="w-3 h-3" />}
+                  title="Generate Official Pay Slip"
+                >
+                  Pay Slip
+                </AppButton>
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => handleDeleteEmployee(item.id, item.name)}
+                  title="Remove Staff"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </IconButton>
+              </Stack>
+            ),
+          },
+        ]}
+      />
+        </TableFilterBar>
+      </AppCard>
 
       {/* Official Pay Slip Modal */}
       {selectedPaySlipRecord && (

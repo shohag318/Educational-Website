@@ -35,7 +35,7 @@ import {
   DEFAULT_FEE_CATEGORIES,
   DEFAULT_MONTHLY_SCHEDULE,
 } from "@/sections/fees/component/monthly-fee-template";
-import { FeeNavHeader } from "@/sections/fees/component/fee-nav-header";
+import { FeesPageShell } from "@/sections/fees/component/fees-page-shell";
 import {
   StudentWaiver,
   getStoredWaivers,
@@ -740,7 +740,7 @@ export default function StudentFeeModulePage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <FeesPageShell>
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-5 right-5 z-50 bg-emerald-600 text-white text-xs px-4 py-3 rounded-lg shadow-xl flex items-center space-x-2 animate-in fade-in slide-in-from-top-2 no-print">
@@ -748,9 +748,6 @@ export default function StudentFeeModulePage() {
           <span className="font-medium">{toastMessage}</span>
         </div>
       )}
-
-      {/* Module Sub-Navigation Tab Header */}
-      <FeeNavHeader />
 
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
@@ -1019,7 +1016,7 @@ export default function StudentFeeModulePage() {
           rowKey={(row) => row.id}
           defaultOrderBy="classRoll"
           minWidth={1000}
-          loading={loading}
+          loading={loading}
           columns={[
             {
               id: "classRoll",
@@ -1511,6 +1508,6 @@ export default function StudentFeeModulePage() {
           </div>
         </div>
       )}
-    </div>
+    </FeesPageShell>
   );
 }

@@ -5,34 +5,35 @@ import {
   Alert,
   Box,
   Chip,
-  Container,
   Divider,
-  Paper,
   Stack,
   Typography,
 } from "@mui/material";
 import { AddCircleOutlineIcon, TuneIcon } from "@/components/iconify/mui-icons";
 import { CustomBreadcrumbs, NoDataFound } from "@/components";
+import { ModulePageShell } from "@/components/layout/module-page-shell";
+import { ModulePanel } from "@/components/layout/module-panel";
 import { PATHS } from "@/config-global";
 import { ResultNavHeader } from "@/sections/results/component/result-nav-header";
+import { RADIUS, SPACING } from "@/theme/spacing";
+import { THEME_PLATE } from "@/theme/plate";
 
 /** Shared frame for every Results & Exams page. */
 export function ResultsPageShell({
   children,
-  maxWidth = "xl",
+  maxWidth,
 }: {
   children: ReactNode;
+  /** Kept for call-site compatibility; plate uses a single max width. */
   maxWidth?: "lg" | "xl" | false;
 }) {
   return (
-    <Container maxWidth={maxWidth} disableGutters sx={{ py: 0, pb: { xs: 4, md: 6 } }}>
-      <Box className="no-print" sx={{ mb: 2.5 }}>
-        <ResultNavHeader />
-      </Box>
-      <Stack spacing={2.5} useFlexGap sx={{ width: 1 }}>
-        {children}
-      </Stack>
-    </Container>
+    <ModulePageShell
+      nav={<ResultNavHeader />}
+      maxWidth={maxWidth === false ? false : THEME_PLATE.layout.pageMaxWidth}
+    >
+      {children}
+    </ModulePageShell>
   );
 }
 
@@ -62,7 +63,7 @@ export function ResultsPageHeader({
   );
 }
 
-/** White content surface. */
+/** White content surface — thin wrapper over ModulePanel. */
 export function ResultsPanel({
   children,
   sx,
@@ -75,22 +76,9 @@ export function ResultsPanel({
   className?: string;
 }) {
   return (
-    <Paper
-      elevation={0}
-      className={className}
-      sx={{
-        border: 1,
-        borderColor: "divider",
-        borderRadius: 3,
-        overflow: "hidden",
-        bgcolor: "background.paper",
-        boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
-        ...(padded ? { p: { xs: 2, sm: 2.5 } } : null),
-        ...sx,
-      }}
-    >
+    <ModulePanel padded={padded} className={className} sx={sx}>
       {children}
-    </Paper>
+    </ModulePanel>
   );
 }
 
@@ -114,15 +102,15 @@ export function ResultsFilterCard({
     <ResultsPanel className="no-print" sx={{ bgcolor: "grey.50" }}>
       <Stack
         direction="row"
-        spacing={1}
-        sx={{ alignItems: "center", justifyContent: "space-between", mb: 2 }}
+        spacing={SPACING.inline}
+        sx={{ alignItems: "center", justifyContent: "space-between", mb: SPACING.section }}
       >
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center", minWidth: 0 }}>
+        <Stack direction="row" spacing={SPACING.inline} sx={{ alignItems: "center", minWidth: 0 }}>
           <Box
             sx={{
               width: 32,
               height: 32,
-              borderRadius: 1.5,
+              borderRadius: `${RADIUS.chip}px`,
               display: "grid",
               placeItems: "center",
               bgcolor: "primary.lighter",
@@ -145,14 +133,14 @@ export function ResultsFilterCard({
             variant="outlined"
             label={resetLabel}
             onClick={onReset}
-            sx={{ height: 26, cursor: "pointer", fontWeight: 600 }}
+            sx={{ height: 26, cursor: "pointer", fontWeight: 500 }}
           />
         ) : null}
       </Stack>
       <Box
         sx={{
           display: "grid",
-          gap: 2,
+          gap: SPACING.section,
           gridTemplateColumns: {
             xs: "1fr",
             sm: "repeat(2, minmax(0, 1fr))",
@@ -187,19 +175,19 @@ export function ResultsTableCard({
     <ResultsPanel padded={false}>
       <Stack
         direction={{ xs: "column", sm: "row" }}
-        spacing={1.5}
+        spacing={SPACING.stack}
         sx={{
-          px: { xs: 2, sm: 2.5 },
-          py: 2,
+          px: { xs: SPACING.section, sm: SPACING.page },
+          py: SPACING.section,
           alignItems: { sm: "center" },
           justifyContent: "space-between",
         }}
       >
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+        <Stack direction="row" spacing={SPACING.inline} sx={{ alignItems: "center", flexWrap: "wrap" }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             {title}
             {count !== undefined ? (
-              <Typography component="span" variant="subtitle1" color="text.secondary" sx={{ fontWeight: 600 }}>
+              <Typography component="span" variant="subtitle1" color="text.secondary" sx={{ fontWeight: 500 }}>
                 {" "}
                 ({count})
               </Typography>
@@ -207,7 +195,7 @@ export function ResultsTableCard({
           </Typography>
           {badge}
         </Stack>
-        {action ? <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>{action}</Box> : null}
+        {action ? <Box sx={{ display: "flex", gap: SPACING.inline, flexWrap: "wrap" }}>{action}</Box> : null}
       </Stack>
       <Divider />
       {children}
@@ -293,24 +281,27 @@ export function ResultsStat({
   color?: "primary" | "success" | "warning" | "error" | "info" | "secondary";
 }) {
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 2.25,
-        border: 1,
-        borderColor: "divider",
-        borderRadius: 3,
-        height: 1,
-        boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
-      }}
-    >
+    <ModulePanel sx={{ height: 1, p: 2.25 }} padded={false}>
       <Typography
         variant="caption"
-        sx={{ fontWeight: 700, letterSpacing: 0.4, textTransform: "uppercase", color: "text.secondary" }}
+        sx={{
+          fontWeight: THEME_PLATE.fonts.weights.bold,
+          letterSpacing: 0.4,
+          textTransform: "uppercase",
+          color: "text.secondary",
+        }}
       >
         {label}
       </Typography>
-      <Typography variant="h4" sx={{ mt: 0.75, fontWeight: 800, color: `${color}.dark`, fontSize: { xs: 24, sm: 28 } }}>
+      <Typography
+        variant="h4"
+        sx={{
+          mt: 0.75,
+          fontWeight: THEME_PLATE.fonts.weights.bold,
+          color: `${color}.dark`,
+          fontSize: { xs: 24, sm: 28 },
+        }}
+      >
         {value}
       </Typography>
       {hint ? (
@@ -318,6 +309,6 @@ export function ResultsStat({
           {hint}
         </Typography>
       ) : null}
-    </Paper>
+    </ModulePanel>
   );
 }

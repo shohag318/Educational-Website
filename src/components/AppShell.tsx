@@ -8,6 +8,8 @@ import { Header } from "@/components/Header";
 import { RecentlyVisitedBar } from "@/components/RecentlyVisitedBar";
 import { AuthGuard } from "@/components/auth-guard";
 import { PATHS } from "@/config-global";
+import { RADIUS, SPACING } from "@/theme/spacing";
+import { THEME_PLATE } from "@/theme/plate";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -31,7 +33,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             display: "flex",
             height: "100vh",
             overflow: "hidden",
-            bgcolor: "grey.100",
+            bgcolor: THEME_PLATE.colors.surface.canvas,
             width: "100%",
           }}
         >
@@ -58,21 +60,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               minWidth: 0,
               height: "100vh",
               overflow: "hidden",
-              bgcolor: "grey.100",
+              bgcolor: THEME_PLATE.colors.surface.canvas,
             }}
           >
             <Header onMenuClick={() => setNavOpen(true)} />
             <RecentlyVisitedBar />
 
-            {/* Depth gutter between header/sidebar and content card */}
             <Box
               sx={{
                 flex: 1,
                 minHeight: 0,
                 overflow: "hidden",
-                p: { xs: 1.25, sm: 1.5, md: 2 },
+                p: SPACING.gutter,
                 pt: { xs: 1.25, md: 1.5 },
-                bgcolor: "grey.100",
+                bgcolor: THEME_PLATE.colors.surface.canvas,
               }}
             >
               <Box
@@ -82,17 +83,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   height: "100%",
                   overflowY: "auto",
                   minWidth: 0,
-                  // Soft grey canvas so white section cards show clear gaps between them
-                  bgcolor: "grey.50",
-                  borderRadius: { xs: 2, md: 2.5 },
+                  bgcolor: THEME_PLATE.colors.surface.content,
+                  borderRadius: `${RADIUS.surface}px`,
                   border: "1px solid",
                   borderColor: "divider",
-                  boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06)",
-                  px: { xs: 1.5, sm: 2, md: 2.5 },
-                  py: { xs: 1.5, sm: 2, md: 2.25 },
-                  // Default vertical rhythm between top-level page blocks/cards
+                  boxShadow: THEME_PLATE.shadows.surface,
+                  px: SPACING.contentX,
+                  py: SPACING.contentY,
+                  fontFamily: THEME_PLATE.fonts.sans,
                   "& > .MuiContainer-root > .MuiStack-root": {
-                    gap: "20px",
+                    gap: `${SPACING.page * 8}px`,
                   },
                 }}
               >

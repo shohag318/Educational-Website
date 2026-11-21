@@ -1,19 +1,16 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Box, Divider, Stack, Typography } from "@mui/material";
-import {
-  ResultsPanel,
-  ResultsFilterCard,
-} from "@/sections/results/component/result-page-ui";
+import { Box, Stack, Typography } from "@mui/material";
+import { ModuleContentStack } from "@/components/layout/module-page-shell";
+import { ModulePanel } from "@/components/layout/module-panel";
+import { ResultsFilterCard } from "@/sections/results/component/result-page-ui";
+import { SPACING } from "@/theme/spacing";
+import { THEME_PLATE } from "@/theme/plate";
 
 /** Page content wrapper — stacks section cards with visible gaps (exam-config style). */
 export function RulesAtmosphere({ children }: { children: ReactNode }) {
-  return (
-    <Stack spacing={2.5} sx={{ width: 1 }}>
-      {children}
-    </Stack>
-  );
+  return <ModuleContentStack>{children}</ModuleContentStack>;
 }
 
 export function RulesSection({
@@ -30,89 +27,16 @@ export function RulesSection({
   children: ReactNode;
 }) {
   return (
-    <ResultsPanel padded={false}>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={1.5}
-        sx={{
-          px: { xs: 2.25, sm: 2.75 },
-          py: 2.25,
-          alignItems: { sm: "flex-start" },
-          justifyContent: "space-between",
-          background:
-            "linear-gradient(180deg, rgba(248,250,252,0.9) 0%, rgba(255,255,255,1) 100%)",
-        }}
-      >
-        <Box sx={{ minWidth: 0 }}>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 700,
-              fontSize: { xs: "1rem", sm: "1.0625rem" },
-              letterSpacing: "-0.01em",
-              color: "text.primary",
-              lineHeight: 1.35,
-            }}
-          >
-            {title}
-          </Typography>
-          {subtitle ? (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{
-                mt: 0.6,
-                maxWidth: 640,
-                fontSize: "0.8125rem",
-                lineHeight: 1.55,
-                fontWeight: 400,
-              }}
-            >
-              {subtitle}
-            </Typography>
-          ) : null}
-        </Box>
-        {action ? (
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", flexShrink: 0 }}>{action}</Box>
-        ) : null}
-      </Stack>
-
-      {toolbar ? (
-        <>
-          <Divider />
-          <Box
-            sx={{
-              px: { xs: 2.25, sm: 2.75 },
-              py: 2,
-              bgcolor: "grey.50",
-              borderBottom: 1,
-              borderColor: "divider",
-              "& .MuiFormControl-root": {
-                width: "100%",
-                bgcolor: "background.paper",
-                borderRadius: 1,
-              },
-            }}
-          >
-            {toolbar}
-          </Box>
-        </>
-      ) : (
-        <Divider />
-      )}
-
-      <Box
-        sx={{
-          px: { xs: 2.25, sm: 2.75 },
-          py: { xs: 2.25, sm: 2.75 },
-          bgcolor: "grey.50",
-          // Nested white/list cards get a clear gap against this soft canvas
-          "& > .MuiStack-root": { gap: 1.5 },
-        }}
-      >
-        {children}
-      </Box>
-    </ResultsPanel>
+    <ModulePanel
+      variant="section"
+      title={title}
+      subtitle={subtitle}
+      action={action}
+      toolbar={toolbar}
+      padded={false}
+    >
+      {children}
+    </ModulePanel>
   );
 }
 
@@ -127,7 +51,7 @@ export function RulesFilterGrid({
     <Box
       sx={{
         display: "grid",
-        gap: 2,
+        gap: SPACING.section,
         gridTemplateColumns: {
           xs: "1fr",
           sm: "repeat(2, minmax(0, 1fr))",
@@ -153,7 +77,7 @@ export function RulesFormBlock({
   return (
     <Box
       sx={{
-        p: { xs: 2, sm: 2.25 },
+        p: { xs: SPACING.section, sm: 2.25 },
         borderRadius: 2.5,
         border: 1,
         borderColor: "divider",
@@ -162,12 +86,16 @@ export function RulesFormBlock({
     >
       <Stack
         direction="row"
-        spacing={1}
-        sx={{ alignItems: "center", justifyContent: "space-between", mb: 2 }}
+        spacing={SPACING.inline}
+        sx={{ alignItems: "center", justifyContent: "space-between", mb: SPACING.section }}
       >
         <Typography
           variant="subtitle2"
-          sx={{ fontWeight: 700, fontSize: "0.875rem", letterSpacing: "-0.01em" }}
+          sx={{
+            fontWeight: THEME_PLATE.fonts.weights.bold,
+            fontSize: "0.875rem",
+            letterSpacing: "-0.01em",
+          }}
         >
           {title}
         </Typography>
@@ -192,7 +120,7 @@ export function RulesListItem({
   return (
     <Box
       sx={{
-        p: 2,
+        p: SPACING.section,
         borderRadius: 2.5,
         border: 1,
         borderColor: "divider",
@@ -200,15 +128,24 @@ export function RulesListItem({
         transition: "border-color 160ms ease, box-shadow 160ms ease",
         "&:hover": {
           borderColor: "primary.light",
-          boxShadow: "0 4px 14px rgba(15, 23, 42, 0.04)",
+          boxShadow: THEME_PLATE.shadows.lg,
         },
       }}
     >
-      <Stack direction="row" spacing={1.25} sx={{ alignItems: "flex-start", justifyContent: "space-between" }}>
+      <Stack
+        direction="row"
+        spacing={SPACING.stack}
+        sx={{ alignItems: "flex-start", justifyContent: "space-between" }}
+      >
         <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography
             variant="subtitle2"
-            sx={{ fontWeight: 700, fontSize: "0.875rem", letterSpacing: "-0.01em", color: "text.primary" }}
+            sx={{
+              fontWeight: THEME_PLATE.fonts.weights.bold,
+              fontSize: "0.875rem",
+              letterSpacing: "-0.01em",
+              color: "text.primary",
+            }}
           >
             {title}
           </Typography>

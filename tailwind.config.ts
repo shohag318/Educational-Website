@@ -10,12 +10,31 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-roboto)", "Roboto", "Helvetica", "Arial", "sans-serif"],
+        sans: ["var(--font-roboto)", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
+      },
+      fontSize: {
+        xs: ["var(--text-xs)", { lineHeight: "1.5" }],
+        sm: ["var(--text-sm)", { lineHeight: "1.5" }],
+        base: ["var(--text-body)", { lineHeight: "1.57" }],
+        md: ["var(--text-md)", { lineHeight: "1.5" }],
+        lg: ["var(--text-lg)", { lineHeight: "1.5" }],
+        xl: ["var(--text-xl)", { lineHeight: "1.5" }],
+      },
+      spacing: {
+        tight: "var(--space-tight)",
+        inline: "var(--space-inline)",
+        stack: "var(--space-stack)",
+        section: "var(--space-section)",
+        page: "var(--space-page)",
+      },
+      maxWidth: {
+        page: "var(--page-max-width)",
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "var(--radius-card)",
+        md: "var(--radius)",
+        sm: "calc(var(--radius) - 2px)",
+        panel: "var(--radius-panel)",
       },
       colors: {
         background: "var(--background)",
@@ -34,6 +53,8 @@ const config: Config = {
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",
+          dark: "var(--primary-dark)",
+          lighter: "var(--primary-lighter)",
         },
         secondary: {
           DEFAULT: "var(--secondary)",
@@ -47,6 +68,12 @@ const config: Config = {
           DEFAULT: "var(--destructive)",
           foreground: "var(--destructive-foreground)",
         },
+        info: "var(--info)",
+        success: "var(--success)",
+        warning: "var(--warning)",
+        canvas: "var(--surface-canvas)",
+        content: "var(--surface-content)",
+        sidebar: "var(--sidebar)",
       },
     },
   },

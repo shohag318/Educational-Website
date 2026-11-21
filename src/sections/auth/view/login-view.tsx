@@ -3,24 +3,25 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  AlertCircle,
-  CheckCircle2,
-  Eye,
-  EyeOff,
-  Lock,
-  School,
-  User,
-} from "@/components/iconify/lucide";
+  Alert,
+  Box,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { Eye, EyeOff } from "@/components/iconify/lucide";
 import { AppButton } from "@/components/button/app-button";
+import { AppTextField } from "@/components/text-field/app-text-field";
 import { saveAuthSession } from "@/lib/authSession";
 import { saveStoredSchoolInfo, DEFAULT_SCHOOL_INFO } from "@/lib/settingsStore";
 import { CONFIG, PATHS } from "@/config-global";
+import { THEME_PLATE } from "@/theme/plate";
+import { RADIUS, SPACING, TYPE } from "@/theme/spacing";
 
-const DEMO_CREDENTIALS = {
+const DEMO = {
   institutionCode: "108254",
   adminId: "admin_108254",
   password: "Smart@1234",
-  institutionName: CONFIG.defaultSchoolName,
 } as const;
 
 const SUPER_DEMO = {
@@ -32,16 +33,16 @@ export default function LoginView() {
   const router = useRouter();
   const [adminId, setAdminId] = useState("");
   const [password, setPassword] = useState("");
-  const [institutionCode, setInstitutionCode] = useState(DEMO_CREDENTIALS.institutionCode);
+  const [institutionCode, setInstitutionCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [loginSuccess, setLoginSuccess] = useState(false);
 
   const fillDemo = () => {
-    setInstitutionCode(DEMO_CREDENTIALS.institutionCode);
-    setAdminId(DEMO_CREDENTIALS.adminId);
-    setPassword(DEMO_CREDENTIALS.password);
+    setInstitutionCode(DEMO.institutionCode);
+    setAdminId(DEMO.adminId);
+    setPassword(DEMO.password);
     setErrorMessage("");
   };
 
@@ -50,13 +51,12 @@ export default function LoginView() {
     setErrorMessage("");
 
     if (!adminId.trim() || !password.trim()) {
-      setErrorMessage("Please enter Admin ID and Password.");
+      setErrorMessage("Enter your Admin ID and password.");
       return;
     }
 
     setSubmitting(true);
     try {
-      // Dummy super-admin shortcut (no API needed)
       if (
         adminId.trim().toLowerCase() === SUPER_DEMO.adminId &&
         password === SUPER_DEMO.password
@@ -64,7 +64,7 @@ export default function LoginView() {
         saveAuthSession({
           role: "SUPER_ADMIN",
           adminId: SUPER_DEMO.adminId,
-          institutionCode: DEMO_CREDENTIALS.institutionCode,
+          institutionCode: DEMO.institutionCode,
           institutionName: "Smart Academy HQ",
           isInstitutionLogin: false,
           loginAt: new Date().toISOString(),
@@ -120,141 +120,244 @@ export default function LoginView() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-hidden">
-      <div className="pointer-events-none absolute -top-24 left-1/4 h-80 w-80 rounded-full bg-emerald-500/15 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 right-1/5 h-72 w-72 rounded-full bg-sky-500/10 blur-3xl" />
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        fontFamily: THEME_PLATE.fonts.sans,
+        color: THEME_PLATE.colors.ink.primary,
+        background: `
+          radial-gradient(ellipse 80% 60% at 10% 20%, rgba(5, 150, 105, 0.12), transparent 55%),
+          radial-gradient(ellipse 70% 50% at 90% 80%, rgba(15, 23, 42, 0.06), transparent 50%),
+          linear-gradient(160deg, #F8FAFC 0%, #EEF2F6 45%, #E8F5F0 100%)
+        `,
+      }}
+    >
+      {/* Brand plane */}
+      <Box
+        sx={{
+          display: { xs: "none", md: "flex" },
+          flex: 1,
+          flexDirection: "column",
+          justifyContent: "flex-end",
+          p: { md: 6, lg: 8 },
+          position: "relative",
+          overflow: "hidden",
+          background: `
+            linear-gradient(145deg, ${THEME_PLATE.colors.ink.primary} 0%, #1E293B 48%, ${THEME_PLATE.colors.brand.darker} 100%)
+          `,
+        }}
+      >
+        <Box
+          aria-hidden
+          sx={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "radial-gradient(circle at 30% 40%, rgba(52, 211, 153, 0.18), transparent 42%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.05), transparent 40%)",
+          }}
+        />
+        <Box sx={{ position: "relative", maxWidth: 420 }}>
+          <Typography
+            component="p"
+            sx={{
+              fontSize: TYPE.sm,
+              fontWeight: THEME_PLATE.fonts.weights.medium,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: THEME_PLATE.colors.brand.light,
+              mb: SPACING.stack,
+            }}
+          >
+            {CONFIG.appName}
+          </Typography>
+          <Typography
+            component="h1"
+            sx={{
+              fontSize: { md: 36, lg: 42 },
+              fontWeight: THEME_PLATE.fonts.weights.bold,
+              lineHeight: 1.15,
+              letterSpacing: "-0.03em",
+              color: "#fff",
+            }}
+          >
+            School management, built for Bangladesh campuses.
+          </Typography>
+          <Typography
+            sx={{
+              mt: SPACING.section,
+              fontSize: TYPE.body,
+              lineHeight: 1.6,
+              color: "rgba(226, 232, 240, 0.78)",
+              maxWidth: 360,
+            }}
+          >
+            Sign in to manage sessions, students, results, and campus operations.
+          </Typography>
+        </Box>
+      </Box>
 
-      <header className="relative z-10 flex items-center justify-between border-b border-slate-800/80 bg-slate-900/50 px-5 py-4 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-emerald-500 px-2.5 py-1 text-xs font-black tracking-wider text-slate-950">
-            NCTB
-          </div>
-          <div>
-            <div className="text-sm font-bold tracking-tight text-white">{CONFIG.appName}</div>
-            <div className="text-[11px] text-slate-400">{CONFIG.appTagline}</div>
-          </div>
-        </div>
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400">
-          Demo Login
-        </span>
-      </header>
+      {/* Form plane */}
+      <Box
+        sx={{
+          flex: { xs: 1, md: "0 0 44%" },
+          maxWidth: { md: 520 },
+          width: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          px: { xs: 3, sm: 4 },
+          py: { xs: 6, md: 4 },
+        }}
+      >
+        <Box sx={{ width: 1, maxWidth: 380 }}>
+          <Typography
+            component="p"
+            sx={{
+              display: { xs: "block", md: "none" },
+              fontSize: TYPE.sm,
+              fontWeight: THEME_PLATE.fonts.weights.bold,
+              color: THEME_PLATE.colors.brand.main,
+              mb: SPACING.inline,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+            }}
+          >
+            {CONFIG.appName}
+          </Typography>
 
-      <main className="relative z-10 flex flex-1 items-center justify-center p-4 sm:p-6">
-        <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/90 shadow-2xl backdrop-blur-xl">
-          <div className="border-b border-slate-800 bg-gradient-to-b from-slate-800/80 to-slate-900 px-6 py-6 text-center">
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/15 text-emerald-400">
-              <School className="h-6 w-6" />
-            </div>
-            <h1 className="text-lg font-bold tracking-tight text-white">Sign in</h1>
-            <p className="mt-1 text-xs text-slate-400">
-              Use the demo credentials below to enter the campus portal.
-            </p>
-          </div>
+          <Typography
+            component="h2"
+            sx={{
+              fontSize: { xs: 26, sm: 28 },
+              fontWeight: THEME_PLATE.fonts.weights.bold,
+              letterSpacing: "-0.02em",
+              lineHeight: 1.2,
+              color: THEME_PLATE.colors.ink.primary,
+            }}
+          >
+            Sign in
+          </Typography>
+          <Typography
+            sx={{
+              mt: SPACING.tight,
+              mb: SPACING.page,
+              fontSize: TYPE.md,
+              color: THEME_PLATE.colors.ink.secondary,
+              lineHeight: 1.5,
+            }}
+          >
+            Enter your institution credentials to continue.
+          </Typography>
 
           {loginSuccess ? (
-            <div className="space-y-3 p-8 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">
-                <CheckCircle2 className="h-7 w-7" />
-              </div>
-              <div className="text-sm font-bold text-white">Login successful</div>
-              <p className="text-xs text-slate-400">Opening workspace…</p>
-            </div>
+            <Box
+              sx={{
+                py: 4,
+                textAlign: "center",
+                borderRadius: `${RADIUS.card}px`,
+                border: "1px solid",
+                borderColor: "divider",
+                bgcolor: "background.paper",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontWeight: THEME_PLATE.fonts.weights.bold,
+                  fontSize: TYPE.lg,
+                  color: THEME_PLATE.colors.brand.dark,
+                }}
+              >
+                Welcome back
+              </Typography>
+              <Typography sx={{ mt: 0.75, fontSize: TYPE.md, color: "text.secondary" }}>
+                Opening your workspace…
+              </Typography>
+            </Box>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4 p-6">
-              {errorMessage ? (
-                <div className="flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 text-xs text-rose-300">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>{errorMessage}</span>
-                </div>
-              ) : null}
+            <Box component="form" onSubmit={handleSubmit} noValidate>
+              <Stack spacing={SPACING.section}>
+                {errorMessage ? (
+                  <Alert severity="error" variant="outlined" sx={{ borderRadius: 2 }}>
+                    {errorMessage}
+                  </Alert>
+                ) : null}
 
-              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-[11px] text-slate-300">
-                <div className="mb-1.5 font-bold text-emerald-300">Dummy credentials</div>
-                <div className="space-y-0.5 font-mono text-slate-400">
-                  <div>EIIN: {DEMO_CREDENTIALS.institutionCode}</div>
-                  <div>Admin ID: {DEMO_CREDENTIALS.adminId}</div>
-                  <div>Password: {DEMO_CREDENTIALS.password}</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={fillDemo}
-                  className="mt-2 text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 underline underline-offset-2"
-                >
-                  Fill demo credentials
-                </button>
-                <div className="mt-2 border-t border-slate-700/60 pt-2 text-slate-500">
-                  Super Admin: <span className="font-mono text-slate-400">{SUPER_DEMO.adminId}</span> /{" "}
-                  <span className="font-mono text-slate-400">{SUPER_DEMO.password}</span>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">Institution EIIN</label>
-                <input
+                <AppTextField
+                  label="Institution EIIN"
                   value={institutionCode}
                   onChange={(e) => setInstitutionCode(e.target.value)}
-                  placeholder="108254"
-                  className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 font-mono text-xs text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                  placeholder="e.g. 108254"
+                  autoComplete="organization"
                 />
-              </div>
 
-              <div className="space-y-1.5">
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-                  <User className="h-3.5 w-3.5 text-emerald-400" />
-                  Admin ID
-                </label>
-                <input
+                <AppTextField
+                  label="Admin ID"
                   value={adminId}
                   onChange={(e) => setAdminId(e.target.value)}
-                  placeholder="admin_108254"
+                  placeholder="Your admin ID"
                   required
-                  className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 font-mono text-xs text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                  autoComplete="username"
                 />
-              </div>
 
-              <div className="space-y-1.5">
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-                  <Lock className="h-3.5 w-3.5 text-emerald-400" />
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter password"
-                    required
-                    className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 pr-10 font-mono text-xs text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
+                <AppTextField
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
+                  required
+                  autoComplete="current-password"
+                  endIcon={
+                    <IconButton
+                      size="small"
+                      onClick={() => setShowPassword((v) => !v)}
+                      edge="end"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </IconButton>
+                  }
+                />
 
-              <AppButton
-                type="submit"
-                variant="contained"
-                color="primary"
-                fullWidth
-                loading={submitting}
-                disabled={submitting}
-              >
-                {submitting ? "Signing in…" : "Sign in"}
-              </AppButton>
-            </form>
+                <AppButton
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  size="large"
+                  loading={submitting}
+                  disabled={submitting}
+                  sx={{ mt: SPACING.tight, minHeight: 44 }}
+                >
+                  {submitting ? "Signing in…" : "Sign in"}
+                </AppButton>
+
+                <Typography
+                  component="button"
+                  type="button"
+                  onClick={fillDemo}
+                  sx={{
+                    alignSelf: "center",
+                    border: 0,
+                    background: "none",
+                    cursor: "pointer",
+                    fontSize: TYPE.sm,
+                    fontWeight: THEME_PLATE.fonts.weights.medium,
+                    color: THEME_PLATE.colors.ink.muted,
+                    textDecoration: "underline",
+                    textUnderlineOffset: 3,
+                    p: 0,
+                    "&:hover": { color: THEME_PLATE.colors.brand.main },
+                  }}
+                >
+                  Use demo account
+                </Typography>
+              </Stack>
+            </Box>
           )}
-        </div>
-      </main>
-
-      <footer className="relative z-10 border-t border-slate-800/80 px-5 py-3 text-center text-[11px] text-slate-500">
-        {CONFIG.appName} · Mock authentication for demo use
-      </footer>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 }

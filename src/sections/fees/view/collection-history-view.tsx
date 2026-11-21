@@ -17,6 +17,7 @@ import {
 import * as XLSX from "xlsx";
 import { AppButton } from "@/components/button/app-button";
 import { AppTable, Label, AppCard, TableFilterBar } from "@/components";
+import { ModulePageShell } from "@/components/layout/module-page-shell";
 import { ManualFeeNavHeader } from "@/sections/fees/component/manual-fee-nav-header";
 import {
   FeeCollectionVoucher,
@@ -176,7 +177,7 @@ export default function DailyCollectionHistoryPage() {
   };
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 max-w-7xl mx-auto min-h-screen">
+    <ModulePageShell nav={<ManualFeeNavHeader />}>
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-5 right-5 z-[110] bg-emerald-900 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center space-x-2 border border-emerald-500 animate-in fade-in slide-in-from-top-4">
@@ -184,9 +185,6 @@ export default function DailyCollectionHistoryPage() {
           <span className="text-xs font-semibold">{toastMessage}</span>
         </div>
       )}
-
-      {/* Top Menu Bar */}
-      <ManualFeeNavHeader />
 
       {/* Summary Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -319,7 +317,7 @@ export default function DailyCollectionHistoryPage() {
         rows={filteredVouchers}
         rowKey={(row) => row.id}
         defaultOrderBy="collectionDate"
-        minWidth={1100}
+        minWidth={1100}
         columns={[
           {
             id: "sl",
@@ -455,6 +453,6 @@ export default function DailyCollectionHistoryPage() {
         isOpen={isReceiptModalOpen}
         onClose={() => setIsReceiptModalOpen(false)}
       />
-    </div>
+    </ModulePageShell>
   );
 }

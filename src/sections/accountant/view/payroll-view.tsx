@@ -21,7 +21,7 @@ import {
   Download,
   AlertCircle,
 } from "@/components/iconify/lucide";
-import { AccountantNavHeader } from "@/sections/accountant/component/accountant-nav-header";
+import { AccountantPageShell } from "@/sections/accountant/component/accountant-page-shell";
 import {
   PayrollRecord,
   getStoredPayroll,
@@ -201,10 +201,7 @@ export default function TeacherStaffPayrollPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Shared Nav Tabs */}
-      <AccountantNavHeader />
-
+    <AccountantPageShell>
       {/* Page Header */}
       <div>
         <div className="flex items-center space-x-2 text-xs text-slate-500 mb-1">
@@ -381,7 +378,7 @@ export default function TeacherStaffPayrollPage() {
         rows={filteredPayroll}
         rowKey={(row) => row.id}
         defaultOrderBy="name"
-        minWidth={1100}
+        minWidth={1100}
         columns={[
           {
             id: "empId",
@@ -852,6 +849,6 @@ export default function TeacherStaffPayrollPage() {
           <span>{toastMessage}</span>
         </div>
       )}
-    </div>
+    </AccountantPageShell>
   );
 }

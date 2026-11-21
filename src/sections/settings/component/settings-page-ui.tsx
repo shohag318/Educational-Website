@@ -1,13 +1,13 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Box, Container, Stack } from "@mui/material";
+import { Box } from "@mui/material";
 import { CustomBreadcrumbs } from "@/components";
+import { ModulePageShell } from "@/components/layout/module-page-shell";
 import { SettingsIcon } from "@/components/iconify/mui-icons";
 import { PATHS } from "@/config-global";
 import { SettingNavHeader } from "@/sections/settings/component/setting-nav-header";
 import {
-  RulesAtmosphere,
   RulesFilterGrid,
   RulesFormBlock,
   RulesListItem,
@@ -17,14 +17,7 @@ import { ResultsNotice } from "@/sections/results/component/result-page-ui";
 
 /** Shared frame for every Settings page. */
 export function SettingsPageShell({ children }: { children: ReactNode }) {
-  return (
-    <Container maxWidth="xl" disableGutters sx={{ py: 0, pb: { xs: 4, md: 6 } }}>
-      <Box className="no-print" sx={{ mb: 2.5 }}>
-        <SettingNavHeader />
-      </Box>
-      <RulesAtmosphere>{children}</RulesAtmosphere>
-    </Container>
-  );
+  return <ModulePageShell nav={<SettingNavHeader />}>{children}</ModulePageShell>;
 }
 
 export function SettingsPageHeader({

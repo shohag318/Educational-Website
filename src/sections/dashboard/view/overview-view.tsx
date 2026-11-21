@@ -5,6 +5,7 @@ import { Box, Card, CardActionArea, Chip, Grid, Stack, Typography } from "@mui/m
 import { SchoolIcon, PeopleIcon, CalendarMonthIcon, MenuBookIcon, TuneIcon, TableChartIcon, CheckCircleIcon, VerifiedUserIcon, SendIcon, AssessmentIcon, WorkspacePremiumIcon, BadgeIcon, CreditCardIcon, EventAvailableIcon, DescriptionIcon, GridViewIcon, BarChartIcon, WarningAmberIcon, ReceiptIcon, PaymentsIcon, AccountBalanceIcon, SettingsIcon, HowToRegIcon, DateRangeIcon, AddCircleOutlineIcon, Inventory2Icon, ArrowForwardIcon } from "@/components/iconify/mui-icons";
 import { AppButton } from "@/components/button/app-button";
 import { CONFIG, PATHS } from "@/config-global";
+import { ModulePageShell } from "@/components/layout/module-page-shell";
 
 const sessionControlItems = [
   { name: "Classes & Sections", href: PATHS.setup.classes, icon: SchoolIcon, color: "success" as const },
@@ -72,7 +73,7 @@ const financeAndAdmin = [
 
 export default function DashboardOverviewPage() {
   return (
-    <Stack spacing={2.5} sx={{ maxWidth: 1200, mx: "auto", width: 1 }}>
+    <ModulePageShell>
       <Card
         sx={{
           p: 3,
@@ -281,6 +282,6 @@ export default function DashboardOverviewPage() {
           })}
         </Grid>
       </Box>
-    </Stack>
+    </ModulePageShell>
   );
 }

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { ModulePageShell } from "@/components/layout/module-page-shell";
 import { DownloadNavHeader } from "@/sections/download/component/download-nav-header";
 
 /** Shared page frame for every Downloads submenu screen. */
@@ -15,19 +16,21 @@ export function DownloadPageShell({
   hideNav?: boolean;
 }) {
   return (
-    <div
-      className={cn(
-        "mx-auto max-w-7xl space-y-5 pb-16 font-sans print:max-w-none print:space-y-0 print:p-0 print:m-0",
-        className
-      )}
+    <ModulePageShell
+      nav={<DownloadNavHeader />}
+      hideNav={hideNav}
+      className={cn("print:max-w-none", className)}
+      sx={{
+        "@media print": {
+          maxWidth: "none",
+          p: 0,
+          m: 0,
+          pb: 0,
+        },
+      }}
     >
-      {!hideNav && (
-        <div className="no-print print:hidden">
-          <DownloadNavHeader />
-        </div>
-      )}
       {children}
-    </div>
+    </ModulePageShell>
   );
 }
 
@@ -50,7 +53,7 @@ export function DownloadHero({
   return (
     <div
       className={cn(
-        "no-print print:hidden relative overflow-hidden rounded-2xl border border-amber-900/40 bg-[linear-gradient(135deg,#0f172a_0%,#1c1917_42%,#78350f_100%)] p-5 text-white shadow-sm sm:p-6",
+        "no-print print:hidden relative overflow-hidden rounded-2xl border border-amber-900/40 bg-[linear-gradient(135deg,#0f172a_0%,#1c1917_42%,#78350f_100%)] p-5 text-white shadow-sm sm:p-6 font-sans",
         className
       )}
     >
@@ -137,7 +140,7 @@ export function DownloadPanel({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]",
+        "rounded-2xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] font-sans",
         padded && "p-4 sm:p-5",
         className
       )}
@@ -201,7 +204,7 @@ export function DownloadStatCard({
   };
 
   return (
-    <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+    <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] font-sans">
       <div className="flex items-start justify-between gap-2">
         <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</span>
         {icon ? (
@@ -228,7 +231,7 @@ export function DownloadEmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-6 py-12 text-center">
+    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-6 py-12 text-center font-sans">
       {icon ? (
         <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
           {icon}
@@ -253,7 +256,7 @@ export function DownloadToast({
   return (
     <div
       className={cn(
-        "no-print fixed right-5 top-20 z-50 flex items-center gap-2.5 rounded-xl border px-4 py-2.5 text-xs font-semibold text-white shadow-xl",
+        "no-print fixed right-5 top-20 z-50 flex items-center gap-2.5 rounded-xl border px-4 py-2.5 text-xs font-semibold text-white shadow-xl font-sans",
         tone === "success"
           ? "border-emerald-400/40 bg-slate-900"
           : "border-rose-400/40 bg-slate-900"

@@ -13,6 +13,7 @@ import TablePagination from '@mui/material/TablePagination';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { Scrollbar } from 'src/components/scrollbar';
+import { RADIUS, SPACING, TYPE } from '@/theme/spacing';
 
 import { TableNoData } from './table-no-data';
 import { TableHeadCustom } from './table-head-custom';
@@ -100,11 +101,11 @@ export function CommonTable({
                   borderCollapse: 'separate',
                   borderSpacing: 0,
                   '& .MuiTableCell-root': {
-                    fontSize: 13.5,
+                    fontSize: TYPE.md,
                     lineHeight: 1.5,
                     color: 'text.primary',
-                    py: 2,
-                    px: 2,
+                    py: SPACING.section,
+                    px: SPACING.section,
                     verticalAlign: 'middle',
                     borderBottom: `1px solid ${varAlpha(greyChannel, 0.12)}`,
                   },
@@ -114,7 +115,7 @@ export function CommonTable({
                   '& .MuiTableHead-root .MuiTableCell-root': {
                     color: 'text.primary',
                     fontWeight: 700,
-                    fontSize: 13,
+                    fontSize: TYPE.md,
                     lineHeight: 1.4,
                     letterSpacing: '-0.01em',
                     bgcolor: 'grey.100',
@@ -137,13 +138,13 @@ export function CommonTable({
                   },
                   '& .MuiTableBody-root .MuiTypography-subtitle2, & .MuiTableBody-root .MuiTypography-body2':
                     {
-                      fontSize: 13.5,
+                      fontSize: TYPE.md,
                       fontWeight: 700,
                       lineHeight: 1.45,
                       color: 'text.primary',
                     },
                   '& .MuiTableBody-root .MuiTypography-caption': {
-                    fontSize: 12,
+                    fontSize: TYPE.sm,
                     fontWeight: 500,
                     lineHeight: 1.4,
                     color: 'text.secondary',
@@ -191,23 +192,23 @@ export function CommonTable({
           rowsPerPageOptions={rowsPerPageOptions}
           onRowsPerPageChange={onRowsPerPageChange}
           sx={{
-            px: 2,
+            px: SPACING.section,
             borderTop: '1px solid',
             borderColor: 'divider',
             bgcolor: 'background.paper',
             '& .MuiTablePagination-toolbar': {
-              minHeight: 56,
+              minHeight: 52,
               px: 0,
             },
             '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-              fontSize: 13,
+              fontSize: TYPE.md,
               fontWeight: 500,
               color: 'text.secondary',
               m: 0,
             },
             '& .MuiTablePagination-select': {
-              fontSize: 13,
-              fontWeight: 600,
+              fontSize: TYPE.md,
+              fontWeight: 500,
             },
           }}
         />
@@ -220,8 +221,8 @@ export function CommonTable({
       {(toolbar || actions) && (
         <Box
           sx={{
-            mb: 2,
-            gap: 1.5,
+            mb: SPACING.section,
+            gap: SPACING.stack,
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
@@ -238,7 +239,7 @@ export function CommonTable({
         <Box
           sx={{
             overflow: 'hidden',
-            borderRadius: 2,
+            borderRadius: `${RADIUS.card}px`,
             border: '1px solid',
             borderColor: 'divider',
             bgcolor: 'background.paper',
@@ -250,7 +251,7 @@ export function CommonTable({
         <Card
           sx={{
             overflow: 'hidden',
-            borderRadius: 2,
+            borderRadius: `${RADIUS.card}px`,
             border: '1px solid',
             borderColor: 'divider',
             boxShadow: '0 1px 3px rgba(15, 23, 42, 0.06)',

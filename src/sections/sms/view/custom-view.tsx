@@ -27,7 +27,7 @@ import {
   ListPlus,
   UserPlus,
 } from "@/components/iconify/lucide";
-import { SmsNavHeader } from "@/sections/sms/component/sms-nav-header";
+import { SmsPageShell } from "@/sections/sms/component/sms-page-shell";
 import { getStoredSchoolInfo } from "@/lib/settingsStore";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
@@ -579,10 +579,7 @@ export default function CustomSMSPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-16 font-sans">
-      {/* Top Module Sub-navigation */}
-      <SmsNavHeader />
-
+    <SmsPageShell>
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 border border-slate-800">
         <div>
@@ -1466,6 +1463,6 @@ export default function CustomSMSPage() {
         </div>
       </div>
 
-    </div>
+    </SmsPageShell>
   );
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Box, Breadcrumbs, Link as MuiLink, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { SPACING, TYPE } from "@/theme/spacing";
 
 export interface BreadcrumbLink {
   name: string;
@@ -20,10 +21,10 @@ interface CustomBreadcrumbsProps {
 
 export function CustomBreadcrumbs({ heading, links, action, moreLink }: CustomBreadcrumbsProps) {
   return (
-    <Stack spacing={1} sx={{ mb: 3 }}>
+    <Stack spacing={SPACING.inline} sx={{ mb: SPACING.page }}>
       <Stack
         direction={{ xs: "column", sm: "row" }}
-        spacing={1.5}
+        spacing={SPACING.stack}
         sx={{ alignItems: { sm: "flex-start" }, justifyContent: "space-between" }}
       >
         <Box sx={{ minWidth: 0 }}>
@@ -31,11 +32,11 @@ export function CustomBreadcrumbs({ heading, links, action, moreLink }: CustomBr
             <Typography
               variant="h5"
               sx={{
-                mb: 0.75,
-                fontWeight: 600,
+                mb: SPACING.tight,
+                fontWeight: 700,
                 letterSpacing: -0.15,
                 color: "text.primary",
-                fontSize: { xs: 18, sm: 20 },
+                fontSize: { xs: TYPE.h5, sm: TYPE.h4 },
                 lineHeight: 1.3,
               }}
             >
@@ -73,7 +74,7 @@ export function CustomBreadcrumbs({ heading, links, action, moreLink }: CustomBr
                     component="span"
                     variant="body2"
                     sx={{
-                      fontSize: 13,
+                      fontSize: TYPE.md,
                       fontWeight: 500,
                       color: "text.disabled",
                       lineHeight: 1.5,
@@ -92,7 +93,7 @@ export function CustomBreadcrumbs({ heading, links, action, moreLink }: CustomBr
                   underline="hover"
                   variant="body2"
                   sx={{
-                    fontSize: 13,
+                    fontSize: TYPE.md,
                     fontWeight: 500,
                     color: "text.secondary",
                     lineHeight: 1.5,

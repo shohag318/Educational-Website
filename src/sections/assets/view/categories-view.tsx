@@ -14,7 +14,7 @@ import {
   FileSpreadsheet,
 } from "@/components/iconify/lucide";
 import * as XLSX from "xlsx";
-import { AssetNavHeader } from "@/sections/assets/component/asset-nav-header";
+import { AssetsPageShell } from "@/sections/assets/component/assets-page-shell";
 import {
   InstitutionAsset,
   ASSET_CATEGORIES,
@@ -84,10 +84,7 @@ export default function AssetLocationsPage() {
   };
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 max-w-7xl mx-auto min-h-screen">
-      {/* Top Menu Bar */}
-      <AssetNavHeader />
-
+    <AssetsPageShell>
       {/* Header Info */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs no-print">
         <div className="flex items-center space-x-2.5">
@@ -215,6 +212,6 @@ export default function AssetLocationsPage() {
           </div>
         ))}
       </div>
-    </div>
+    </AssetsPageShell>
   );
 }

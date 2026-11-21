@@ -7,6 +7,7 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import Typography from "@mui/material/Typography";
 
+import { TYPE } from "@/theme/spacing";
 import { CommonTable } from "./table";
 import { useTable } from "./use-table";
 import type { TableHeadCellProps } from "./types";
@@ -62,7 +63,7 @@ function getComparator<T>(order: "asc" | "desc", orderBy: string) {
 
 function DefaultCell({ value }: { value: unknown }) {
   return (
-    <Typography variant="body2" sx={{ fontWeight: 700, fontSize: 13.5, lineHeight: 1.45 }}>
+    <Typography variant="body2" sx={{ fontWeight: 700, fontSize: TYPE.md, lineHeight: 1.45 }}>
       {String(value ?? "")}
     </Typography>
   );

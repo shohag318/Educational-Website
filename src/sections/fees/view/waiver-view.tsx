@@ -39,7 +39,7 @@ import {
   SlidersHorizontal,
   FileText,
 } from "@/components/iconify/lucide";
-import { FeeNavHeader } from "@/sections/fees/component/fee-nav-header";
+import { FeesPageShell } from "@/sections/fees/component/fees-page-shell";
 import {
   StudentWaiver,
   SCHOLARSHIP_PRESETS,
@@ -613,10 +613,7 @@ export default function ScholarshipWaiverPage() {
     : null;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-12">
-      {/* Shared Module Nav Header */}
-      <FeeNavHeader />
-
+    <FeesPageShell>
       {/* ========================================================
           PAGE HEADER & BREADCRUMBS
          ======================================================== */}
@@ -1869,6 +1866,6 @@ export default function ScholarshipWaiverPage() {
           <span>{toastMessage}</span>
         </div>
       )}
-    </div>
+    </FeesPageShell>
   );
 }

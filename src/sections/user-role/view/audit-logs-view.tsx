@@ -11,7 +11,7 @@ import {
   RotateCcw,
   Sparkles,
 } from "@/components/iconify/lucide";
-import { UserRoleNavHeader } from "@/sections/user-role/component/user-role-nav-header";
+import { UserRolePageShell } from "@/sections/user-role/component/user-role-page-shell";
 import { SessionSelect } from "@/components/SessionSelect";
 import { AppButton } from "@/components/button/app-button";
 import { AppCard, AppSelect, AppTable, Label, TableFilterBar } from "@/components";
@@ -112,7 +112,7 @@ export default function SecurityAuditLogsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <UserRolePageShell>
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center space-x-2.5 text-xs border border-purple-500/50 animate-bounce">
@@ -120,9 +120,6 @@ export default function SecurityAuditLogsPage() {
           <span>{toastMessage}</span>
         </div>
       )}
-
-      {/* Navigation Tabs */}
-      <UserRoleNavHeader />
 
       {/* Header */}
       <div>
@@ -342,6 +339,6 @@ export default function SecurityAuditLogsPage() {
       />
         </TableFilterBar>
       </AppCard>
-    </div>
+    </UserRolePageShell>
   );
 }

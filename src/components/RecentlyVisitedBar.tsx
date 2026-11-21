@@ -342,7 +342,7 @@ export function RecentlyVisitedBar() {
                           noWrap
                           sx={{
                             fontSize: 12,
-                            fontWeight: 600,
+                            fontWeight: 500,
                             lineHeight: 1.2,
                             color: "inherit",
                           }}
@@ -355,7 +355,7 @@ export function RecentlyVisitedBar() {
                       height: 30,
                       borderRadius: 1.5,
                       pr: 2.75,
-                      fontWeight: 600,
+                      fontWeight: 500,
                       border: "1px solid",
                       ...(isActive
                         ? {

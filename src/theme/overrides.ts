@@ -1,6 +1,8 @@
 import { alpha } from "@mui/material/styles";
 import type { Theme, Components } from "@mui/material/styles";
 import { linkColor, softColor } from "./mixins";
+import { FONT_PRIMARY } from "./typography";
+import { RADIUS, TYPE } from "./spacing";
 
 export function componentsOverrides(theme: Theme): Components<Theme> {
   const softByColor = {
@@ -25,7 +27,7 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
       minHeight: 0,
       paddingLeft: 0,
       paddingRight: 0,
-      fontWeight: 600,
+      fontWeight: 500,
       textDecoration: "underline",
       textUnderlineOffset: 3,
       "&:hover": {
@@ -45,8 +47,46 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
   return {
     MuiCssBaseline: {
       styleOverrides: {
+        "*, *::before, *::after": {
+          boxSizing: "border-box",
+        },
+        html: {
+          fontSize: 16,
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+        },
         body: {
+          margin: 0,
+          fontFamily: FONT_PRIMARY,
+          fontSize: TYPE.body,
+          fontWeight: 400,
+          lineHeight: 1.57,
           backgroundColor: theme.palette.background.default,
+          color: theme.palette.text.primary,
+        },
+        "button, input, textarea, select": {
+          fontFamily: "inherit",
+        },
+      },
+    },
+    MuiTypography: {
+      defaultProps: {
+        variantMapping: {
+          h1: "h1",
+          h2: "h2",
+          h3: "h3",
+          h4: "h4",
+          h5: "h5",
+          h6: "h6",
+          subtitle1: "p",
+          subtitle2: "p",
+          body1: "p",
+          body2: "p",
+        },
+      },
+      styleOverrides: {
+        root: {
+          fontFamily: FONT_PRIMARY,
         },
       },
     },
@@ -54,13 +94,15 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
       defaultProps: { disableElevation: true },
       styleOverrides: {
         root: {
-          borderRadius: 10,
-          fontWeight: 600,
+          borderRadius: RADIUS.control,
+          fontFamily: FONT_PRIMARY,
+          fontWeight: 500,
           paddingLeft: 14,
           paddingRight: 14,
         },
-        sizeSmall: { minHeight: 32, fontSize: 12 },
-        sizeMedium: { minHeight: 38 },
+        sizeSmall: { minHeight: 32, fontSize: TYPE.sm },
+        sizeMedium: { minHeight: 36, fontSize: TYPE.md },
+        sizeLarge: { minHeight: 42, fontSize: TYPE.body },
         contained: {
           boxShadow: "none",
           "&:hover": { boxShadow: "none" },
@@ -86,31 +128,40 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     },
     MuiIconButton: {
       styleOverrides: {
-        root: { borderRadius: 10 },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 16,
-          boxShadow: "0 1px 2px rgba(15, 23, 42, 0.06)",
-          border: `1px solid ${theme.palette.divider}`,
-        },
+        root: { borderRadius: RADIUS.control },
       },
     },
     MuiPaper: {
       styleOverrides: {
-        rounded: { borderRadius: 16 },
+        rounded: { borderRadius: RADIUS.card },
         root: {
           backgroundImage: "none",
+          fontFamily: FONT_PRIMARY,
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 16,
+          borderRadius: RADIUS.card,
           boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
+          border: `1px solid ${theme.palette.divider}`,
+          fontFamily: FONT_PRIMARY,
+        },
+      },
+    },
+    MuiCardHeader: {
+      styleOverrides: {
+        root: { padding: theme.spacing(2, 2.5) },
+        title: { fontSize: TYPE.md, fontWeight: 700 },
+        subheader: { fontSize: TYPE.sm },
+      },
+    },
+    MuiCardContent: {
+      styleOverrides: {
+        root: {
+          padding: theme.spacing(2, 2.5),
+          "&:last-child": { paddingBottom: theme.spacing(2.5) },
         },
       },
     },
@@ -119,14 +170,15 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     },
     MuiInputLabel: {
       styleOverrides: {
-        root: { fontSize: 13, fontWeight: 600 },
+        root: { fontSize: TYPE.md, fontWeight: 500, fontFamily: FONT_PRIMARY },
       },
     },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: 10,
+          borderRadius: RADIUS.control,
           backgroundColor: theme.palette.common.white,
+          fontFamily: FONT_PRIMARY,
           "&:hover .MuiOutlinedInput-notchedOutline": {
             borderColor: theme.palette.text.primary,
           },
@@ -139,16 +191,22 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
           borderColor: alpha(theme.palette.grey[500], 0.2),
         },
         input: {
-          paddingTop: 10.5,
-          paddingBottom: 10.5,
-          fontSize: 14,
+          paddingTop: 10,
+          paddingBottom: 10,
+          fontSize: TYPE.body,
+          fontFamily: FONT_PRIMARY,
+        },
+        inputSizeSmall: {
+          paddingTop: 8.5,
+          paddingBottom: 8.5,
+          fontSize: TYPE.md,
         },
       },
     },
     MuiFilledInput: {
       styleOverrides: {
         root: {
-          borderRadius: 10,
+          borderRadius: RADIUS.control,
           backgroundColor: alpha(theme.palette.grey[500], 0.08),
           "&:before, &:after": { display: "none" },
           "&:hover": { backgroundColor: alpha(theme.palette.grey[500], 0.16) },
@@ -163,13 +221,25 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     },
     MuiFormHelperText: {
       styleOverrides: {
-        root: { marginLeft: 2, fontSize: 12 },
+        root: { marginLeft: 2, fontSize: TYPE.sm, fontFamily: FONT_PRIMARY },
+      },
+    },
+    MuiSelect: {
+      defaultProps: { size: "small" },
+      styleOverrides: {
+        select: { fontFamily: FONT_PRIMARY, fontSize: TYPE.md },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: { fontFamily: FONT_PRIMARY, fontSize: TYPE.md, minHeight: 40 },
       },
     },
     MuiChip: {
       styleOverrides: {
-        root: { fontWeight: 600, borderRadius: 8 },
-        sizeSmall: { height: 22, fontSize: 11 },
+        root: { fontWeight: 500, borderRadius: RADIUS.chip, fontFamily: FONT_PRIMARY },
+        sizeSmall: { height: 24, fontSize: TYPE.xs },
+        sizeMedium: { height: 28, fontSize: TYPE.sm },
       },
       variants: [
         { props: { variant: "soft" }, style: softByColor.inherit },
@@ -183,7 +253,7 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     },
     MuiAlert: {
       styleOverrides: {
-        root: { borderRadius: 12 },
+        root: { borderRadius: RADIUS.control + 2 },
       },
       variants: [
         { props: { variant: "soft", severity: "info" }, style: { ...softByColor.info, color: theme.palette.info.darker } },
@@ -195,7 +265,7 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     MuiAccordion: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: RADIUS.control + 2,
           boxShadow: "none",
           border: `1px solid ${theme.palette.divider}`,
           "&:before": { display: "none" },
@@ -215,7 +285,8 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     },
     MuiBreadcrumbs: {
       styleOverrides: {
-        li: { fontSize: 13 },
+        li: { fontSize: TYPE.md, fontFamily: FONT_PRIMARY },
+        separator: { fontSize: TYPE.sm },
       },
     },
     MuiCheckbox: {
@@ -255,8 +326,9 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
         root: {
           backgroundColor: theme.palette.grey[100],
           "& .MuiTableCell-head": {
+            fontFamily: FONT_PRIMARY,
             fontWeight: 700,
-            fontSize: 13,
+            fontSize: TYPE.md,
             lineHeight: 1.4,
             letterSpacing: "-0.01em",
             color: theme.palette.text.primary,
@@ -279,13 +351,15 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
             borderBottom: 0,
           },
           "& .MuiTypography-subtitle2, & .MuiTypography-body2": {
-            fontSize: 13.5,
+            fontFamily: FONT_PRIMARY,
+            fontSize: TYPE.md,
             fontWeight: 700,
             lineHeight: 1.45,
             color: theme.palette.text.primary,
           },
           "& .MuiTypography-caption": {
-            fontSize: 12,
+            fontFamily: FONT_PRIMARY,
+            fontSize: TYPE.sm,
             fontWeight: 500,
             lineHeight: 1.4,
             color: theme.palette.text.secondary,
@@ -311,20 +385,22 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     MuiTableCell: {
       styleOverrides: {
         root: {
+          fontFamily: FONT_PRIMARY,
           borderColor: theme.palette.divider,
           borderBottom: `1px solid ${alpha(theme.palette.grey[500], 0.12)}`,
-          fontSize: 13.5,
+          fontSize: TYPE.md,
           lineHeight: 1.5,
           color: theme.palette.text.primary,
-          paddingTop: 16,
-          paddingBottom: 16,
+          paddingTop: 14,
+          paddingBottom: 14,
           paddingLeft: 16,
           paddingRight: 16,
           verticalAlign: "middle",
         },
         head: {
+          fontFamily: FONT_PRIMARY,
           fontWeight: 700,
-          fontSize: 13,
+          fontSize: TYPE.md,
           color: theme.palette.text.primary,
           backgroundColor: theme.palette.grey[100],
         },
@@ -333,7 +409,7 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
           paddingBottom: 10,
           paddingLeft: 12,
           paddingRight: 12,
-          fontSize: 13,
+          fontSize: TYPE.sm,
         },
       },
     },
@@ -341,19 +417,20 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
       styleOverrides: {
         root: {
           borderTop: `1px solid ${theme.palette.divider}`,
+          fontFamily: FONT_PRIMARY,
         },
         toolbar: {
-          minHeight: 56,
+          minHeight: 52,
           paddingLeft: 16,
           paddingRight: 8,
         },
         selectLabel: {
-          fontSize: 13,
+          fontSize: TYPE.md,
           fontWeight: 500,
           color: theme.palette.text.secondary,
         },
         displayedRows: {
-          fontSize: 13,
+          fontSize: TYPE.md,
           fontWeight: 500,
           color: theme.palette.text.secondary,
         },
@@ -361,7 +438,17 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     },
     MuiDialog: {
       styleOverrides: {
-        paper: { borderRadius: 16 },
+        paper: { borderRadius: RADIUS.card },
+      },
+    },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: { fontFamily: FONT_PRIMARY, fontSize: TYPE.xl, fontWeight: 700 },
+      },
+    },
+    MuiDialogContentText: {
+      styleOverrides: {
+        root: { fontFamily: FONT_PRIMARY, fontSize: TYPE.md },
       },
     },
     MuiDrawer: {
@@ -371,7 +458,13 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     },
     MuiTab: {
       styleOverrides: {
-        root: { textTransform: "none", fontWeight: 600, minHeight: 40 },
+        root: {
+          fontFamily: FONT_PRIMARY,
+          textTransform: "none",
+          fontWeight: 500,
+          fontSize: TYPE.md,
+          minHeight: 40,
+        },
       },
     },
     MuiTabs: {
@@ -379,7 +472,7 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     },
     MuiTooltip: {
       styleOverrides: {
-        tooltip: { fontSize: 12, borderRadius: 8 },
+        tooltip: { fontSize: TYPE.sm, borderRadius: RADIUS.chip, fontFamily: FONT_PRIMARY },
       },
     },
     MuiPagination: {
@@ -392,17 +485,17 @@ export function componentsOverrides(theme: Theme): Components<Theme> {
     },
     MuiListItemButton: {
       styleOverrides: {
-        root: { borderRadius: 10 },
+        root: { borderRadius: RADIUS.control },
       },
     },
     MuiMenu: {
       styleOverrides: {
-        paper: { borderRadius: 12, boxShadow: theme.shadows[4] },
+        paper: { borderRadius: RADIUS.control + 2, boxShadow: theme.shadows[4] },
       },
     },
     MuiPopover: {
       styleOverrides: {
-        paper: { borderRadius: 12, boxShadow: theme.shadows[4] },
+        paper: { borderRadius: RADIUS.control + 2, boxShadow: theme.shadows[4] },
       },
     },
     MuiStepper: {

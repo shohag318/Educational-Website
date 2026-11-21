@@ -208,22 +208,6 @@ export function Sidebar() {
     router.push(PATHS.auth.login);
   };
 
-  const profileName = instSession?.institutionName || "Smart Academy";
-  const profileId = instSession?.adminId || "Guest";
-  const profileRole =
-    instSession?.role === "SUPER_ADMIN"
-      ? "Super Admin"
-      : instSession?.role === "INSTITUTION_ADMIN"
-        ? "Campus Admin"
-        : "User";
-  const profileInitials = (profileId || "SA")
-    .replace(/[^a-zA-Z0-9]/g, " ")
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase() || "")
-    .join("") || "SA";
-
   const isModuleAccessible = (moduleKey: string) => {
     if (!isInstLogin) return true;
     if (!instSession?.accessibleModules || !Array.isArray(instSession.accessibleModules)) return true;
@@ -272,14 +256,9 @@ export function Sidebar() {
   return (
     <aside className="w-72 bg-slate-900 text-slate-200 h-screen max-h-screen sticky top-0 flex flex-col border-r border-slate-800 no-print shrink-0 select-none z-30">
       {/* Brand Header */}
-      <div className="p-4 border-b border-slate-800 flex items-center space-x-3 shrink-0">
-        <div className="bg-emerald-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-xs tracking-wider shadow-sm">
-          NCTB
-        </div>
-        <div className="min-w-0">
-          <h1 className="font-bold text-sm tracking-wide text-white truncate">Smart Academy</h1>
-          <p className="text-[11px] text-slate-400">Bangladesh Standard</p>
-        </div>
+      <div className="p-4 border-b border-slate-800 shrink-0">
+        <h1 className="font-bold text-sm tracking-wide text-white truncate">Smart Academy</h1>
+        <p className="text-[11px] text-slate-400">Bangladesh Standard</p>
       </div>
 
       {/* Super Admin Central Hub - Hidden when logged in via Dedicated Institution Link */}
@@ -1316,26 +1295,8 @@ export function Sidebar() {
         )}
       </nav>
 
-      {/* Profile + Logout */}
-      <div className="shrink-0 border-t border-slate-800 bg-slate-950/80 p-3 space-y-2">
-        <div className="flex items-center gap-2.5 rounded-xl border border-slate-800 bg-slate-900/90 px-2.5 py-2">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/20 text-[11px] font-bold text-emerald-300 border border-emerald-500/30">
-            {profileInitials}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-xs font-bold text-white" title={profileName}>
-              {profileName}
-            </div>
-            <div className="truncate font-mono text-[10px] text-slate-400" title={profileId}>
-              {profileId}
-            </div>
-            <div className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              {profileRole}
-            </div>
-          </div>
-        </div>
-
+      {/* Logout */}
+      <div className="shrink-0 border-t border-slate-800 bg-slate-950/80 p-3">
         <button
           type="button"
           onClick={handleLogout}

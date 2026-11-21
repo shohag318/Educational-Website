@@ -28,6 +28,7 @@ import {
   ExternalLink,
 } from "@/components/iconify/lucide";
 import * as XLSX from "xlsx";
+import { ModulePageShell } from "@/components/layout/module-page-shell";
 import { ManualFeeNavHeader } from "@/sections/fees/component/manual-fee-nav-header";
 import { FeeCollectionCounterModal } from "@/sections/fees/component/fee-collection-counter-modal";
 import { AppButton } from "@/components/button/app-button";
@@ -603,7 +604,7 @@ export default function AbsentFineCalculationPage() {
   }, [attendanceSummaries, policy]);
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 max-w-7xl mx-auto min-h-screen">
+    <ModulePageShell nav={<ManualFeeNavHeader />}>
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-5 right-5 z-[120] bg-emerald-900 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center space-x-2 border border-emerald-500 animate-in fade-in slide-in-from-top-4">
@@ -611,9 +612,6 @@ export default function AbsentFineCalculationPage() {
           <span className="text-xs font-semibold">{toastMessage}</span>
         </div>
       )}
-
-      {/* Top Menu Bar */}
-      <ManualFeeNavHeader />
 
       {/* Overall Summary Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -893,7 +891,7 @@ export default function AbsentFineCalculationPage() {
         rowKey={(row) => row.enrollmentId}
         defaultOrderBy="classRoll"
         minWidth={1200}
-        loading={loading}
+        loading={loading}
         columns={[
           {
             id: "classRoll",
@@ -1198,6 +1196,6 @@ export default function AbsentFineCalculationPage() {
         onClose={() => setIsCounterWindowOpen(false)}
         onCollectionSuccess={() => loadFeeRecords()}
       />
-    </div>
+    </ModulePageShell>
   );
 }

@@ -2,8 +2,10 @@
 
 import { createTheme } from "@mui/material/styles";
 import { palette } from "./palette";
-import { typography } from "./typography";
+import { typography, FONT_PRIMARY } from "./typography";
 import { componentsOverrides } from "./overrides";
+import { SPACING, RADIUS, TYPE } from "./spacing";
+import { THEME_PLATE } from "./plate";
 
 declare module "@mui/material/styles" {
   interface PaletteColor {
@@ -18,6 +20,20 @@ declare module "@mui/material/styles" {
 
   interface TypeBackground {
     neutral: string;
+  }
+
+  interface Theme {
+    customSpacing: typeof SPACING;
+    customRadius: typeof RADIUS;
+    customType: typeof TYPE;
+    plate: typeof THEME_PLATE;
+  }
+
+  interface ThemeOptions {
+    customSpacing?: typeof SPACING;
+    customRadius?: typeof RADIUS;
+    customType?: typeof TYPE;
+    plate?: typeof THEME_PLATE;
   }
 }
 
@@ -44,14 +60,19 @@ const baseTheme = createTheme({
   cssVariables: true,
   palette,
   typography,
-  shape: { borderRadius: 12 },
+  spacing: 8,
+  shape: { borderRadius: RADIUS.control },
+  customSpacing: SPACING,
+  customRadius: RADIUS,
+  customType: TYPE,
+  plate: THEME_PLATE,
   shadows: [
     "none",
-    "0 1px 2px rgba(15, 23, 42, 0.06)",
-    "0 1px 3px rgba(15, 23, 42, 0.08)",
-    "0 4px 12px rgba(15, 23, 42, 0.08)",
-    "0 8px 24px rgba(15, 23, 42, 0.10)",
-    ...Array(20).fill("0 8px 24px rgba(15, 23, 42, 0.10)"),
+    THEME_PLATE.shadows.sm,
+    THEME_PLATE.shadows.md,
+    THEME_PLATE.shadows.lg,
+    THEME_PLATE.shadows.xl,
+    ...Array(20).fill(THEME_PLATE.shadows.xl),
   ] as unknown as ReturnType<typeof createTheme>["shadows"],
 });
 
@@ -61,3 +82,6 @@ export const theme = createTheme(baseTheme, {
 
 export { palette } from "./palette";
 export { typography, FONT_PRIMARY } from "./typography";
+export { SPACING, RADIUS, TYPE } from "./spacing";
+export { THEME_PLATE } from "./plate";
+export type { ThemePlate } from "./plate";

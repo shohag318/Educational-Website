@@ -1,29 +1,22 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardProps, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import type { SxProps, Theme } from "@mui/material/styles";
+import { ModulePanel } from "@/components/layout/module-panel";
 
-interface AppCardProps extends CardProps {
+interface AppCardProps {
   title?: string;
   action?: ReactNode;
   children: ReactNode;
+  className?: string;
+  sx?: SxProps<Theme>;
 }
 
-export function AppCard({ title, action, children, ...props }: AppCardProps) {
+/** Shared card — delegates to ModulePanel so padding/radius match the theme plate. */
+export function AppCard({ title, action, children, sx, className }: AppCardProps) {
   return (
-    <Card {...props}>
-      {title && (
-        <CardHeader
-          title={
-            <Typography variant="subtitle2" color="text.primary">
-              {title}
-            </Typography>
-          }
-          action={action}
-          sx={{ pb: 0 }}
-        />
-      )}
-      <CardContent>{children}</CardContent>
-    </Card>
+    <ModulePanel title={title} action={action} className={className} sx={sx}>
+      {children}
+    </ModulePanel>
   );
 }

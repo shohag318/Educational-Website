@@ -26,7 +26,7 @@ export function linkColor(color: PaletteColor) {
     minHeight: 0,
     paddingLeft: 0,
     paddingRight: 0,
-    fontWeight: 600,
+    fontWeight: 500,
     textDecoration: "underline",
     textUnderlineOffset: 3,
     "&:hover": {

@@ -3,6 +3,7 @@
 import { Box, BoxProps } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import type { ReactNode } from "react";
+import { TYPE } from "@/theme/spacing";
 
 export type LabelColor = "default" | "primary" | "secondary" | "info" | "success" | "warning" | "error";
 export type LabelVariant = "filled" | "outlined" | "soft" | "inverted";
@@ -70,8 +71,8 @@ export function Label({
         display: "inline-flex",
         justifyContent: "center",
         px: 1,
-        fontSize: 12,
-        fontWeight: 700,
+        fontSize: TYPE.sm,
+        fontWeight: 500,
         gap: 0.5,
         ...styles,
         ...sx,

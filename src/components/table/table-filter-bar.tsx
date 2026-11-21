@@ -6,6 +6,7 @@ import Stack from "@mui/material/Stack";
 import { SearchIcon } from "@/components/iconify/mui-icons";
 import { AppTextField } from "@/components/text-field/app-text-field";
 import { AppTabs, type AppTabItem } from "@/components/ui/tabs-component";
+import { RADIUS, SPACING } from "@/theme/spacing";
 
 export type TableFilterBarProps = {
   /** Extra filters in the same row as search (selects, date pickers, chips). */
@@ -40,7 +41,7 @@ export function TableFilterBar({
   children,
 }: TableFilterBarProps) {
   return (
-    <Stack spacing={2}>
+    <Stack spacing={SPACING.section}>
       {tabs?.length ? (
         <AppTabs value={tabValue} onValueChange={onTabChange} items={tabs} />
       ) : null}
@@ -48,7 +49,7 @@ export function TableFilterBar({
       {(showSearch && onSearchChange) || filters || endAdornment ? (
         <Stack
           direction={{ xs: "column", md: "row" }}
-          spacing={1.5}
+          spacing={SPACING.stack}
           useFlexGap
           sx={{
             alignItems: { md: "center" },
@@ -57,7 +58,7 @@ export function TableFilterBar({
               minWidth: { xs: "100%", sm: 160 },
             },
             "& .MuiOutlinedInput-root": {
-              borderRadius: 1.25,
+              borderRadius: `${RADIUS.control}px`,
               bgcolor: "common.white",
             },
           }}
@@ -80,7 +81,7 @@ export function TableFilterBar({
             sx={{
               display: "flex",
               flexWrap: "wrap",
-              gap: 1.5,
+              gap: SPACING.stack,
               alignItems: "center",
               flex: 1,
               minWidth: 0,

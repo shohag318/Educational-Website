@@ -20,7 +20,7 @@ import {
   Layers,
   ArrowRight,
 } from "@/components/iconify/lucide";
-import { AccountantNavHeader } from "@/sections/accountant/component/accountant-nav-header";
+import { AccountantPageShell } from "@/sections/accountant/component/accountant-page-shell";
 import {
   AuditRecord,
   getStoredAudit,
@@ -157,10 +157,7 @@ export default function InstitutionalAuditPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Shared Nav Tabs */}
-      <AccountantNavHeader />
-
+    <AccountantPageShell>
       {/* Page Header */}
       <div>
         <div className="flex items-center space-x-2 text-xs text-slate-500 mb-1">
@@ -265,7 +262,7 @@ export default function InstitutionalAuditPage() {
         rows={trialBalanceAccounts}
         rowKey={(row) => row.code}
         defaultOrderBy="code"
-        minWidth={900}
+        minWidth={900}
         columns={[
           {
             id: "code",
@@ -326,7 +323,7 @@ export default function InstitutionalAuditPage() {
         rows={filteredAuditLogs}
         rowKey={(row) => row.id}
         defaultOrderBy="timestamp"
-        minWidth={1100}
+        minWidth={1100}
         columns={[
           {
             id: "timestamp",
@@ -559,6 +556,6 @@ export default function InstitutionalAuditPage() {
           <span>{toastMessage}</span>
         </div>
       )}
-    </div>
+    </AccountantPageShell>
   );
 }

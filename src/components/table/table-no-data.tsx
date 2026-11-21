@@ -44,7 +44,7 @@ export function TableNoData({ colSpan = 8, searchQuery: _searchQuery, ...other }
             <Iconify icon="solar:inbox-bold" width={32} />
           </Box>
 
-          <Typography variant="subtitle1" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+          <Typography variant="subtitle1" sx={{ color: 'text.secondary', fontWeight: 500 }}>
             No Data
           </Typography>
         </Box>

@@ -35,7 +35,7 @@ export function NoDataFound({
       <Iconify icon={icon} width={40} sx={{ color: "text.disabled", mb: 1.25 }} />
       <Typography
         variant="body2"
-        sx={{ fontWeight: 600, color: "text.secondary", letterSpacing: 0.2 }}
+        sx={{ fontWeight: 500, color: "text.secondary", letterSpacing: 0.2 }}
       >
         No Data Found
       </Typography>

@@ -14,7 +14,7 @@ import {
   Layers,
 } from "@/components/iconify/lucide";
 import * as XLSX from "xlsx";
-import { AssetNavHeader } from "@/sections/assets/component/asset-nav-header";
+import { AssetsPageShell } from "@/sections/assets/component/assets-page-shell";
 import {
   InstitutionAsset,
   ASSET_CATEGORIES,
@@ -134,10 +134,7 @@ export default function AssetDepreciationPage() {
   };
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 max-w-7xl mx-auto min-h-screen">
-      {/* Top Menu Bar */}
-      <AssetNavHeader />
-
+    <AssetsPageShell>
       {/* Summary Valuation KPI Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
@@ -193,7 +190,7 @@ export default function AssetDepreciationPage() {
         rowKey={(row) => row.key}
         defaultOrderBy="label"
         minWidth={800}
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[5, 10, 25]}
         columns={[
           { id: "label", label: "Asset Category", render: (cat) => <Typography variant="body2" sx={{ fontWeight: 600 }}>{cat.label}</Typography> },
           { id: "itemCount", label: "Entries", align: "center", render: (cat) => <Typography variant="body2" sx={{ fontFamily: "monospace" }}>{cat.itemCount}</Typography> },
@@ -271,7 +268,7 @@ export default function AssetDepreciationPage() {
         rows={assetDepreciationList}
         rowKey={(row) => row.id}
         defaultOrderBy="assetCode"
-        minWidth={1100}
+        minWidth={1100}
         columns={[
           { id: "assetCode", label: "Asset Code", render: (asset) => <Typography variant="caption" sx={{ fontWeight: 700 }}>{asset.assetCode}</Typography> },
           { id: "name", label: "Asset Name", render: (asset) => <Typography variant="body2" sx={{ fontWeight: 600 }}>{asset.name}</Typography> },
@@ -286,6 +283,6 @@ export default function AssetDepreciationPage() {
       />
         </TableFilterBar>
       </AppCard>
-    </div>
+    </AssetsPageShell>
   );
 }

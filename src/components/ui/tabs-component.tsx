@@ -52,7 +52,7 @@ export function AppTabs({
     >
       <Tabs.List
         className={cn(
-          "flex flex-wrap gap-1 p-1 bg-gray-100 rounded-lg w-fit max-w-full",
+          "flex flex-wrap gap-inline p-tight bg-gray-100 rounded-md w-fit max-w-full font-sans",
           listClassName
         )}
       >
@@ -62,7 +62,7 @@ export function AppTabs({
             value={tab.value}
             disabled={tab.disabled}
             className={cn(
-              "inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-600 rounded-md transition-all",
+              "inline-flex items-center justify-center px-4 py-2 text-md font-medium text-gray-600 rounded-sm transition-all font-sans",
               "data-[selected]:bg-white data-[selected]:text-gray-900 data-[selected]:shadow-sm",
               "disabled:opacity-50 disabled:pointer-events-none",
               triggerClassName

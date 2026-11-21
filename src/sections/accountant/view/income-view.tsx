@@ -19,7 +19,7 @@ import {
   ArrowLeft,
   FileSpreadsheet,
 } from "@/components/iconify/lucide";
-import { AccountantNavHeader } from "@/sections/accountant/component/accountant-nav-header";
+import { AccountantPageShell } from "@/sections/accountant/component/accountant-page-shell";
 import { DatePicker } from "@/components/date-picker/date-picker";
 import {
   IncomeEntry,
@@ -155,10 +155,7 @@ export default function InstitutionalIncomePage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Shared Module Nav Tabs */}
-      <AccountantNavHeader />
-
+    <AccountantPageShell>
       {/* Page Header */}
       <div>
         <div className="flex items-center space-x-2 text-xs text-slate-500 mb-1">
@@ -583,6 +580,6 @@ export default function InstitutionalIncomePage() {
           <span>{toastMessage}</span>
         </div>
       )}
-    </div>
+    </AccountantPageShell>
   );
 }

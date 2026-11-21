@@ -20,7 +20,7 @@ import {
   Receipt,
   Scale,
 } from "@/components/iconify/lucide";
-import { AccountantNavHeader } from "@/sections/accountant/component/accountant-nav-header";
+import { AccountantPageShell } from "@/sections/accountant/component/accountant-page-shell";
 import { AppTable, AppCard, TableFilterBar } from "@/components";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -65,10 +65,7 @@ export default function AccountantPage() {
   const paidPayrollCount = useMemo(() => payroll.filter((p) => p.status === "PAID").length, [payroll]);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Shared Module Nav Tabs */}
-      <AccountantNavHeader />
-
+    <AccountantPageShell>
       {/* Header */}
       <div>
         <div className="flex items-center space-x-2 text-xs text-slate-500 mb-1">
@@ -295,7 +292,7 @@ export default function AccountantPage() {
         ]}
         rowKey={(row) => `${row._kind}-${row.id}`}
         defaultOrderBy="date"
-        minWidth={900}
+        minWidth={900}
         columns={[
           {
             id: "voucherNo",
@@ -363,6 +360,6 @@ export default function AccountantPage() {
       />
         </TableFilterBar>
       </AppCard>
-    </div>
+    </AccountantPageShell>
   );
 }

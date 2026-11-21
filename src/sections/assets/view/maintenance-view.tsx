@@ -16,7 +16,7 @@ import {
   Check,
 } from "@/components/iconify/lucide";
 import * as XLSX from "xlsx";
-import { AssetNavHeader } from "@/sections/assets/component/asset-nav-header";
+import { AssetsPageShell } from "@/sections/assets/component/assets-page-shell";
 import {
   MaintenanceRecord,
   InstitutionAsset,
@@ -185,7 +185,7 @@ export default function AssetMaintenancePage() {
   };
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 max-w-7xl mx-auto min-h-screen">
+    <AssetsPageShell>
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-5 right-5 z-[120] bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center space-x-2 border border-blue-500 animate-in fade-in slide-in-from-top-4">
@@ -193,9 +193,6 @@ export default function AssetMaintenancePage() {
           <span className="text-xs font-semibold">{toastMessage}</span>
         </div>
       )}
-
-      {/* Top Menu Bar */}
-      <AssetNavHeader />
 
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -302,7 +299,7 @@ export default function AssetMaintenancePage() {
         rows={filteredLogs}
         rowKey={(row) => row.id}
         defaultOrderBy="serviceDate"
-        minWidth={1000}
+        minWidth={1000}
         columns={[
           {
             id: "assetCode",
@@ -496,6 +493,6 @@ export default function AssetMaintenancePage() {
           </div>
         </div>
       )}
-    </div>
+    </AssetsPageShell>
   );
 }
